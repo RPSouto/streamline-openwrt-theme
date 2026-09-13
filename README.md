@@ -1,35 +1,58 @@
-# Streamline para LuCI
+# Streamline for LuCI
 
-Tema escuro para OpenWrt inspirado na linguagem visual do Stremio Server: navegação lateral, cartões discretos, acentos roxos, estados em verde/âmbar e alta densidade de informação. Não contém código nem marcas do Stremio.
+Streamline is a dark, responsive theme for the OpenWrt LuCI web interface. Its visual language is inspired by the Stremio Server dashboard: compact navigation, understated cards, purple accents, clear status colors, and high information density. It does not include Stremio code or branding.
 
-## Compatibilidade
+## Highlights
 
-- OpenWrt 21.02, 22.03, 23.05, 24.10, 25.12 e LuCI atual.
-- Templates Lua (`.htm`) para versões antigas e ucode (`.ut`) para versões novas no mesmo pacote.
-- `opkg`/IPK, `apk` e instalação direta por SSH.
-- Arquitetura independente (`all`): apenas HTML, CSS, JavaScript e SVG.
-- GL.iNet Flint 2 (GL-MT6000): o tema altera somente o LuCI aberto em **Sistema → Definições avançadas**. O painel principal da GL.iNet permanece inalterado.
-- Sidebar recolhível e secções de navegação expansíveis, com estado guardado no navegador.
-- Visualizadores de syslog, kernel log e saídas de comandos com largura total e scroll próprio.
+- Collapsible sidebar and expandable navigation sections, with their state saved in the browser.
+- Responsive layouts for desktop, tablet, and mobile devices.
+- Improved forms, tables, action buttons, interface cards, firewall zones, and package manager controls.
+- Full-width viewers with independent scrolling for system logs, kernel logs, and command output.
+- Login screen displaying the router hostname.
+- Home shortcut that closes open navigation sections and returns to the LuCI overview.
+- Optional Progressive Web App installation.
 
-## Teste rápido no Flint 2
+## Compatibility
 
-Mantenha uma sessão SSH aberta durante o primeiro teste. Copie esta pasta inteira para o router:
+- OpenWrt 21.02, 22.03, 23.05, 24.10, 25.12, and current LuCI releases.
+- Legacy Lua (`.htm`) and modern ucode (`.ut`) templates in the same package.
+- `opkg`/IPK, `apk`, and direct SSH installation.
+- Architecture-independent package (`all`): HTML, CSS, JavaScript, and SVG only.
+- GL.iNet Flint 2 (GL-MT6000). Streamline changes only the LuCI interface opened from **System → Advanced Settings**. It does not replace the main GL.iNet administration panel.
+
+## Install the IPK
+
+Copy the package to the router and install it with `opkg`:
+
+```sh
+scp luci-theme-streamline_1.0.10-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.10-1_all.ipk'
+```
+
+Keep the SSH session open during the first test. Open LuCI again and perform a hard refresh (`Ctrl+F5`) if the previous theme is still cached.
+
+## Direct installation from the source tree
+
+Copy the complete project directory to the router:
 
 ```sh
 scp -r luci-theme-streamline root@192.168.8.1:/tmp/
 ssh root@192.168.8.1 'sh /tmp/luci-theme-streamline/install.sh'
 ```
 
-Depois abra **Sistema → Definições avançadas → Ir para LuCI** no painel GL.iNet. Se o browser ainda mostrar o tema anterior, faça uma atualização forçada (`Ctrl+F5`).
+On a Flint 2, open **System → Advanced Settings → Go to LuCI** from the GL.iNet panel.
 
-Para remover:
+To uninstall a direct installation:
 
 ```sh
 ssh root@192.168.8.1 'sh /tmp/luci-theme-streamline/uninstall.sh'
 ```
 
-Recuperação manual caso o LuCI não carregue:
+## Recovery
+
+Recovery always selects Bootstrap, the default OpenWrt LuCI theme. It does not depend on Argon or any other third-party theme.
+
+If LuCI fails to load after installation, run:
 
 ```sh
 uci set luci.main.mediaurlbase='/luci-static/bootstrap'
@@ -38,32 +61,35 @@ rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 /etc/init.d/uhttpd restart
 ```
 
-## Instalação como PWA
+Then reload LuCI. Argon and other themes remain optional personal choices and are not part of the Streamline recovery path.
 
-O tema inclui manifesto e service worker. Abra o LuCI em HTTPS e use **Instalar app** no menu do Chrome/Edge ou **Adicionar ao ecrã principal** no Android.
+## Progressive Web App
 
-O service worker guarda apenas CSS, ícone e a página de indisponibilidade. Navegação LuCI, autenticação, RPC/ubus e páginas de configuração nunca são guardadas; quando o router não está acessível, a PWA apenas explica como voltar à rede local/VPN.
+Streamline includes a web app manifest and service worker. Open LuCI over HTTPS and choose **Install app** in Chrome or Edge, or **Add to Home screen** on Android.
 
-Se o LuCI ainda não tiver HTTPS, instale a variante SSL adequada ao firmware (`luci-ssl` em instalações OpenWrt habituais) e aceda pelo endereço HTTPS do router. Certificados autoassinados precisam ser aceites pelo dispositivo antes de o browser permitir a instalação da PWA.
+The service worker caches only static theme assets and the offline information page. LuCI navigation, authentication, RPC/ubus requests, and configuration pages are never cached. When the router is unavailable, the PWA only explains how to reconnect to the local network or VPN.
 
-## Compilar pacote IPK/APK
+If LuCI does not provide HTTPS yet, install the SSL variant appropriate for the firmware (`luci-ssl` on typical OpenWrt installations) and open the router's HTTPS address. A self-signed certificate must be accepted on the device before the browser can offer PWA installation.
 
-Para gerar um IPK universal numa máquina Linux com GNU `tar`:
+## Build an IPK
+
+On Linux, or another environment with POSIX shell tools and GNU `tar`, run:
 
 ```sh
 sh build-ipk.sh
 ```
 
-O resultado é `luci-theme-streamline_1.0.9-1_all.ipk`. Para instalar no router:
+The generated package is `luci-theme-streamline_1.0.10-1_all.ipk`. The outer package is a gzip-compressed GNU tar archive in the OpenWrt format and contains `debian-binary`, `control.tar.gz`, and `data.tar.gz`.
+
+Validate the resulting package before uploading it:
 
 ```sh
-scp luci-theme-streamline_1.0.9-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.9-1_all.ipk'
+node tools/verify-ipk.js luci-theme-streamline_1.0.10-1_all.ipk
 ```
 
-Para integrar o tema numa imagem completa ou produzir um pacote APK, copie a pasta para o buildroot:
+## Build with the OpenWrt SDK or buildroot
 
-Copie a pasta para `feeds/luci/themes/luci-theme-streamline` num buildroot OpenWrt/LuCI da versão desejada e execute:
+Copy this directory to `feeds/luci/themes/luci-theme-streamline` in the buildroot for the target OpenWrt release, then run:
 
 ```sh
 ./scripts/feeds update luci
@@ -71,12 +97,12 @@ Copie a pasta para `feeds/luci/themes/luci-theme-streamline` num buildroot OpenW
 make package/luci-theme-streamline/compile V=s
 ```
 
-O formato final é determinado pelo buildroot: releases com `opkg` produzem `.ipk`; versões baseadas em `apk` produzem `.apk`.
+The buildroot determines the output format: `opkg`-based releases produce an `.ipk`, while `apk`-based releases produce an `.apk`.
 
-## Desenvolvimento
+## Development
 
-As cores e medidas principais ficam nas variáveis no início de `htdocs/luci-static/streamline/cascade.css`. Ao alterar assets PWA, incremente `CACHE` em `htdocs/streamline-sw.js` para eliminar automaticamente o cache anterior.
+The main colors and dimensions are CSS custom properties at the beginning of `htdocs/luci-static/streamline/cascade.css`. When changing PWA assets, increment `CACHE` in `htdocs/streamline-sw.js` so browsers discard the previous static cache.
 
-## Licença
+## License
 
-Apache-2.0. As estruturas de integração seguem a API pública e os templates de referência do projeto LuCI, também licenciados em Apache-2.0.
+Apache-2.0. The LuCI integration follows the public APIs and reference templates of the LuCI project, which is also licensed under Apache-2.0.

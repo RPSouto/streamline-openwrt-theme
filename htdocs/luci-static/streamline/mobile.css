@@ -58,6 +58,15 @@
   [data-page="admin-system-opkg"] .controls .cbi-button,
   [data-page="admin-system-package-manager"] .controls .btn,
   [data-page="admin-system-package-manager"] .controls .cbi-button { width: 100%; flex-basis: 100%; }
+  .sl-dashboard-summary { margin-bottom: 18px; border-radius: 13px; }
+  .sl-dashboard-heading { padding: 15px 16px; }
+  .sl-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sl-metric { min-height: 186px; padding: 17px 10px 14px; }
+  .sl-gauge { width: 124px; height: 124px; }
+  .sl-gauge-value { max-width: 104px; font-size: 1.35rem; }
+  .sl-uptime .sl-gauge-value { font-size: .9rem; }
+  .sl-gauge-label { margin-top: 8px; font-size: .56rem; }
+  .sl-metric-detail { margin-top: 10px; font-size: .7rem; }
 }
 
 @media (max-width: 480px) {
@@ -65,4 +74,7 @@
   #topmenu > li > a { padding: 0 8px; }
   h2 { font-size: 1.35rem; }
   .btn, .cbi-button, button { min-height: 42px; }
+  .sl-dashboard-heading { align-items: flex-start; }
+  .sl-live-status { min-height: 28px; padding: 5px 9px; }
+  .sl-gauge { width: 112px; height: 112px; }
 }
