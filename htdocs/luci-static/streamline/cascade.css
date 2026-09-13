@@ -212,7 +212,6 @@ h3 + .table, h3 + table { margin-top: 12px; }
 .sl-metric.is-empty .sl-gauge { filter: saturate(.2); opacity: .72; }
 .sl-metric.is-loading .sl-gauge { animation: sl-health-pulse 1.35s ease-in-out infinite; }
 .sl-metric.is-loading .sl-gauge-value { color: var(--sl-muted); }
-.streamline-overview > #view > h2:first-child { display: none; }
 .streamline-overview > .cbi-section { border-top-color: rgba(139,92,246,.38); }
 .streamline-overview .network-status-table + h3 { margin-top: 36px; margin-bottom: 14px; }
 

@@ -7,5 +7,6 @@ if [ -f /etc/uci-defaults/30_luci-theme-streamline ]; then
 		rm -f /etc/uci-defaults/30_luci-theme-streamline
 fi
 
+rm -f /www/luci-static/resources/menu-streamline.js
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 exit 0

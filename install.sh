@@ -27,6 +27,7 @@ install_tree "$SOURCE_DIR/luasrc/view/themes/streamline" /usr/lib/lua/luci/view/
 install_tree "$SOURCE_DIR/ucode/template/themes/streamline" /usr/share/ucode/luci/template/themes/streamline
 cp "$SOURCE_DIR/htdocs/streamline-sw.js" /www/streamline-sw.js
 cp "$SOURCE_DIR/htdocs/streamline-offline.html" /www/streamline-offline.html
+rm -f /www/luci-static/resources/menu-streamline.js
 
 uci set luci.themes.Streamline='/luci-static/streamline'
 uci set luci.main.mediaurlbase='/luci-static/streamline'

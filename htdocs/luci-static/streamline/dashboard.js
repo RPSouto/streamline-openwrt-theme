@@ -176,12 +176,8 @@
      * Keep this shell outside #view. LuCI replaces #view after its asynchronous
      * RPC requests finish; placing the shell beside it makes the gauges visible
      * immediately and prevents them from disappearing during a refresh.
-     */
+    */
     if (view) {
-      var title = document.createElement('h2');
-      title.id = 'streamline-overview-title';
-      title.textContent = typeof window._ === 'function' ? window._('Status') : 'Status';
-      main.insertBefore(title, view);
       main.insertBefore(summary, view);
     } else if (firstSection) {
       firstSection.parentNode.insertBefore(summary, firstSection);
