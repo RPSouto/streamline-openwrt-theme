@@ -75,6 +75,7 @@ return baseclass.extend({
       }, [_(child.title)]);
 
       if (hasSubmenu) {
+        li.setAttribute('data-preference-key', 'streamline.menu.' + path);
         submenu.id = 'streamline-menu-' + child.name;
         link.setAttribute('aria-controls', submenu.id);
         link.addEventListener('click', (event) => {
@@ -160,6 +161,31 @@ return baseclass.extend({
     const header = document.querySelector('header');
     if (!header || header.querySelector('.sidebar-toggle'))
       return;
+
+    const indicators = document.querySelector('#indicators');
+    if (indicators && !indicators.querySelector('.sidebar-home')) {
+      const homeUrl = L.url('admin/status/overview');
+      const homeLink = E('a', {
+        'class': 'sidebar-home',
+        'href': homeUrl,
+        'title': _('Home'),
+        'aria-label': _('Home')
+      }, [_('Home')]);
+      homeLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        document.querySelectorAll('#topmenu > li.dropdown').forEach((item) => {
+          item.classList.remove('open');
+          const link = item.querySelector(':scope > a');
+          if (link)
+            link.setAttribute('aria-expanded', 'false');
+          if (item.dataset.preferenceKey)
+            this.setPreference(item.dataset.preferenceKey, 'closed');
+        });
+        document.body.classList.remove('mobile-menu-open');
+        window.location.assign(homeUrl);
+      });
+      indicators.prepend(homeLink);
+    }
 
     const button = E('button', {
       'type': 'button',

@@ -119,9 +119,10 @@ footer span { display: inline-block; }
 .cbi-dynlist > .item small { display: block; min-width: 0; color: var(--sl-muted); }
 .cbi-dynlist > .item code { display: inline; color: #c7d7f4; white-space: normal; overflow-wrap: anywhere; word-break: break-all; }
 .cbi-dynlist > .item:hover { border-color: rgba(255,100,124,.48); background: rgba(255,100,124,.04); }
-.cbi-dynlist > .add-item { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 4px; }
-.cbi-dynlist > .add-item > input { flex: 1 1 360px; width: auto; min-width: 180px; min-height: 42px; }
-.cbi-dynlist > .add-item > .cbi-button { flex: 0 0 auto; min-height: 42px; margin: 0; }
+.cbi-dynlist { display: inline-flex; flex-direction: column; width: min(100%, 480px); min-width: 0; }
+.cbi-dynlist > .add-item { display: flex; align-items: stretch; flex-wrap: nowrap; gap: 0; width: 100%; padding-top: 4px; }
+.cbi-dynlist > .add-item > input { flex: 1 1 auto; width: auto; min-width: 0; height: 42px; min-height: 42px; border-right: 0; border-radius: 9px 0 0 9px; }
+.cbi-dynlist > .add-item > .cbi-button { flex: 0 0 auto; height: 42px; min-height: 42px; margin: 0; border-radius: 0 9px 9px 0; }
 .cbi-value { display: flex; align-items: flex-start; padding: 11px 0; gap: 24px; border-bottom: 1px solid rgba(41,48,61,.55); }
 .cbi-value:last-child { border-bottom: 0; }
 .cbi-value-title { flex: 0 0 240px; padding-top: 9px; color: #d7dbe5; font-weight: 600; }
@@ -159,6 +160,15 @@ input[disabled], select[disabled], textarea[disabled] { opacity: .55; cursor: no
 .td[data-title]::before { color: var(--sl-muted); }
 .table + h3, table + h3 { margin-top: 30px; padding-top: 4px; }
 h3 + .table, h3 + table { margin-top: 12px; }
+.cbi-section > .table + .cbi-button, .cbi-section-node > .table + .cbi-button,
+.cbi-section > table + .cbi-button, .cbi-section-node > table + .cbi-button { margin-top: 12px; }
+.cbi-section-create { display: flex; align-items: stretch; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding: 0; }
+.cbi-section-create > * { margin: 0 !important; }
+.cbi-section-create > div:first-child { display: flex; flex: 1 1 260px; min-width: 0; }
+.cbi-section-create > div:first-child > input,
+.cbi-section-create > div:first-child > select { flex: 1 1 auto; width: 100%; min-width: 0; height: 42px; min-height: 42px; }
+.cbi-section-create > button, .cbi-section-create .cbi-button { height: 42px; min-height: 42px; }
+.cbi-section > .cbi-button-add, .cbi-section-node > .cbi-button-add { min-height: 42px; margin-top: 12px; }
 
 .ifacebox { display: inline-flex; flex-direction: column; min-width: 220px; margin: 6px; overflow: hidden; }
 .ifacebox-head { padding: 10px 13px; background: var(--sl-surface-3); font-weight: 700; }
@@ -247,6 +257,9 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 #indicators > [data-clickable] { cursor: pointer; }
 #indicators > [data-clickable]:hover { border-color: var(--sl-purple); background: var(--sl-surface-3); }
 #indicators > [data-style="active"]::before { content: ""; width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--sl-green); box-shadow: 0 0 0 3px rgba(57,216,170,.12); }
+#indicators > .sidebar-home { display: flex; align-items: center; gap: 9px; min-height: 38px; padding: 9px 12px; background: var(--sl-surface-2); border-color: var(--sl-border); color: var(--sl-text); font-size: .82rem; font-weight: 650; }
+#indicators > .sidebar-home::before { content: "⌂"; width: 18px; color: #b79aff; font-size: 1.15rem; line-height: 1; text-align: center; }
+#indicators > .sidebar-home:hover { border-color: var(--sl-purple); background: rgba(139,92,246,.13); color: #fff; }
 
 /* Package manager toolbars: keep labels, fields and actions in aligned groups. */
 [data-page="admin-system-opkg"] .controls,
@@ -263,6 +276,14 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 [data-page="admin-system-opkg"] .controls .cbi-button,
 [data-page="admin-system-package-manager"] .controls .btn,
 [data-page="admin-system-package-manager"] .controls .cbi-button { flex: 0 0 auto; min-height: 42px; margin: 0 !important; }
+
+/* Equal-height command fields on Network > Diagnostics. */
+[data-page="admin-network-diagnostics"] .tr { display: flex; align-items: stretch; gap: 24px; }
+[data-page="admin-network-diagnostics"] .tr > .td { display: flex; flex: 1 1 0; align-items: stretch; min-width: 0; padding: 16px; border-bottom: 0; }
+[data-page="admin-network-diagnostics"] .tr > .td > input { flex: 1 1 auto; width: auto; min-width: 0; height: 42px; min-height: 42px; margin: 0; border-right: 0; border-radius: 9px 0 0 9px; }
+[data-page="admin-network-diagnostics"] .tr > .td > .cbi-button,
+[data-page="admin-network-diagnostics"] .tr > .td > .cbi-dropdown { flex: 0 0 auto; height: 42px; min-height: 42px; margin: 0; border-radius: 0 9px 9px 0; }
+[data-page="admin-network-diagnostics"] .tr > .td > .cbi-dropdown > .open { min-height: 40px; }
 .cbi-dropdown.cbi-button { position: relative; display: inline-flex; align-items: stretch; padding: 0; min-height: 42px; overflow: visible; }
 .cbi-dropdown.cbi-button > ul { display: flex; align-items: center; flex: 1; margin: 0; padding: 0; list-style: none; }
 .cbi-dropdown.cbi-button > ul > li { display: none; padding: 11px 16px; line-height: 18px; white-space: nowrap; }
@@ -288,12 +309,37 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 }
 
 .zonebadge { border-radius: 7px; border: 1px solid var(--sl-border); }
+.zonebadge { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 5px 7px; color: var(--sl-text); white-space: nowrap; }
+.zonebadge > strong, .zonebadge > em { display: inline-block; margin: 0 2px; }
 .zonebadge > strong { border-radius: 6px 0 0 6px; }
+.zonebadge > .ifacebadge { margin-left: 2px; }
+.zonebadge-empty { border-style: dashed; color: var(--sl-muted); font-size: .84rem; font-style: italic; }
+.zone-forwards { display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; min-width: 210px; }
+.zone-forwards > .zone-src, .zone-forwards > .zone-dest { display: flex; flex: 1 1 42%; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+.zone-forwards > span { flex: 0 0 20px; color: var(--sl-faint); text-align: center; }
+.zonebadge .cbi-tooltip { display: flex; flex-wrap: wrap; gap: 5px; min-width: min(300px, 78vw); padding: 8px; background: var(--sl-surface-3); }
+.zonebadge .cbi-tooltip > * { position: relative; z-index: 2; margin: 0; }
 .cbi-dropdown { display: inline-flex; min-height: 38px; border: 1px solid #343c4d; border-radius: 9px; background: #0d1118; }
 .cbi-dropdown > ul { list-style: none; margin: 0; padding: 0; }
 .cbi-dropdown > ul > li { padding: 8px 11px; }
 .cbi-dropdown > button { min-height: 36px; border: 0; border-left: 1px solid var(--sl-border); border-radius: 0 8px 8px 0; }
-.cbi-tooltip { position: absolute; z-index: 900; padding: 8px; border: 1px solid var(--sl-border); border-radius: 8px; background: var(--sl-surface-3); color: var(--sl-text); box-shadow: var(--sl-shadow); }
+.cbi-tooltip-container { position: relative; cursor: help; }
+.cbi-tooltip { position: absolute; z-index: 900; left: -10000px; top: calc(100% + 8px); width: max-content; max-width: min(340px, 82vw); padding: 10px 12px; border: 1px solid var(--sl-border); border-radius: 9px; background: var(--sl-surface-3); color: var(--sl-text); box-shadow: var(--sl-shadow); line-height: 1.5; white-space: normal; overflow-wrap: anywhere; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-4px); transition: opacity .15s ease, transform .15s ease, visibility .15s ease; }
+.cbi-tooltip-container:hover > .cbi-tooltip:not(:empty), .cbi-tooltip-container:focus-within > .cbi-tooltip:not(:empty) { left: 0; opacity: 1; visibility: visible; transform: translateY(0); }
+.ifacebox .cbi-tooltip-container { display: inline-flex; align-items: center; vertical-align: middle; }
+.ifacebox .cbi-tooltip-container + .cbi-tooltip-container { margin-left: 4px; }
+.ifacebox .cbi-tooltip img { flex: 0 0 auto; }
+
+/* Stable three-column layout for the LuCI Interfaces overview. */
+#cbi-network-interface .cbi-section-table-row > .td { vertical-align: middle; }
+#cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacebox"] { width: 31%; min-width: 260px; padding: 16px 18px; }
+#cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"] { width: 45%; min-width: 320px; padding: 16px 20px; line-height: 1.55; overflow-wrap: anywhere; }
+#cbi-network-interface .cbi-section-table-row > .cbi-section-actions { width: 24%; min-width: 310px; padding: 16px 18px; }
+#cbi-network-interface .ifacebox { width: 100%; min-width: 0; margin: 0; box-shadow: none; }
+#cbi-network-interface .ifacebox-head { padding: 10px 14px; }
+#cbi-network-interface .ifacebox-body { min-height: 62px; padding: 12px 14px; line-height: 1.5; white-space: normal; }
+#cbi-network-interface .cbi-section-actions > div { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 7px; }
+#cbi-network-interface .cbi-section-actions .cbi-button { min-height: 38px; margin: 0; }
 .nowrap { white-space: nowrap; }
 .hidden { display: none !important; }
 .left { text-align: left; }
