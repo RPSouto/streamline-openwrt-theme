@@ -85,14 +85,16 @@ header {
   width: 232px; padding: 22px 16px;
   background: rgba(var(--sl-header-rgb),.97); border-right: 1px solid var(--sl-border);
   display: flex; flex-direction: column; overflow-y: auto;
-  transition: width .18s ease;
+  transition: width .3s cubic-bezier(.22,1,.36,1), padding .3s cubic-bezier(.22,1,.36,1);
 }
 .brand {
   min-height: 58px; padding: 5px 8px 5px 54px; margin-bottom: 16px;
   display: flex; flex-direction: column; justify-content: center;
   color: var(--sl-text) !important; font-weight: 750; font-size: 1.08rem; overflow-wrap: anywhere;
   position: relative;
+  transition: width .3s cubic-bezier(.22,1,.36,1), padding .3s cubic-bezier(.22,1,.36,1);
 }
+.brand > span { display: block; max-width: 150px; overflow: hidden; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .24s cubic-bezier(.22,1,.36,1), opacity .14s ease, transform .24s cubic-bezier(.22,1,.36,1); }
 .brand::before { content: ""; position: absolute; left: 4px; top: 8px; width: 38px; height: 38px; background: url(logo.svg) center/contain no-repeat; filter: drop-shadow(0 6px 12px rgba(var(--sl-accent-rgb),.35)); }
 .brand::after { content: "OPENWRT"; font-size: .57rem; letter-spacing: .22em; color: var(--sl-faint); font-weight: 700; margin-top: 3px; }
 
@@ -103,7 +105,9 @@ header {
 #topmenu > li > a {
   display: flex; align-items: center; min-height: 42px; padding: 0 13px;
   border-radius: 10px; color: var(--sl-muted); font-weight: 650; line-height: 1.25;
+  transition: padding .3s cubic-bezier(.22,1,.36,1), color .12s linear, background .12s linear, box-shadow .12s linear;
 }
+#topmenu > li > a > .menu-label { display: block; max-width: 150px; overflow: hidden; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .24s cubic-bezier(.22,1,.36,1), opacity .14s ease, transform .24s cubic-bezier(.22,1,.36,1); }
 #topmenu > li > a::before { content: "◇"; flex: 0 0 24px; width: 24px; text-align: center; color: #778197; font-size: 1rem; }
 #topmenu > .menu-item-status > a::before { content: "▦"; }
 #topmenu > .menu-item-system > a::before { content: "⚙"; }
@@ -124,11 +128,11 @@ header {
 #indicators { margin-top: auto; padding-top: 12px; }
 #indicators > span, #indicators > a, #indicators > button { display: block; width: 100%; padding: 8px 10px; border: 1px solid var(--sl-border); border-radius: 9px; color: var(--sl-muted); }
 
-.container { width: auto; max-width: none; margin-left: 232px; padding: 28px 34px 72px; min-height: calc(100vh - 54px); transition: margin-left .18s ease; }
+.container { width: auto; max-width: none; margin-left: 232px; padding: 28px 34px 72px; min-height: calc(100vh - 54px); transition: margin-left .3s cubic-bezier(.22,1,.36,1); }
 .container::before { content: "ROUTER CONTROL"; display: block; color: var(--sl-accent-label); font-weight: 750; letter-spacing: .22em; font-size: .62rem; margin-bottom: 7px; }
 .container > h2:first-of-type, .container > .cbi-map > h2:first-child { margin-bottom: 22px; }
 
-footer { margin-left: 232px; min-height: 54px; border-top: 1px solid var(--sl-border); padding: 16px 34px; color: var(--sl-faint); font-size: .78rem; transition: margin-left .18s ease; }
+footer { margin-left: 232px; min-height: 54px; border-top: 1px solid var(--sl-border); padding: 16px 34px; color: var(--sl-faint); font-size: .78rem; transition: margin-left .3s cubic-bezier(.22,1,.36,1); }
 footer span { display: inline-block; }
 .pull-right { float: right; }
 .breadcrumb { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
@@ -315,7 +319,8 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 .spinning::before { content: ""; width: 20px; height: 20px; margin-right: 10px; border: 2px solid #353b49; border-top-color: var(--sl-purple); border-radius: 50%; animation: sl-spin .8s linear infinite; }
 @keyframes sl-spin { to { transform: rotate(360deg); } }
 .pwa-install { position: fixed; right: 20px; bottom: 20px; z-index: 950; min-height: 42px; padding: 10px 17px; border: 0; background: linear-gradient(135deg, var(--sl-purple), var(--sl-purple-2)); color: #fff; box-shadow: 0 14px 35px rgba(0,0,0,.4); }
-.sidebar-toggle { position: fixed; top: 50%; left: 217px; right: auto; z-index: 101; width: 30px; min-height: 30px; padding: 0; border-radius: 50%; color: var(--sl-link); background: var(--sl-surface-2); transform: translateY(-50%); }
+.sidebar-toggle { position: fixed; top: 50%; left: 217px; right: auto; z-index: 101; width: 30px; min-height: 30px; padding: 0; border-radius: 50%; color: var(--sl-link); background: var(--sl-surface-2); transform: translateY(-50%); transition: left .3s cubic-bezier(.22,1,.36,1) !important; }
+.sidebar-toggle:hover, .sidebar-toggle:focus, .sidebar-toggle:active { color: var(--sl-text); border-color: var(--sl-purple); background: var(--sl-surface-3); transform: translateY(-50%); }
 
 /* Native LuCI action groups and split buttons. */
 .control-group { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px; vertical-align: middle; }
@@ -394,10 +399,12 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 
 @media (min-width: 855px) {
   body.sidebar-collapsed header { width: 76px; padding-left: 10px; padding-right: 10px; overflow-x: hidden; }
-  body.sidebar-collapsed .brand { width: 48px; padding: 5px; font-size: 0; }
+  body.sidebar-collapsed .brand { width: 48px; padding: 5px; }
   body.sidebar-collapsed .brand::before { left: 5px; }
   body.sidebar-collapsed .brand::after { display: none; }
-  body.sidebar-collapsed #topmenu > li > a { justify-content: center; padding: 0; font-size: 0; }
+  body.sidebar-collapsed .brand > span,
+  body.sidebar-collapsed #topmenu > li > a > .menu-label { max-width: 0; opacity: 0; transform: translateX(-8px); }
+  body.sidebar-collapsed #topmenu > li > a { justify-content: center; padding: 0; }
   body.sidebar-collapsed #topmenu > li > a::before { width: auto; font-size: 1rem; }
   body.sidebar-collapsed #topmenu > .menu-item-network > a::before,
   body.sidebar-collapsed #topmenu > .menu-item-logout > a::before { flex-basis: 18px; width: 18px; margin: 0; }
