@@ -30,7 +30,8 @@ cp "$SOURCE_DIR/htdocs/streamline-offline.html" /www/streamline-offline.html
 rm -f /www/luci-static/resources/menu-streamline.js \
 	/www/luci-static/resources/menu-streamline-v17.js \
 	/www/luci-static/resources/menu-streamline-v18.js \
-	/www/luci-static/resources/menu-streamline-v19.js
+	/www/luci-static/resources/menu-streamline-v19.js \
+	/www/luci-static/resources/menu-streamline-v20.js
 
 uci set luci.themes.Streamline='/luci-static/streamline'
 uci set luci.main.mediaurlbase='/luci-static/streamline'

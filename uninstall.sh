@@ -23,6 +23,7 @@ rm -f \
 	/www/luci-static/resources/menu-streamline-v18.js \
 	/www/luci-static/resources/menu-streamline-v19.js \
 	/www/luci-static/resources/menu-streamline-v20.js \
+	/www/luci-static/resources/menu-streamline-v21.js \
 	/www/luci-static/resources/view/streamline/sysauth.js
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 /etc/init.d/uhttpd restart

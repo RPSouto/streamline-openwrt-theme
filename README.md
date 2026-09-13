@@ -28,8 +28,8 @@ Streamline is a dark, responsive theme for the OpenWrt LuCI web interface. Its v
 Copy the package to the router and install it with `opkg`:
 
 ```sh
-scp luci-theme-streamline_1.0.20-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.20-1_all.ipk'
+scp luci-theme-streamline_1.0.21-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.21-1_all.ipk'
 ```
 
 Keep the SSH session open during the first test. Open LuCI again and perform a hard refresh (`Ctrl+F5`) if the previous theme is still cached.
@@ -86,12 +86,12 @@ On Linux, or another environment with POSIX shell tools and GNU `tar`, run:
 sh build-ipk.sh
 ```
 
-The generated package is `luci-theme-streamline_1.0.20-1_all.ipk`. The outer package is a gzip-compressed GNU tar archive in the OpenWrt format and contains `debian-binary`, `control.tar.gz`, and `data.tar.gz`.
+The generated package is `luci-theme-streamline_1.0.21-1_all.ipk`. The outer package is a gzip-compressed GNU tar archive in the OpenWrt format and contains `debian-binary`, `control.tar.gz`, and `data.tar.gz`.
 
 Validate the resulting package before uploading it:
 
 ```sh
-node tools/verify-ipk.js luci-theme-streamline_1.0.20-1_all.ipk
+node tools/verify-ipk.js luci-theme-streamline_1.0.21-1_all.ipk
 ```
 
 ## Build with the OpenWrt SDK or buildroot
