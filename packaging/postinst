@@ -1,0 +1,11 @@
+#!/bin/sh
+
+[ -n "${IPKG_INSTROOT:-}" ] && exit 0
+
+if [ -f /etc/uci-defaults/30_luci-theme-streamline ]; then
+	sh /etc/uci-defaults/30_luci-theme-streamline && \
+		rm -f /etc/uci-defaults/30_luci-theme-streamline
+fi
+
+rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
+exit 0

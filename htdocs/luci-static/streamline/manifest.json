@@ -1,0 +1,17 @@
+{
+  "id": "/cgi-bin/luci/",
+  "name": "Streamline Router Control",
+  "short_name": "Router",
+  "description": "Administração OpenWrt com o tema Streamline",
+  "start_url": "/cgi-bin/luci/",
+  "scope": "/cgi-bin/luci/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090b11",
+  "theme_color": "#0b0e14",
+  "icons": [
+    { "src": "/luci-static/streamline/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/luci-static/streamline/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/luci-static/streamline/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

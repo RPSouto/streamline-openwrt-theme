@@ -1,0 +1,45 @@
+<%# SPDX-License-Identifier: Apache-2.0 -%>
+<%
+  local util = require "luci.util"
+  local http = require "luci.http"
+  local disp = require "luci.dispatcher"
+  local boardinfo = util.ubus("system", "board") or {}
+  local node = disp.context.dispatched
+  http.prepare_content("text/html")
+-%>
+<!DOCTYPE html>
+<html lang="<%=luci.i18n.context.lang%>" data-darkmode="true">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b0e14">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title><%=striptags((boardinfo.hostname or "?") .. ((node and node.title) and " | " .. translate(node.title) or ""))%></title>
+    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.5">
+    <link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="<%=media%>/mobile.css?v=1.0.5">
+    <link rel="icon" href="<%=media%>/logo.svg" sizes="any">
+    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.5">
+    <% if node and node.css then %><link rel="stylesheet" href="<%=resource%>/<%=node.css%>"><% end %>
+    <% if css then %><style><%=css%></style><% end %>
+    <script src="<%=url('admin/translations', luci.i18n.context.lang)%>"></script>
+    <script src="<%=resource%>/cbi.js"></script>
+    <script defer src="<%=media%>/pwa.js?v=1.0.5"></script>
+  </head>
+  <body class="lang_<%=luci.i18n.context.lang%>" data-page="<%=pcdata(table.concat(disp.context.requestpath, '-'))%>">
+    <% if not blank_page then %>
+    <header>
+      <a class="brand" href="/"><%=striptags(boardinfo.hostname or "?")%></a>
+      <ul class="nav" id="topmenu" style="display:none"></ul>
+      <div id="indicators" class="pull-right"></div>
+    </header>
+    <div id="maincontent" class="container">
+      <%- if luci.sys.process.info("uid") == 0 and luci.sys.user.getuser("root") and not luci.sys.user.getpasswd("root") then -%>
+      <div class="alert-message warning"><h4><%:No password set!%></h4><p><%:There is no password set on this router. Please configure a root password to protect the web interface.%></p>
+        <% if disp.lookup("admin/system/admin") then %><div class="right"><a class="btn" href="<%=url('admin/system/admin')%>"><%:Go to password configuration...%></a></div><% end %>
+      </div>
+      <%- end -%>
+      <noscript><div class="alert-message warning"><h4><%:JavaScript required!%></h4><p><%:You must enable JavaScript in your browser or LuCI will not work properly.%></p></div></noscript>
+      <div id="tabmenu" style="display:none"></div>
+    <% end %>

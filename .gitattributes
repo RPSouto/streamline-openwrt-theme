@@ -1,0 +1,8 @@
+* text=auto
+*.sh text eol=lf
+packaging/control text eol=lf
+packaging/postinst text eol=lf
+packaging/postrm text eol=lf
+root/etc/uci-defaults/* text eol=lf
+*.png binary
+*.ico binary

@@ -1,0 +1,40 @@
+@media (max-width: 854px) {
+  header { position: sticky; top: 0; width: 100%; height: 61px; padding: 8px 12px; border: 0; border-bottom: 1px solid var(--sl-border); overflow: visible; display: block; }
+  .brand { position: absolute; left: 12px; top: 8px; width: 125px; min-height: 44px; margin: 0; padding-left: 45px; font-size: .95rem; }
+  .brand::before { width: 34px; height: 34px; top: 5px; }
+  .brand::after { display: none; }
+  #topmenu { display: grid !important; grid-auto-flow: column; grid-auto-columns: 42px; width: calc(100% - 130px); margin-left: 130px; justify-content: end; gap: 4px; overflow-x: auto; }
+  #topmenu > li { flex: 0 0 42px; margin: 0; position: relative; }
+  #topmenu > li > a { min-height: 38px; padding: 0 10px; font-size: 0; }
+  #topmenu > li > a::before { width: auto; font-size: 1rem; }
+  #topmenu > li.dropdown > a::after { display: none; }
+  #topmenu > li:hover > a, #topmenu > li.dropdown.active > a { box-shadow: inset 0 -2px var(--sl-purple); }
+  .dropdown-menu { display: none; position: fixed; left: 10px; right: 10px; top: 61px; max-height: calc(100vh - 75px); overflow: auto; margin: 0; padding: 8px; border: 1px solid var(--sl-border); border-radius: 12px; background: var(--sl-surface); box-shadow: var(--sl-shadow); }
+  #topmenu > li:hover .dropdown-menu, #topmenu > li:focus-within .dropdown-menu, #topmenu > li.open .dropdown-menu { display: block; }
+  .dropdown-menu li a { padding: 11px 12px 11px 25px; font-size: .92rem; }
+  #indicators { display: none; }
+  .sidebar-toggle { display: none; }
+  .container, footer { margin-left: 0; }
+  .container { min-height: calc(100vh - 106px); padding: 22px 14px 52px; }
+  footer { padding: 14px; }
+  footer .breadcrumb { float: none; margin-top: 8px; }
+  .cbi-section { padding: 14px; border-radius: 12px; overflow-x: auto; }
+  .cbi-value { display: block; padding: 10px 0; }
+  .cbi-value-title { display: block; width: 100%; padding: 0 0 7px; }
+  .cbi-value-field { width: 100%; }
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; }
+  .table { display: block; overflow-x: auto; }
+  .th, .td { min-width: 110px; }
+  .cbi-page-actions { position: sticky; bottom: 0; z-index: 20; margin: 0 -14px -52px; padding: 12px 14px; background: rgba(9,11,17,.92); border-top: 1px solid var(--sl-border); backdrop-filter: blur(10px); }
+  #content_syslog, #content_dmesg, #content_systemlog, #content_kernellog, #diag-rc-output, #command-rc-output, .command-output { padding: 8px; }
+  #syslog, #dmesg, #content_syslog textarea, #content_dmesg textarea, #content_systemlog textarea, #content_kernellog textarea { min-height: 55vh; padding: 11px; font-size: .76rem !important; }
+  #modal_overlay { padding: 12px; }
+  .modal { width: 100%; margin: 5vh auto; padding: 18px; }
+}
+
+@media (max-width: 480px) {
+  .brand { max-width: 125px; }
+  #topmenu > li > a { padding: 0 8px; }
+  h2 { font-size: 1.35rem; }
+  .btn, .cbi-button, button { min-height: 42px; }
+}
