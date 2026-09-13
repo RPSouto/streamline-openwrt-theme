@@ -5,7 +5,7 @@
       <span>Streamline · <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }} {{ version.luciversion }}</a> / {{ version.distname }} {{ version.distversion }}</span>
       <ul class="breadcrumb pull-right" id="modemenu" style="display:none"></ul>
     </footer>
-    <script>L.require('menu-streamline-v17')</script>
+    <script>L.require('menu-streamline-v19')</script>
     {% endif %}
   </body>
 </html>

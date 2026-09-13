@@ -165,7 +165,7 @@
     summary.id = 'streamline-overview-summary';
     summary.className = 'sl-dashboard-summary';
     summary.innerHTML = '<div class="sl-dashboard-heading"><div><span>ROUTER HEALTH</span><h3>System overview</h3></div>' +
-      '<div class="sl-live-status is-loading"><i></i><span>Loading</span></div></div><div class="sl-metric-grid"></div>';
+      '<div class="sl-live-status is-loading" role="status" aria-label="Loading" title="Loading"><i></i></div></div><div class="sl-metric-grid"></div>';
 
     var grid = summary.querySelector('.sl-metric-grid');
     grid.appendChild(metric('1 MIN LOAD', 'sl-load'));
@@ -232,7 +232,8 @@
     if (loadText || memory || storage || uptime) {
       var live = summary.querySelector('.sl-live-status');
       live.classList.remove('is-loading');
-      live.querySelector('span').textContent = 'Live';
+      live.setAttribute('aria-label', 'Live');
+      live.setAttribute('title', 'Live');
     }
   }
 
