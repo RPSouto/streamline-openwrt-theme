@@ -54,11 +54,11 @@ Para gerar um IPK universal numa máquina Linux com GNU `tar`:
 sh build-ipk.sh
 ```
 
-O resultado é `luci-theme-streamline_1.0.5-1_all.ipk`. Para instalar no router:
+O resultado é `luci-theme-streamline_1.0.6-1_all.ipk`. Para instalar no router:
 
 ```sh
-scp luci-theme-streamline_1.0.5-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.5-1_all.ipk'
+scp luci-theme-streamline_1.0.6-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.6-1_all.ipk'
 ```
 
 Para integrar o tema numa imagem completa ou produzir um pacote APK, copie a pasta para o buildroot:

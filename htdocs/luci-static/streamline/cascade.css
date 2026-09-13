@@ -214,6 +214,7 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 .modal.login::before { content: ""; display: block; width: 52px; height: 52px; margin: 0 auto 18px; background: url(logo.svg) center/contain no-repeat; filter: drop-shadow(0 8px 20px rgba(109,61,225,.4)); }
 .modal.login { width: min(420px, calc(100% - 24px)); margin-top: 11vh; padding: 30px; overflow: visible; }
 .modal.login > h4 { margin-bottom: 20px; text-align: center; font-size: 1.35rem; }
+.modal.login > .login-subtitle { margin: -10px 0 18px; color: var(--sl-muted); font-size: .82rem; font-weight: 650; letter-spacing: .08em; text-align: center; text-transform: uppercase; }
 .modal.login > form { margin: 0; }
 .modal.login > form .cbi-section { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .modal.login > form .cbi-value { display: block; padding: 8px 0; border: 0; }

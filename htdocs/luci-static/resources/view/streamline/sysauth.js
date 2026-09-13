@@ -4,9 +4,14 @@
 
 return view.extend({
   render() {
+    const section = document.querySelector('section');
     const form = document.querySelector('form');
     const btn = document.querySelector('button');
-    const dlg = ui.showModal(_('Authorization Required'), Array.from(document.querySelectorAll('section > *')), 'login');
+    const hostnameNode = section.querySelector('.login-hostname');
+    const hostname = hostnameNode ? hostnameNode.textContent.trim() : '';
+    const content = Array.from(section.children).filter((node) => node !== hostnameNode);
+    content.unshift(E('div', { 'class': 'login-subtitle' }, _('Authorization Required')));
+    const dlg = ui.showModal(hostname || _('Authorization Required'), content, 'login');
 
     form.addEventListener('keypress', (event) => {
       if (event.key === 'Enter')

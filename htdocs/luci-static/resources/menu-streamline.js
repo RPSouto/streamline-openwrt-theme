@@ -79,6 +79,17 @@ return baseclass.extend({
         link.setAttribute('aria-controls', submenu.id);
         link.addEventListener('click', (event) => {
           event.preventDefault();
+          const mobile = window.matchMedia('(max-width: 854px)').matches;
+          if (mobile) {
+            document.querySelectorAll('#topmenu > li.open').forEach((item) => {
+              if (item !== li) {
+                item.classList.remove('open');
+                const itemLink = item.querySelector(':scope > a');
+                if (itemLink)
+                  itemLink.setAttribute('aria-expanded', 'false');
+              }
+            });
+          }
           if (document.body.classList.contains('sidebar-collapsed')) {
             this.setSidebarCollapsed(false);
             li.classList.add('open');
@@ -87,7 +98,14 @@ return baseclass.extend({
           }
           const isOpen = li.classList.contains('open');
           link.setAttribute('aria-expanded', String(isOpen));
+          if (mobile)
+            document.body.classList.toggle('mobile-menu-open', isOpen);
           this.setPreference('streamline.menu.' + path, isOpen ? 'open' : 'closed');
+        });
+
+        submenu.addEventListener('click', (event) => {
+          if (event.target.closest('a'))
+            document.body.classList.remove('mobile-menu-open');
         });
       }
 
@@ -154,5 +172,38 @@ return baseclass.extend({
     });
     header.appendChild(button);
     this.setSidebarCollapsed(this.getPreference('streamline.sidebar') === 'collapsed');
+
+    const resetMobileMenu = () => {
+      if (!window.matchMedia('(max-width: 854px)').matches)
+        return;
+      document.querySelectorAll('#topmenu > li.open').forEach((item) => {
+        item.classList.remove('open');
+        const link = item.querySelector(':scope > a');
+        if (link)
+          link.setAttribute('aria-expanded', 'false');
+      });
+      document.body.classList.remove('mobile-menu-open');
+    };
+    resetMobileMenu();
+    window.addEventListener('resize', resetMobileMenu);
+
+    document.addEventListener('click', (event) => {
+      if (!window.matchMedia('(max-width: 854px)').matches || event.target.closest('header'))
+        return;
+      document.querySelectorAll('#topmenu > li.open').forEach((item) => {
+        item.classList.remove('open');
+        const link = item.querySelector(':scope > a');
+        if (link)
+          link.setAttribute('aria-expanded', 'false');
+      });
+      document.body.classList.remove('mobile-menu-open');
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && document.body.classList.contains('mobile-menu-open')) {
+        document.body.classList.remove('mobile-menu-open');
+        document.querySelectorAll('#topmenu > li.open').forEach((item) => item.classList.remove('open'));
+      }
+    });
   }
 });

@@ -1,17 +1,20 @@
 @media (max-width: 854px) {
   header { position: sticky; top: 0; width: 100%; height: 61px; padding: 8px 12px; border: 0; border-bottom: 1px solid var(--sl-border); overflow: visible; display: block; }
-  .brand { position: absolute; left: 12px; top: 8px; width: 125px; min-height: 44px; margin: 0; padding-left: 45px; font-size: .95rem; }
+  .brand { position: absolute; left: 12px; top: 8px; width: 150px; min-height: 44px; margin: 0; padding-left: 45px; font-size: .95rem; white-space: nowrap; }
   .brand::before { width: 34px; height: 34px; top: 5px; }
   .brand::after { display: none; }
-  #topmenu { display: grid !important; grid-auto-flow: column; grid-auto-columns: 42px; width: calc(100% - 130px); margin-left: 130px; justify-content: end; gap: 4px; overflow-x: auto; }
-  #topmenu > li { flex: 0 0 42px; margin: 0; position: relative; }
+  #topmenu { display: grid !important; grid-auto-flow: column; grid-auto-columns: 40px; width: calc(100% - 155px); margin-left: 155px; justify-content: end; gap: 2px; overflow-x: auto; }
+  #topmenu > li { flex: 0 0 40px; margin: 0; position: relative; }
   #topmenu > li > a { min-height: 38px; padding: 0 10px; font-size: 0; }
   #topmenu > li > a::before { width: auto; font-size: 1rem; }
   #topmenu > li.dropdown > a::after { display: none; }
   #topmenu > li:hover > a, #topmenu > li.dropdown.active > a { box-shadow: inset 0 -2px var(--sl-purple); }
-  .dropdown-menu { display: none; position: fixed; left: 10px; right: 10px; top: 61px; max-height: calc(100vh - 75px); overflow: auto; margin: 0; padding: 8px; border: 1px solid var(--sl-border); border-radius: 12px; background: var(--sl-surface); box-shadow: var(--sl-shadow); }
-  #topmenu > li:hover .dropdown-menu, #topmenu > li:focus-within .dropdown-menu, #topmenu > li.open .dropdown-menu { display: block; }
-  .dropdown-menu li a { padding: 11px 12px 11px 25px; font-size: .92rem; }
+  body.mobile-menu-open { overflow: hidden; }
+  body.mobile-menu-open::before { content: ""; position: fixed; inset: 61px 0 0; z-index: 90; background: rgba(4,6,10,.72); backdrop-filter: blur(2px); }
+  .dropdown-menu { display: none; position: fixed; z-index: 110; left: 12px; right: 12px; top: 69px; max-height: min(58vh, 480px); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: 8px; border: 1px solid var(--sl-border); border-radius: 14px; background: rgba(17,21,29,.99); box-shadow: 0 22px 60px rgba(0,0,0,.55); }
+  #topmenu > li.open > .dropdown-menu { display: block; }
+  .dropdown-menu li + li { margin-top: 3px; }
+  .dropdown-menu li a { min-height: 46px; padding: 12px 14px 12px 30px; font-size: .92rem; }
   #indicators { display: none; }
   .sidebar-toggle { display: none; }
   .container, footer { margin-left: 0; }
@@ -30,10 +33,24 @@
   #syslog, #dmesg, #content_syslog textarea, #content_dmesg textarea, #content_systemlog textarea, #content_kernellog textarea { min-height: 55vh; padding: 11px; font-size: .76rem !important; }
   #modal_overlay { padding: 12px; }
   .modal { width: 100%; margin: 5vh auto; padding: 18px; }
+  .cbi-section-node > .cbi-dynlist { padding: 12px; }
+  .cbi-dynlist > .item { padding: 12px; }
+  .cbi-dynlist > .add-item { align-items: stretch; }
+  .cbi-dynlist > .add-item > input, .cbi-dynlist > .add-item > .cbi-button { width: 100%; flex-basis: 100%; }
+  [data-page="admin-system-opkg"] .controls,
+  [data-page="admin-system-package-manager"] .controls { padding: 14px; gap: 16px; }
+  [data-page="admin-system-opkg"] .controls > div,
+  [data-page="admin-system-package-manager"] .controls > div { flex-basis: 100%; align-items: stretch; }
+  [data-page="admin-system-opkg"] .controls input[type="text"],
+  [data-page="admin-system-package-manager"] .controls input[type="text"],
+  [data-page="admin-system-opkg"] .controls .btn,
+  [data-page="admin-system-opkg"] .controls .cbi-button,
+  [data-page="admin-system-package-manager"] .controls .btn,
+  [data-page="admin-system-package-manager"] .controls .cbi-button { width: 100%; flex-basis: 100%; }
 }
 
 @media (max-width: 480px) {
-  .brand { max-width: 125px; }
+  .brand { max-width: 150px; }
   #topmenu > li > a { padding: 0 8px; }
   h2 { font-size: 1.35rem; }
   .btn, .cbi-button, button { min-height: 42px; }
