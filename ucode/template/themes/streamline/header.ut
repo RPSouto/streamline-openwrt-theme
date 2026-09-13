@@ -15,16 +15,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="darkreader-lock">
     <title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
-    <link rel="stylesheet" href="{{ media }}/cascade.css?v=1.0.15">
-    <link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="{{ media }}/mobile.css?v=1.0.15">
+    <link rel="stylesheet" href="{{ media }}/cascade.css?v=1.0.16">
+    <link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="{{ media }}/mobile.css?v=1.0.16">
     <link rel="icon" href="{{ media }}/logo.svg" sizes="any">
-    <link rel="manifest" href="{{ media }}/manifest.json?v=1.0.15">
+    <link rel="manifest" href="{{ media }}/manifest.json?v=1.0.16">
     {% if (dispatched?.css): %}<link rel="stylesheet" href="{{ resource }}/{{ dispatched.css }}">{% endif %}
     {% if (css): %}<style>{{ css }}</style>{% endif %}
     <script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
     <script src="{{ resource }}/cbi.js"></script>
-    <script defer src="{{ media }}/pwa.js?v=1.0.15"></script>
-    <script defer src="{{ media }}/dashboard.js?v=1.0.15"></script>
+    <script defer src="{{ media }}/pwa.js?v=1.0.16"></script>
+    <script defer src="{{ media }}/dashboard.js?v=1.0.16"></script>
   </head>
   <body class="lang_{{ dispatcher.lang }}" data-page="{{ entityencode(join('-', length(ctx.request_path) ? ctx.request_path : ctx.path), true) }}">
     {% if (!blank_page): %}

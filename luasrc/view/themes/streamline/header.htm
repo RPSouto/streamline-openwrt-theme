@@ -17,16 +17,16 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title><%=striptags((boardinfo.hostname or "?") .. ((node and node.title) and " | " .. translate(node.title) or ""))%></title>
-    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.15">
-    <link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="<%=media%>/mobile.css?v=1.0.15">
+    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.16">
+    <link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="<%=media%>/mobile.css?v=1.0.16">
     <link rel="icon" href="<%=media%>/logo.svg" sizes="any">
-    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.15">
+    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.16">
     <% if node and node.css then %><link rel="stylesheet" href="<%=resource%>/<%=node.css%>"><% end %>
     <% if css then %><style><%=css%></style><% end %>
     <script src="<%=url('admin/translations', luci.i18n.context.lang)%>"></script>
     <script src="<%=resource%>/cbi.js"></script>
-    <script defer src="<%=media%>/pwa.js?v=1.0.15"></script>
-    <script defer src="<%=media%>/dashboard.js?v=1.0.15"></script>
+    <script defer src="<%=media%>/pwa.js?v=1.0.16"></script>
+    <script defer src="<%=media%>/dashboard.js?v=1.0.16"></script>
   </head>
   <body class="lang_<%=luci.i18n.context.lang%>" data-page="<%=pcdata(table.concat(disp.context.requestpath, '-'))%>">
     <% if not blank_page then %>

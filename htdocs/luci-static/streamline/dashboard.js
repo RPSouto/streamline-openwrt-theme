@@ -34,7 +34,7 @@
 
     /* GL.iNet 21.02 may render the overview directly at /cgi-bin/luci/. */
     if (/\/cgi-bin\/luci$/.test(path))
-      return !!rowValue(/^(hostname|uptime|load average)$/i);
+      return true;
 
     return false;
   }
@@ -142,9 +142,9 @@
 
   function metric(label, className) {
     var card = document.createElement('article');
-    card.className = 'sl-metric ' + className;
+    card.className = 'sl-metric is-loading ' + className;
     card.innerHTML = '<div class="sl-gauge"><div class="sl-gauge-value">--</div><div class="sl-gauge-label"></div></div>' +
-      '<div class="sl-metric-detail">Waiting for data</div>';
+      '<div class="sl-metric-detail">Loading…</div>';
     card.querySelector('.sl-gauge-label').textContent = label;
     return card;
   }
@@ -152,9 +152,10 @@
   function build() {
     var main = document.getElementById('maincontent');
     var firstSection = main && main.querySelector('.cbi-section, .network-status-table');
+    var view = main && main.querySelector('#view');
     var summary = document.getElementById('streamline-overview-summary');
 
-    if (!main || !firstSection || !isOverview())
+    if (!main || !isOverview())
       return null;
 
     if (summary)
@@ -164,15 +165,29 @@
     summary.id = 'streamline-overview-summary';
     summary.className = 'sl-dashboard-summary';
     summary.innerHTML = '<div class="sl-dashboard-heading"><div><span>ROUTER HEALTH</span><h3>System overview</h3></div>' +
-      '<div class="sl-live-status"><i></i> Live</div></div><div class="sl-metric-grid"></div>';
+      '<div class="sl-live-status is-loading"><i></i><span>Loading</span></div></div><div class="sl-metric-grid"></div>';
 
     var grid = summary.querySelector('.sl-metric-grid');
     grid.appendChild(metric('1 MIN LOAD', 'sl-load'));
     grid.appendChild(metric('MEMORY USED', 'sl-memory'));
     grid.appendChild(metric('STORAGE USED', 'sl-storage'));
     grid.appendChild(metric('UPTIME', 'sl-uptime'));
-    /* Keep the native page title above and all LuCI detail cards below. */
-    firstSection.parentNode.insertBefore(summary, firstSection);
+    /*
+     * Keep this shell outside #view. LuCI replaces #view after its asynchronous
+     * RPC requests finish; placing the shell beside it makes the gauges visible
+     * immediately and prevents them from disappearing during a refresh.
+     */
+    if (view) {
+      var title = document.createElement('h2');
+      title.id = 'streamline-overview-title';
+      title.textContent = typeof window._ === 'function' ? window._('Status') : 'Status';
+      main.insertBefore(title, view);
+      main.insertBefore(summary, view);
+    } else if (firstSection) {
+      firstSection.parentNode.insertBefore(summary, firstSection);
+    } else {
+      main.appendChild(summary);
+    }
     main.classList.add('streamline-overview');
     return summary;
   }
@@ -182,10 +197,11 @@
     var available = value && value !== '--';
     var bounded = Math.max(0, Math.min(100, Number(percent) || 0));
 
+    card.classList.toggle('is-loading', !available);
     card.classList.toggle('is-empty', !available);
     card.style.setProperty('--sl-gauge', available ? bounded : 0);
     card.querySelector('.sl-gauge-value').textContent = available ? value : '--';
-    card.querySelector('.sl-metric-detail').textContent = available ? detail : 'Unavailable';
+    card.querySelector('.sl-metric-detail').textContent = available ? detail : 'Loading…';
   }
 
   function update() {
@@ -216,6 +232,12 @@
     setMetric(summary, '.sl-memory', memory && memory.text, memory && memory.percent, 'Physical memory');
     setMetric(summary, '.sl-storage', storage && storage.text, storage && storage.percent, 'Overlay storage');
     setMetric(summary, '.sl-uptime', compactUptime(uptime), uptime ? 100 : 0, 'Since last restart');
+
+    if (loadText || memory || storage || uptime) {
+      var live = summary.querySelector('.sl-live-status');
+      live.classList.remove('is-loading');
+      live.querySelector('span').textContent = 'Live';
+    }
   }
 
   update();

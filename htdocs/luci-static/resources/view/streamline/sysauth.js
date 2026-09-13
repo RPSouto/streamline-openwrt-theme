@@ -10,8 +10,8 @@ return view.extend({
     const hostnameNode = section.querySelector('.login-hostname');
     const hostname = hostnameNode ? hostnameNode.textContent.trim() : '';
     const content = Array.from(section.children).filter((node) => node !== hostnameNode);
-    content.unshift(E('div', { 'class': 'login-subtitle' }, _('Authorization Required')));
-    const dlg = ui.showModal(hostname || _('Authorization Required'), content, 'login');
+    content.push(E('div', { 'class': 'login-powered' }, ['Powered by OpenWrt']));
+    const dlg = ui.showModal(hostname || 'OpenWrt', content, 'login');
 
     form.addEventListener('keypress', (event) => {
       if (event.key === 'Enter')
