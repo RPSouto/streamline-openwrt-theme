@@ -277,9 +277,10 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 .cbi-button.spinning, button.spinning { display: inline-flex; min-height: 42px; }
 .cbi-button.spinning::before, button.spinning::before { width: 14px; height: 14px; flex: 0 0 14px; margin-right: 8px; }
 #indicators > [data-indicator] { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 9px 12px; margin-top: 6px; background: var(--sl-surface-2); border: 1px solid var(--sl-border); border-radius: 9px; color: #c5ccdc; font-size: .8rem; font-weight: 600; line-height: 1.4; }
+#indicators > [data-indicator], #indicators > .sidebar-home { display: grid; grid-template-columns: 18px minmax(0, 1fr); align-items: center; column-gap: 9px; min-height: 38px; padding: 9px 12px; }
 #indicators > [data-clickable] { cursor: pointer; }
 #indicators > [data-clickable]:hover { border-color: var(--sl-purple); background: var(--sl-surface-3); }
-#indicators > [data-style="active"]::before { content: ""; width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--sl-green); box-shadow: 0 0 0 3px rgba(57,216,170,.12); }
+#indicators > [data-style="active"]::before { content: ""; width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle, var(--sl-green) 0 3.5px, rgba(57,216,170,.12) 4px 7px, transparent 7.5px); }
 #indicators > .sidebar-home { display: flex; align-items: center; gap: 9px; min-height: 38px; padding: 9px 12px; background: var(--sl-surface-2); border-color: var(--sl-border); color: var(--sl-text); font-size: .82rem; font-weight: 650; }
 #indicators > .sidebar-home::before { content: "⌂"; width: 18px; color: #b79aff; font-size: 1.15rem; line-height: 1; text-align: center; }
 #indicators > .sidebar-home:hover { border-color: var(--sl-purple); background: rgba(139,92,246,.13); color: #fff; }
@@ -361,12 +362,14 @@ body.modal-overlay-active #modal_overlay { opacity: 1; visibility: visible; }
 
 /* Stable three-column layout for the LuCI Interfaces overview. */
 #cbi-network-interface .cbi-section-table-row > .td { vertical-align: middle; }
-#cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacebox"] { width: 31%; min-width: 260px; padding: 16px 18px; }
+#cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacebox"] { width: 28%; min-width: 240px; padding: 13px 16px; }
 #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"] { width: 45%; min-width: 320px; padding: 16px 20px; line-height: 1.55; overflow-wrap: anywhere; }
 #cbi-network-interface .cbi-section-table-row > .cbi-section-actions { width: 24%; min-width: 310px; padding: 16px 18px; }
-#cbi-network-interface .ifacebox { width: 100%; min-width: 0; margin: 0; box-shadow: none; }
-#cbi-network-interface .ifacebox-head { padding: 10px 14px; }
-#cbi-network-interface .ifacebox-body { min-height: 62px; padding: 12px 14px; line-height: 1.5; white-space: normal; }
+#cbi-network-interface .ifacebox { width: min(100%, 360px); min-width: 0; margin: 0 auto; box-shadow: none; }
+#cbi-network-interface .ifacebox-head { min-height: 36px; padding: 8px 12px; }
+#cbi-network-interface .ifacebox-body { min-height: 50px; padding: 9px 12px; line-height: 1.4; white-space: normal; }
+#cbi-network-interface .ifacebox-body > div { display: flex; align-items: center; flex-wrap: wrap; gap: 3px; }
+#cbi-network-interface .ifacebox-body img { max-width: 20px; max-height: 20px; }
 #cbi-network-interface .cbi-section-actions > div { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 7px; }
 #cbi-network-interface .cbi-section-actions .cbi-button { min-height: 38px; margin: 0; }
 .nowrap { white-space: nowrap; }

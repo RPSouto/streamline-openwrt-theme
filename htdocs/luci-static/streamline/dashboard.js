@@ -1,19 +1,42 @@
 (function () {
   'use strict';
 
-  var page = document.body && document.body.getAttribute('data-page');
   var timer;
   var attempts = 0;
-
-  if (page !== 'admin-status-overview')
-    return;
+  var storageInfo = null;
+  var storageRequested = false;
 
   function clean(value) {
     return String(value || '').replace(/\s+/g, ' ').trim();
   }
 
+  function compactUptime(value) {
+    var days = clean(value).match(/\d+\s*d/i);
+    var hours = clean(value).match(/\d+\s*h/i);
+
+    if (days)
+      return days[0].replace(/\s+/g, '') + ' ' + (hours ? hours[0].replace(/\s+/g, '') : '0h');
+    if (hours)
+      return hours[0].replace(/\s+/g, '');
+    return value ? '<1h' : '';
+  }
+
   function rows() {
     return document.querySelectorAll('#maincontent .tr');
+  }
+
+  function isOverview() {
+    var page = document.body && document.body.getAttribute('data-page');
+    var path = window.location.pathname.replace(/\/+$/, '');
+
+    if (page === 'admin-status-overview' || /\/admin\/status\/overview$/.test(path))
+      return true;
+
+    /* GL.iNet 21.02 may render the overview directly at /cgi-bin/luci/. */
+    if (/\/cgi-bin\/luci$/.test(path))
+      return !!rowValue(/^(hostname|uptime|load average)$/i);
+
+    return false;
   }
 
   function rowValue(pattern) {
@@ -66,7 +89,55 @@
       }
     }
 
-    return progressValue(/root|disk|storage|flash/i);
+    return progressValue(/root|disk|storage|flash/i) || storageInfo;
+  }
+
+  function requestStorage() {
+    if (storageRequested || !window.L || typeof L.require !== 'function')
+      return;
+
+    storageRequested = true;
+    Promise.resolve(L.require('rpc')).then(function (rpc) {
+      var callMountPoints = rpc.declare({
+        object: 'luci',
+        method: 'getMountPoints',
+        expect: { result: [] }
+      });
+
+      return callMountPoints().then(function (mounts) {
+        var root = null;
+
+        for (var i = 0; i < mounts.length; i++) {
+          if (mounts[i].mount === '/overlay') {
+            root = mounts[i];
+            break;
+          }
+          if (!root && mounts[i].mount === '/')
+            root = mounts[i];
+        }
+
+        if (root && Number(root.size) > 0)
+          return { root: { total: root.size, free: root.free } };
+
+        return rpc.declare({ object: 'system', method: 'info' })();
+      });
+    }).then(function (info) {
+      var root = info && info.root;
+      var total = Number(root && root.total);
+      var used = Number(root && root.used);
+      var free = Number(root && root.free);
+
+      if (!isFinite(used) && isFinite(total) && isFinite(free))
+        used = total - free;
+
+      if (isFinite(total) && total > 0 && isFinite(used)) {
+        var percent = Math.max(0, Math.min(100, Math.round(used * 100 / total)));
+        storageInfo = { text: percent + '%', percent: percent };
+        update();
+      }
+    }).catch(function () {
+      /* The card remains unavailable only if both LuCI storage APIs fail. */
+    });
   }
 
   function metric(label, className) {
@@ -83,7 +154,7 @@
     var firstSection = main && main.querySelector('.cbi-section, .network-status-table');
     var summary = document.getElementById('streamline-overview-summary');
 
-    if (!main || !firstSection)
+    if (!main || !firstSection || !isOverview())
       return null;
 
     if (summary)
@@ -100,6 +171,7 @@
     grid.appendChild(metric('MEMORY USED', 'sl-memory'));
     grid.appendChild(metric('STORAGE USED', 'sl-storage'));
     grid.appendChild(metric('UPTIME', 'sl-uptime'));
+    /* Keep the native page title above and all LuCI detail cards below. */
     firstSection.parentNode.insertBefore(summary, firstSection);
     main.classList.add('streamline-overview');
     return summary;
@@ -137,10 +209,13 @@
     storage = storageValue();
     uptime = rowValue(/^uptime$/i);
 
+    if (!storage)
+      requestStorage();
+
     setMetric(summary, '.sl-load', loadText, isNaN(loadNumber) ? 0 : loadNumber * 100, 'Current system load');
     setMetric(summary, '.sl-memory', memory && memory.text, memory && memory.percent, 'Physical memory');
-    setMetric(summary, '.sl-storage', storage && storage.text, storage && storage.percent, 'Local storage');
-    setMetric(summary, '.sl-uptime', uptime, uptime ? 100 : 0, 'Since last restart');
+    setMetric(summary, '.sl-storage', storage && storage.text, storage && storage.percent, 'Overlay storage');
+    setMetric(summary, '.sl-uptime', compactUptime(uptime), uptime ? 100 : 0, 'Since last restart');
   }
 
   update();

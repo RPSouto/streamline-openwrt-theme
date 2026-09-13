@@ -1,5 +1,5 @@
 Package: luci-theme-streamline
-Version: 1.0.10-1
+Version: 1.0.15-1
 Depends: libc, luci-base
 Source: luci-theme-streamline
 SourceName: luci-theme-streamline
@@ -7,5 +7,5 @@ License: Apache-2.0
 Architecture: all
 Maintainer: Streamline contributors
 Section: luci
-Installed-Size: 130774
+Installed-Size: 133908
 Description:  Dark responsive LuCI theme with optional PWA installation

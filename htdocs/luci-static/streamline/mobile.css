@@ -28,9 +28,10 @@
   input:not([type="checkbox"]):not([type="radio"]), select, textarea { width: 100%; }
   .table { display: block; overflow-x: auto; }
   .th, .td { min-width: 110px; }
-  #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacebox"],
-  #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"],
-  #cbi-network-interface .cbi-section-table-row > .cbi-section-actions { width: auto; min-width: 260px; }
+  #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacebox"] { width: 300px; min-width: 300px; max-width: 300px; padding: 12px; vertical-align: middle; }
+  #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"] { width: 300px; min-width: 300px; padding: 12px; vertical-align: top; }
+  #cbi-network-interface .cbi-section-table-row > .cbi-section-actions { width: 280px; min-width: 280px; padding: 12px; vertical-align: top; }
+  #cbi-network-interface .ifacebox { width: 100%; max-width: 100%; }
   #cbi-network-interface .cbi-section-actions > div { justify-content: flex-start; }
   .cbi-tooltip { position: fixed; left: 14px !important; right: 14px; top: auto; bottom: 18px; width: auto; max-width: none; transform: translateY(8px); }
   .cbi-tooltip-container:hover > .cbi-tooltip:not(:empty), .cbi-tooltip-container:focus-within > .cbi-tooltip:not(:empty) { transform: translateY(0); }
