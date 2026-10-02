@@ -18,17 +18,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title><%=striptags((boardinfo.hostname or "?") .. ((node and node.title) and " | " .. translate(node.title) or ""))%></title>
     <script>(function(){try{var p=localStorage.getItem('streamline.palette'),g=p==='glinet';document.documentElement.setAttribute('data-palette',g?'glinet':'streamline');document.querySelector('meta[name="theme-color"]').setAttribute('content',g?'#111331':'#0b0e14')}catch(e){}}())</script>
-    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.21">
-    <link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="<%=media%>/mobile.css?v=1.0.21">
-    <link rel="icon" href="<%=media%>/logo.svg?v=1.0.21" sizes="any">
-    <script>if(document.documentElement.getAttribute('data-palette')==='glinet')document.querySelector('link[rel~="icon"]').href='<%=media%>/logo-glinet.svg?v=1.0.21'</script>
-    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.21">
+    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.23">
+    <link rel="stylesheet" href="<%=media%>/mobile.css?v=1.0.23" media="(max-width: 854px)">
+    <link rel="icon" href="<%=media%>/logo.svg?v=1.0.23" sizes="any">
+    <script>if(document.documentElement.getAttribute('data-palette')==='glinet')document.querySelector('link[rel~="icon"]').href='<%=media%>/logo-glinet.svg?v=1.0.23'</script>
+    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.23">
     <% if node and node.css then %><link rel="stylesheet" href="<%=resource%>/<%=node.css%>"><% end %>
     <% if css then %><style><%=css%></style><% end %>
     <script src="<%=url('admin/translations', luci.i18n.context.lang)%>"></script>
     <script src="<%=resource%>/cbi.js"></script>
-    <script defer src="<%=media%>/pwa.js?v=1.0.21"></script>
-    <script defer src="<%=media%>/dashboard.js?v=1.0.21"></script>
+    <script defer src="<%=media%>/pwa.js?v=1.0.23"></script>
+    <script defer src="<%=media%>/dashboard.js?v=1.0.23"></script>
   </head>
   <body class="lang_<%=luci.i18n.context.lang%>" data-page="<%=pcdata(table.concat(disp.context.requestpath, '-'))%>">
     <% if not blank_page then %>

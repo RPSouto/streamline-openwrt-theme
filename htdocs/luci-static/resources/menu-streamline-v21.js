@@ -261,7 +261,7 @@ return baseclass.extend({
     const button = document.querySelector('.sidebar-toggle');
     if (button) {
       button.setAttribute('aria-expanded', String(!collapsed));
-      button.textContent = collapsed ? '›' : '‹';
+      button.textContent = collapsed ? '\u203A' : '\u2039';
       button.title = collapsed ? _('Expand navigation') : _('Collapse navigation');
     }
   },
@@ -271,7 +271,7 @@ return baseclass.extend({
     const button = document.querySelector('.sidebar-toggle');
     if (button && window.matchMedia('(max-width: 854px)').matches) {
       button.setAttribute('aria-expanded', String(open));
-      button.textContent = open ? '×' : '☰';
+      button.textContent = open ? '\u00D7' : '\u2630';
       button.title = open ? _('Close navigation') : _('Open navigation');
     }
   },

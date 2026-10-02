@@ -6,19 +6,38 @@
   var storageInfo = null;
   var storageRequested = false;
 
+  var LOAD_PATTERN = /load(\s*average)?|carga\s*m[eé]dia|durchschnittliche\s*last|charge\s*moyenne|carga\s*media|средняя\s*загрузка|平均负载/i;
+  var UPTIME_PATTERN = /uptime|tempo(\s*de)?\s*atividade|laufzeit|temps\s*d.activit|tiempo\s*de\s*actividad|tempo\s*ativo|время\s*работы|运行时间/i;
+  var MEMORY_PATTERN = /memory|used|mem[oó]ria|speicher|m[eé]moire|память|内存/i;
+  var STORAGE_PATTERN = /storage|disk|filesystem|mount|flash|root|overlay|disco|armazenamento|sistema\s*de\s*arquivos/i;
+
+  function tr(text, fallback) {
+    if (typeof window._ === 'function') {
+      try {
+        var translated = window._(text);
+        if (translated) return translated;
+      } catch (e) {}
+    }
+    return fallback || text;
+  }
+
   function clean(value) {
     return String(value || '').replace(/\s+/g, ' ').trim();
   }
 
   function compactUptime(value) {
-    var days = clean(value).match(/\d+\s*d/i);
-    var hours = clean(value).match(/\d+\s*h/i);
+    var v = clean(value);
+    var days = v.match(/(\d+)\s*d/i);
+    var hours = v.match(/(\d+)\s*h/i);
+    var mins = v.match(/(\d+)\s*m/i);
 
     if (days)
-      return days[0].replace(/\s+/g, '') + ' ' + (hours ? hours[0].replace(/\s+/g, '') : '0h');
+      return days[1] + 'd' + (hours ? ' ' + hours[1] + 'h' : '');
     if (hours)
-      return hours[0].replace(/\s+/g, '');
-    return value ? '<1h' : '';
+      return hours[1] + 'h' + (mins ? ' ' + mins[1] + 'm' : '');
+    if (mins)
+      return mins[1] + 'm';
+    return v ? '<1m' : '';
   }
 
   function rows() {
@@ -61,7 +80,7 @@
       var label = cells.length ? clean(cells[0].textContent) : '';
       var bar = list[i].querySelector('.cbi-progressbar');
 
-      if (bar && pattern.test(label)) {
+      if (bar && (pattern.test(label) || (cells.length > 1 && pattern.test(clean(cells[1].textContent))))) {
         var title = clean(bar.getAttribute('title'));
         var match = title.match(/\((\d+(?:\.\d+)?)%\)/);
         return {
@@ -82,14 +101,14 @@
       var heading = section && section.querySelector('h3, h4');
       var context = clean(heading && heading.textContent);
 
-      if (/storage|disk|filesystem|mount|flash/i.test(context)) {
+      if (STORAGE_PATTERN.test(context)) {
         var title = clean(bars[i].getAttribute('title'));
         var match = title.match(/\((\d+(?:\.\d+)?)%\)/);
         return { text: match ? match[1] + '%' : title, percent: match ? Number(match[1]) : 0 };
       }
     }
 
-    return progressValue(/root|disk|storage|flash/i) || storageInfo;
+    return progressValue(STORAGE_PATTERN) || storageInfo;
   }
 
   function requestStorage() {
@@ -164,14 +183,17 @@
     summary = document.createElement('section');
     summary.id = 'streamline-overview-summary';
     summary.className = 'sl-dashboard-summary';
-    summary.innerHTML = '<div class="sl-dashboard-heading"><div><span>ROUTER HEALTH</span><h3>System overview</h3></div>' +
-      '<div class="sl-live-status is-loading" role="status" aria-label="Loading" title="Loading"><i></i></div></div><div class="sl-metric-grid"></div>';
+    summary.innerHTML = '<div class="sl-dashboard-heading"><div><span>' +
+      tr('ROUTER HEALTH', 'ROUTER HEALTH') + '</span><h3>' +
+      tr('System overview', 'System overview') + '</h3></div>' +
+      '<div class="sl-live-status is-loading" role="status" aria-label="' +
+      tr('Loading…', 'Loading…') + '" title="' + tr('Loading…', 'Loading…') + '"><i></i></div></div><div class="sl-metric-grid"></div>';
 
     var grid = summary.querySelector('.sl-metric-grid');
-    grid.appendChild(metric('1 MIN LOAD', 'sl-load'));
-    grid.appendChild(metric('MEMORY USED', 'sl-memory'));
-    grid.appendChild(metric('STORAGE USED', 'sl-storage'));
-    grid.appendChild(metric('UPTIME', 'sl-uptime'));
+    grid.appendChild(metric(tr('1 MIN LOAD', '1 MIN LOAD'), 'sl-load'));
+    grid.appendChild(metric(tr('MEMORY USED', 'MEMORY USED'), 'sl-memory'));
+    grid.appendChild(metric(tr('STORAGE USED', 'STORAGE USED'), 'sl-storage'));
+    grid.appendChild(metric(tr('UPTIME', 'UPTIME'), 'sl-uptime'));
     /*
      * Keep this shell outside #view. LuCI replaces #view after its asynchronous
      * RPC requests finish; placing the shell beside it makes the gauges visible
@@ -197,7 +219,7 @@
     card.classList.toggle('is-empty', !available);
     card.style.setProperty('--sl-gauge', available ? bounded : 0);
     card.querySelector('.sl-gauge-value').textContent = available ? value : '--';
-    card.querySelector('.sl-metric-detail').textContent = available ? detail : 'Loading…';
+    card.querySelector('.sl-metric-detail').textContent = available ? detail : tr('Loading…', 'Loading…');
   }
 
   function update() {
@@ -215,25 +237,25 @@
       return;
     }
 
-    loadText = rowValue(/load average/i).split(/[ ,]/)[0];
+    loadText = rowValue(LOAD_PATTERN).split(/[ ,]/)[0];
     loadNumber = Number(loadText.replace(',', '.'));
-    memory = progressValue(/^used$/i);
+    memory = progressValue(MEMORY_PATTERN);
     storage = storageValue();
-    uptime = rowValue(/^uptime$/i);
+    uptime = rowValue(UPTIME_PATTERN);
 
     if (!storage)
       requestStorage();
 
-    setMetric(summary, '.sl-load', loadText, isNaN(loadNumber) ? 0 : loadNumber * 100, 'Current system load');
-    setMetric(summary, '.sl-memory', memory && memory.text, memory && memory.percent, 'Physical memory');
-    setMetric(summary, '.sl-storage', storage && storage.text, storage && storage.percent, 'Overlay storage');
-    setMetric(summary, '.sl-uptime', compactUptime(uptime), uptime ? 100 : 0, 'Since last restart');
+    setMetric(summary, '.sl-load', loadText, isNaN(loadNumber) ? 0 : loadNumber * 100, tr('Current system load', 'Current system load'));
+    setMetric(summary, '.sl-memory', memory && memory.text, memory && memory.percent, tr('Physical memory', 'Physical memory'));
+    setMetric(summary, '.sl-storage', storage && storage.text, storage && storage.percent, tr('Overlay storage', 'Overlay storage'));
+    setMetric(summary, '.sl-uptime', compactUptime(uptime), uptime ? 100 : 0, tr('Since last restart', 'Since last restart'));
 
     if (loadText || memory || storage || uptime) {
       var live = summary.querySelector('.sl-live-status');
       live.classList.remove('is-loading');
-      live.setAttribute('aria-label', 'Live');
-      live.setAttribute('title', 'Live');
+      live.setAttribute('aria-label', tr('Live', 'Live'));
+      live.setAttribute('title', tr('Live', 'Live'));
     }
   }
 
