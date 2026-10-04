@@ -12,7 +12,8 @@ Streamline is a dark, responsive theme for the OpenWrt LuCI web interface. Its v
 - Clean login footer with OpenWrt attribution.
 - Home shortcut that closes open navigation sections and returns to the LuCI overview.
 - Persistent Router Health gauges that render immediately and fill in as data arrives.
-- Switchable Streamline and GL.iNet-inspired color palettes, saved in the browser.
+- Six switchable color palettes—Streamline, GL.iNet, Ocean, Forest, Sunset, and Rose—saved in the browser.
+- Four interface font options—System, Arial, Georgia, and Monospace—with a browser-local preference.
 - Optional Progressive Web App installation.
 
 ## Compatibility
@@ -28,8 +29,8 @@ Streamline is a dark, responsive theme for the OpenWrt LuCI web interface. Its v
 Copy the package to the router and install it with `opkg`:
 
 ```sh
-scp luci-theme-streamline_1.0.23-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.23-1_all.ipk'
+scp luci-theme-streamline_1.0.28-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.28-1_all.ipk'
 ```
 
 Keep the SSH session open during the first test. Open LuCI again and perform a hard refresh (`Ctrl+F5`) if the previous theme is still cached.
@@ -76,7 +77,7 @@ If LuCI does not provide HTTPS yet, install the SSL variant appropriate for the 
 
 ## Color palettes
 
-Open **Appearance** at the bottom of the desktop sidebar or near the top of the mobile navigation drawer. Choose **Streamline** for the original purple and graphite design, or **GL.iNet** for a navy, turquoise, and blue palette matching the visual direction of GL.iNet firmware. The preference is stored locally in the browser and is applied before the interface is drawn.
+Open **Appearance** at the bottom of the desktop sidebar or near the top of the mobile navigation drawer. Choose **Streamline** for purple and graphite, **GL.iNet** for navy and turquoise, **Ocean** for cool blue and deep sea, **Forest** for fresh green and pine, **Sunset** for warm orange and ember accents, or **Rose** for soft pink and plum. Choose a font in the same dialog: System, Arial, Georgia, or Monospace. Both preferences are stored locally in the browser and applied before the interface is drawn.
 
 ## Build an IPK
 
@@ -86,12 +87,12 @@ On Linux, or another environment with POSIX shell tools and GNU `tar`, run:
 sh build-ipk.sh
 ```
 
-The generated package is `luci-theme-streamline_1.0.22-1_all.ipk`. The outer package is a gzip-compressed GNU tar archive in the OpenWrt format and contains `debian-binary`, `control.tar.gz`, and `data.tar.gz`.
+The generated package is `luci-theme-streamline_1.0.28-1_all.ipk`. The outer package is a gzip-compressed GNU tar archive in the OpenWrt format and contains `debian-binary`, `control.tar.gz`, and `data.tar.gz`.
 
 Validate the resulting package before uploading it:
 
 ```sh
-node tools/verify-ipk.js luci-theme-streamline_1.0.22-1_all.ipk
+node tools/verify-ipk.js luci-theme-streamline_1.0.28-1_all.ipk
 ```
 
 ## Build with the OpenWrt SDK or buildroot

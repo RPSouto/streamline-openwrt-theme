@@ -25,6 +25,27 @@
     return String(value || '').replace(/\s+/g, ' ').trim();
   }
 
+  function normalizeText(value) {
+    var text = clean(value);
+    if (typeof text.normalize === 'function')
+      text = text.normalize('NFD');
+    return text.replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\u2010-\u2015\u2212]/g, '-')
+      .toLowerCase();
+  }
+
+  function firstNumericToken(value) {
+    var text = clean(value);
+    if (!text)
+      return '';
+
+    var match = text.match(/-?\d+(?:[.,]\d+)?/);
+    if (!match)
+      return '';
+
+    return match[0].replace(/\s+/g, '');
+  }
+
   function compactUptime(value) {
     var v = clean(value);
     var days = v.match(/(\d+)\s*d/i);
@@ -58,18 +79,51 @@
     return false;
   }
 
+  function matchesPattern(label, pattern) {
+    if (!label)
+      return false;
+
+    var normalized = normalizeText(label);
+    try {
+      return pattern.test(normalized);
+    } catch (error) {
+      return pattern.test(label);
+    }
+  }
+
   function rowValue(pattern) {
     var list = rows();
 
     for (var i = 0; i < list.length; i++) {
       var cells = list[i].querySelectorAll('.td');
       var label = cells.length ? clean(cells[0].textContent) : '';
+      var valueText = cells.length > 1 ? clean(cells[cells.length - 1].textContent) : '';
 
-      if (cells.length > 1 && pattern.test(label))
-        return clean(cells[cells.length - 1].textContent);
+      if (cells.length > 1 && matchesPattern(label, pattern))
+        return valueText;
+
+      if (cells.length > 1 && matchesPattern(valueText, pattern))
+        return valueText;
     }
 
     return '';
+  }
+
+  function parseProgressPercent(title, fallbackText) {
+    var text = clean(title || fallbackText || '');
+    var match = text.match(/(\d+(?:[.,]\d+)?)\s*%/);
+    if (match)
+      return { text: match[1] + '%', percent: Number(String(match[1]).replace(',', '.')) };
+
+    var numeric = firstNumericToken(text);
+    if (numeric) {
+      return {
+        text: numeric + '%',
+        percent: Number(String(numeric).replace(',', '.'))
+      };
+    }
+
+    return { text: text || '', percent: 0 };
   }
 
   function progressValue(pattern) {
@@ -79,13 +133,14 @@
       var cells = list[i].querySelectorAll('.td');
       var label = cells.length ? clean(cells[0].textContent) : '';
       var bar = list[i].querySelector('.cbi-progressbar');
+      var cellText = cells.length > 1 ? clean(cells[1].textContent) : '';
 
-      if (bar && (pattern.test(label) || (cells.length > 1 && pattern.test(clean(cells[1].textContent))))) {
+      if (bar && (matchesPattern(label, pattern) || matchesPattern(cellText, pattern))) {
         var title = clean(bar.getAttribute('title'));
-        var match = title.match(/\((\d+(?:\.\d+)?)%\)/);
+        var parsed = parseProgressPercent(title, cells.length ? clean(cells[cells.length - 1].textContent) : '');
         return {
-          text: match ? match[1] + '%' : (title || clean(cells[cells.length - 1].textContent)),
-          percent: match ? Number(match[1]) : 0
+          text: parsed.text || title || clean(cells[cells.length - 1].textContent),
+          percent: parsed.percent
         };
       }
     }
@@ -101,10 +156,10 @@
       var heading = section && section.querySelector('h3, h4');
       var context = clean(heading && heading.textContent);
 
-      if (STORAGE_PATTERN.test(context)) {
+      if (matchesPattern(context, STORAGE_PATTERN)) {
         var title = clean(bars[i].getAttribute('title'));
-        var match = title.match(/\((\d+(?:\.\d+)?)%\)/);
-        return { text: match ? match[1] + '%' : title, percent: match ? Number(match[1]) : 0 };
+        var parsed = parseProgressPercent(title, title);
+        return { text: parsed.text || title, percent: parsed.percent };
       }
     }
 
@@ -237,8 +292,8 @@
       return;
     }
 
-    loadText = rowValue(LOAD_PATTERN).split(/[ ,]/)[0];
-    loadNumber = Number(loadText.replace(',', '.'));
+    loadText = firstNumericToken(rowValue(LOAD_PATTERN));
+    loadNumber = Number(String(loadText).replace(',', '.'));
     memory = progressValue(MEMORY_PATTERN);
     storage = storageValue();
     uptime = rowValue(UPTIME_PATTERN);

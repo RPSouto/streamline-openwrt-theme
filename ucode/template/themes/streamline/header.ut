@@ -15,18 +15,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="darkreader-lock">
     <title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
-    <script>(function(){try{var p=localStorage.getItem('streamline.palette'),g=p==='glinet';document.documentElement.setAttribute('data-palette',g?'glinet':'streamline');document.querySelector('meta[name="theme-color"]').setAttribute('content',g?'#111331':'#0b0e14')}catch(e){}}())</script>
-    <link rel="stylesheet" href="{{ media }}/cascade.css?v=1.0.23">
-    <link rel="stylesheet" href="{{ media }}/mobile.css?v=1.0.23" media="(max-width: 854px)">
-    <link rel="icon" href="{{ media }}/logo.svg?v=1.0.23" sizes="any">
-    <script>if(document.documentElement.getAttribute('data-palette')==='glinet')document.querySelector('link[rel~="icon"]').href='{{ media }}/logo-glinet.svg?v=1.0.23'</script>
-    <link rel="manifest" href="{{ media }}/manifest.json?v=1.0.23">
+    <script>(function(){try{var d=document.documentElement,p=localStorage.getItem('streamline.palette'),f=localStorage.getItem('streamline.font'),c={streamline:'#0b0e14',glinet:'#111331',ocean:'#071521',forest:'#0a1511',sunset:'#17100f',rose:'#180f18'},fonts={system:1,arial:1,serif:1,mono:1};if(!Object.prototype.hasOwnProperty.call(c,p))p='streamline';if(!Object.prototype.hasOwnProperty.call(fonts,f))f='system';d.setAttribute('data-palette',p);d.setAttribute('data-font',f);document.querySelector('meta[name="theme-color"]').setAttribute('content',c[p])}catch(e){}}())</script>
+    <link rel="stylesheet" href="{{ media }}/cascade.css?v=1.0.28">
+    <link rel="stylesheet" href="{{ media }}/mobile.css?v=1.0.28" media="(max-width: 854px)">
+    <link rel="icon" href="{{ media }}/logo.svg?v=1.0.28" sizes="any">
+    <script>if(document.documentElement.getAttribute('data-palette')==='glinet')document.querySelector('link[rel~="icon"]').href='{{ media }}/logo-glinet.svg?v=1.0.28'</script>
+    <link rel="manifest" href="{{ media }}/manifest.json?v=1.0.28">
     {% if (dispatched?.css): %}<link rel="stylesheet" href="{{ resource }}/{{ dispatched.css }}">{% endif %}
     {% if (css): %}<style>{{ css }}</style>{% endif %}
     <script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
     <script src="{{ resource }}/cbi.js"></script>
-    <script defer src="{{ media }}/pwa.js?v=1.0.23"></script>
-    <script defer src="{{ media }}/dashboard.js?v=1.0.23"></script>
+    <script defer src="{{ media }}/pwa.js?v=1.0.28"></script>
+    <script defer src="{{ media }}/dashboard.js?v=1.0.28"></script>
   </head>
   <body class="lang_{{ dispatcher.lang }}" data-page="{{ entityencode(join('-', length(ctx.request_path) ? ctx.request_path : ctx.path), true) }}">
     {% if (!blank_page): %}

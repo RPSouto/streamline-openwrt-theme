@@ -2,21 +2,58 @@
 'require baseclass';
 'require ui';
 
+const THEME_VERSION = '1.0.28';
+const FONTS = {
+  system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+  arial: { title: 'Arial', description: 'Clean sans serif', family: 'Arial, Helvetica, sans-serif' },
+  serif: { title: 'Georgia', description: 'Classic serif', family: 'Georgia, "Times New Roman", serif' },
+  mono: { title: 'Monospace', description: 'Technical fixed-width', family: 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace' }
+};
+const PALETTES = {
+  streamline: { title: 'Streamline', description: 'Purple and graphite', colors: ['#8b5cf6', '#4ea1ff', '#090b11'], themeColor: '#0b0e14' },
+  glinet: { title: 'GL.iNet', description: 'Turquoise and navy', colors: ['#00d6c6', '#25aee8', '#080b25'], themeColor: '#111331' },
+  ocean: { title: 'Ocean', description: 'Cool blue and deep sea', colors: ['#38bdf8', '#34d399', '#071521'], themeColor: '#071521' },
+  forest: { title: 'Forest', description: 'Fresh green and pine', colors: ['#4ade80', '#60a5fa', '#0a1511'], themeColor: '#0a1511' },
+  sunset: { title: 'Sunset', description: 'Warm orange and ember', colors: ['#fb923c', '#4ade80', '#17100f'], themeColor: '#17100f' },
+  rose: { title: 'Rose', description: 'Soft pink and plum', colors: ['#f472b6', '#818cf8', '#180f18'], themeColor: '#180f18' }
+};
+
 return baseclass.extend({
   __init__() {
     ui.menu.load().then((tree) => this.render(tree));
   },
 
+  getDispatchPath() {
+    return Array.isArray(L && L.env && L.env.dispatchpath) ? L.env.dispatchpath : [];
+  },
+
+  getRequestPath() {
+    return Array.isArray(L && L.env && L.env.requestpath) ? L.env.requestpath : [];
+  },
+
+  isMobileLayout() {
+    if (typeof window === 'undefined' || !window.matchMedia)
+      return false;
+    return window.matchMedia('(max-width: 854px)').matches;
+  },
+
+  menuUrl() {
+    if (typeof L !== 'undefined' && typeof L.url === 'function')
+      return L.url.apply(L, arguments);
+    return '#';
+  },
+
   render(tree) {
+    const dispatchpath = this.getDispatchPath();
     let node = tree;
     let url = '';
     this.renderModeMenu(tree);
     this.setupSidebar();
 
-    if (L.env.dispatchpath.length >= 3) {
+    if (dispatchpath.length >= 3) {
       for (let i = 0; i < 3 && node; i++) {
-        node = node.children[L.env.dispatchpath[i]];
-        url += (url ? '/' : '') + L.env.dispatchpath[i];
+        node = node && node.children ? node.children[dispatchpath[i]] : null;
+        url += (url ? '/' : '') + dispatchpath[i];
       }
       if (node)
         this.renderTabMenu(node, url);
@@ -25,14 +62,20 @@ return baseclass.extend({
 
   renderTabMenu(tree, url, level) {
     const container = document.querySelector('#tabmenu');
+    if (!container)
+      return E([]);
+    if (level == null || level === 0)
+      container.innerHTML = '';
+
     const ul = E('ul', { 'class': 'tabs' });
-    const children = ui.menu.getChildren(tree);
+    const dispatchpath = this.getDispatchPath();
+    const children = ui.menu && ui.menu.getChildren ? ui.menu.getChildren(tree) : [];
     let activeNode = null;
 
     children.forEach((child) => {
-      const active = L.env.dispatchpath[3 + (level || 0)] === child.name;
+      const active = dispatchpath[3 + (level || 0)] === child.name;
       ul.appendChild(E('li', { 'class': 'tabmenu-item-%s%s'.format(child.name, active ? ' active' : '') }, [
-        E('a', { 'href': L.url(url, child.name) }, [_(child.title)])
+        E('a', { 'href': this.menuUrl(url, child.name) }, [_(child.title)])
       ]));
       if (active)
         activeNode = child;
@@ -50,12 +93,17 @@ return baseclass.extend({
 
   renderMainMenu(tree, url, level) {
     const ul = level ? E('ul', { 'class': 'dropdown-menu' }) : document.querySelector('#topmenu');
-    const children = ui.menu.getChildren(tree);
+    if (!ul)
+      return E([]);
+    if (!level)
+      ul.innerHTML = '';
+
+    const children = ui.menu && ui.menu.getChildren ? ui.menu.getChildren(tree) : [];
     if (!children.length || level > 1)
       return E([]);
 
     if (!level && !ul.querySelector('.mobile-home')) {
-      const homeUrl = L.url('admin/status/overview');
+      const homeUrl = this.menuUrl('admin/status/overview');
       const home = E('li', { 'class': 'mobile-home' }, [
         E('a', { 'href': homeUrl, 'title': _('Home') }, [E('span', { 'class': 'menu-label' }, [_('Home')])])
       ]);
@@ -76,25 +124,29 @@ return baseclass.extend({
     }
 
     children.forEach((child) => {
-      const childName = String(child.name || '').toLowerCase();
-      const childTitle = String(child.title || '').toLowerCase();
-      if (childName === 'argon-config' || childName === 'argon_config' || childTitle === 'argon config')
+      const childName = String(child && child.name || 'item');
+      const childTitle = String(child && child.title || childName);
+      const normalizedName = childName.toLowerCase();
+      const normalizedTitle = childTitle.toLowerCase();
+      if (normalizedName === 'argon-config' || normalizedName === 'argon_config' || normalizedTitle === 'argon config')
         return;
 
       const submenu = this.renderMainMenu(child, url + '/' + child.name, (level || 0) + 1);
-      const hasSubmenu = !!submenu.firstElementChild;
-      const active = L.env.dispatchpath[(level || 0) + 1] === child.name;
+      const hasSubmenu = !!(submenu && submenu.firstElementChild);
+      const dispatchpath = this.getDispatchPath();
+      const active = dispatchpath[(level || 0) + 1] === child.name;
       const path = url + '/' + child.name;
       const state = hasSubmenu ? this.getPreference('streamline.menu.' + path) : null;
       const open = hasSubmenu && (state == null ? active : state === 'open');
       const itemClass = 'menu-item-' + String(child.name || 'item').replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
       const li = E('li', { 'class': itemClass + ' ' + (hasSubmenu ? 'dropdown ' : '') + (active ? 'active ' : '') + (open ? 'open' : '') });
+      const itemTitle = _(child.title || child.name || _('Menu'));
       const link = E('a', {
         'class': hasSubmenu ? 'menu' : '',
-        'href': hasSubmenu ? '#' : L.url(url, child.name),
-        'title': _(child.title),
+        'href': hasSubmenu ? '#' : this.menuUrl(url, child.name),
+        'title': itemTitle,
         'aria-expanded': hasSubmenu ? String(open) : null
-      }, [E('span', { 'class': 'menu-label' }, [_(child.title)])]);
+      }, [E('span', { 'class': 'menu-label' }, [itemTitle])]);
 
       if (hasSubmenu) {
         li.setAttribute('data-preference-key', 'streamline.menu.' + path);
@@ -127,7 +179,7 @@ return baseclass.extend({
         });
 
         submenu.addEventListener('click', (event) => {
-          if (event.target.closest('a'))
+          if (event.target && event.target.closest && event.target.closest('a'))
             this.setMobileMenu(false);
         });
       }
@@ -142,54 +194,68 @@ return baseclass.extend({
 
   renderModeMenu(tree) {
     const ul = document.querySelector('#modemenu');
-    ui.menu.getChildren(tree).forEach((child, index) => {
-      const active = L.env.requestpath.length ? child.name === L.env.requestpath[0] : index === 0;
+    if (!ul)
+      return;
+    ul.innerHTML = '';
+
+    const requestpath = this.getRequestPath();
+    const children = ui.menu && ui.menu.getChildren ? ui.menu.getChildren(tree) : [];
+
+    children.forEach((child, index) => {
+      const active = requestpath.length ? child.name === requestpath[0] : index === 0;
       ul.appendChild(E('li', { 'class': active ? 'active' : '' }, [
-        E('a', { 'href': L.url(child.name) }, [_(child.title)])
+        E('a', { 'href': this.menuUrl(child.name) }, [_(child.title || child.name)])
       ]));
       if (active)
-      this.renderMainMenu(child, child.name);
+        this.renderMainMenu(child, child.name);
     });
     if (ul.children.length > 1)
       ul.style.display = '';
   },
 
   applyPalette(name) {
-    const palette = name === 'glinet' ? 'glinet' : 'streamline';
+    const palette = Object.prototype.hasOwnProperty.call(PALETTES, name) ? name : 'streamline';
     document.documentElement.setAttribute('data-palette', palette);
     this.setPreference('streamline.palette', palette);
     const themeColor = document.querySelector('meta[name="theme-color"]');
     if (themeColor)
-      themeColor.setAttribute('content', palette === 'glinet' ? '#111331' : '#0b0e14');
+      themeColor.setAttribute('content', PALETTES[palette].themeColor);
     const favicon = document.querySelector('link[rel~="icon"]');
     if (favicon) {
       const iconName = palette === 'glinet' ? 'logo-glinet.svg' : 'logo.svg';
-      favicon.setAttribute('href', favicon.getAttribute('href').replace(/logo(?:-glinet)?\.svg(?:\?[^#]*)?/, iconName + '?v=1.0.21'));
+      favicon.setAttribute('href', favicon.getAttribute('href').replace(/logo(?:-glinet)?\.svg(?:\?[^#]*)?/, iconName + '?v=' + THEME_VERSION));
     }
   },
 
-  showPalettePicker() {
-    const current = this.getPreference('streamline.palette') === 'glinet' ? 'glinet' : 'streamline';
-    const palettes = [
-      { id: 'streamline', title: 'Streamline', colors: ['#8b5cf6', '#4ea1ff', '#090b11'] },
-      { id: 'glinet', title: 'GL.iNet', colors: ['#00d6c6', '#25aee8', '#080b25'] }
-    ];
-    const choices = E('div', { 'class': 'sl-palette-choices' });
+  applyFont(name) {
+    const font = Object.prototype.hasOwnProperty.call(FONTS, name) ? name : 'system';
+    document.documentElement.setAttribute('data-font', font);
+    this.setPreference('streamline.font', font);
+  },
 
-    palettes.forEach((palette) => {
+  showPalettePicker() {
+    const savedPalette = this.getPreference('streamline.palette');
+    const current = Object.prototype.hasOwnProperty.call(PALETTES, savedPalette) ? savedPalette : 'streamline';
+    const choices = E('div', { 'class': 'sl-palette-choices' });
+    const savedFont = this.getPreference('streamline.font');
+    const currentFont = Object.prototype.hasOwnProperty.call(FONTS, savedFont) ? savedFont : 'system';
+    const fontChoices = E('div', { 'class': 'sl-font-choices' });
+
+    Object.keys(PALETTES).forEach((id) => {
+      const palette = PALETTES[id];
       const swatches = E('span', { 'class': 'sl-palette-swatches', 'aria-hidden': 'true' },
         palette.colors.map((color) => E('i', { 'style': 'background:' + color })));
       const button = E('button', {
         'type': 'button',
-        'class': 'sl-palette-choice' + (palette.id === current ? ' active' : ''),
-        'data-palette': palette.id,
-        'aria-pressed': String(palette.id === current)
-      }, [swatches, E('strong', {}, [palette.title]), E('small', {}, [palette.id === 'glinet' ? _('Turquoise and navy') : _('Purple and graphite')])]);
+        'class': 'sl-palette-choice' + (id === current ? ' active' : ''),
+        'data-palette': id,
+        'aria-pressed': String(id === current)
+      }, [swatches, E('strong', {}, [_(palette.title)]), E('small', {}, [_(palette.description)])]);
 
       button.addEventListener('click', () => {
-        this.applyPalette(palette.id);
+        this.applyPalette(id);
         choices.querySelectorAll('.sl-palette-choice').forEach((choice) => {
-          const selected = choice.getAttribute('data-palette') === palette.id;
+          const selected = choice.getAttribute('data-palette') === id;
           choice.classList.toggle('active', selected);
           choice.setAttribute('aria-pressed', String(selected));
         });
@@ -197,9 +263,33 @@ return baseclass.extend({
       choices.appendChild(button);
     });
 
+    Object.keys(FONTS).forEach((id) => {
+      const font = FONTS[id];
+      const button = E('button', {
+        'type': 'button',
+        'class': 'sl-font-choice' + (id === currentFont ? ' active' : ''),
+        'data-font': id,
+        'aria-pressed': String(id === currentFont),
+        'style': 'font-family:' + font.family
+      }, [E('strong', {}, [_(font.title)]), E('small', {}, [_(font.description)])]);
+
+      button.addEventListener('click', () => {
+        this.applyFont(id);
+        fontChoices.querySelectorAll('.sl-font-choice').forEach((choice) => {
+          const selected = choice.getAttribute('data-font') === id;
+          choice.classList.toggle('active', selected);
+          choice.setAttribute('aria-pressed', String(selected));
+        });
+      });
+      fontChoices.appendChild(button);
+    });
+
     ui.showModal(_('Appearance'), [
       E('p', { 'class': 'sl-palette-description' }, [_('Choose the color palette used on this device.')]),
       choices,
+      E('h3', { 'class': 'sl-font-heading' }, [_('Font')]),
+      E('p', { 'class': 'sl-palette-description' }, [_('Choose the font used across the interface.')]),
+      fontChoices,
       E('div', { 'class': 'right' }, [
         E('button', { 'type': 'button', 'class': 'btn', 'click': ui.hideModal }, [_('Close')])
       ])
@@ -215,6 +305,7 @@ return baseclass.extend({
     };
 
     this.applyPalette(this.getPreference('streamline.palette'));
+    this.applyFont(this.getPreference('streamline.font'));
 
     if (indicators && !indicators.querySelector('.sidebar-palette')) {
       const button = E('button', {
@@ -278,7 +369,7 @@ return baseclass.extend({
 
   setupSidebar() {
     const header = document.querySelector('header');
-    const mobileQuery = window.matchMedia('(max-width: 854px)');
+    const mobileQuery = typeof window.matchMedia === 'function' ? window.matchMedia('(max-width: 854px)') : null;
     if (!header || header.querySelector('.sidebar-toggle'))
       return;
 
@@ -316,7 +407,9 @@ return baseclass.extend({
       'aria-expanded': 'true'
     });
     button.addEventListener('click', () => {
-      if (mobileQuery.matches)
+      if (!document.body)
+        return;
+      if (mobileQuery && mobileQuery.matches)
         this.setMobileMenu(!document.body.classList.contains('mobile-menu-open'));
       else
         this.setSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed'));
@@ -333,7 +426,9 @@ return baseclass.extend({
     };
 
     const syncNavigationMode = () => {
-      if (mobileQuery.matches) {
+      if (!document.body)
+        return;
+      if (mobileQuery && mobileQuery.matches) {
         document.body.classList.remove('sidebar-collapsed');
         closeMobileSections();
         this.setMobileMenu(false);
@@ -343,13 +438,15 @@ return baseclass.extend({
       }
     };
     syncNavigationMode();
-    if (typeof mobileQuery.addEventListener === 'function')
+    if (mobileQuery && typeof mobileQuery.addEventListener === 'function')
       mobileQuery.addEventListener('change', syncNavigationMode);
-    else
+    else if (mobileQuery && typeof mobileQuery.addListener === 'function')
       mobileQuery.addListener(syncNavigationMode);
 
     document.addEventListener('click', (event) => {
-      if (!mobileQuery.matches || event.target.closest('header'))
+      if (!mobileQuery || !mobileQuery.matches || !event.target || !event.target.closest)
+        return;
+      if (event.target.closest('header'))
         return;
       document.querySelectorAll('#topmenu > li.open').forEach((item) => {
         item.classList.remove('open');
