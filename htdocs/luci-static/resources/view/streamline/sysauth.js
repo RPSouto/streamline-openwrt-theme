@@ -24,7 +24,16 @@ return view.extend({
       form.submit();
     });
 
-    document.querySelector('input[type="password"]').focus();
+    if (dlg && dlg.classList)
+      dlg.classList.add('login');
+
+    const passInput = document.querySelector('input[type="password"]');
+    const userInput = document.querySelector('input[type="text"]');
+    if (userInput && !userInput.value)
+      userInput.focus();
+    else if (passInput)
+      passInput.focus();
+
     return '';
   },
   addFooter() {}

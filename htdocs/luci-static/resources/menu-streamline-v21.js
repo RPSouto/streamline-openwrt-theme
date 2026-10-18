@@ -2,7 +2,8 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.28';
+const THEME_VERSION = '1.0.33';
+const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
   arial: { title: 'Arial', description: 'Clean sans serif', family: 'Arial, Helvetica, sans-serif' },
@@ -34,7 +35,7 @@ return baseclass.extend({
   isMobileLayout() {
     if (typeof window === 'undefined' || !window.matchMedia)
       return false;
-    return window.matchMedia('(max-width: 854px)').matches;
+    return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
   },
 
   menuUrl() {
@@ -154,7 +155,7 @@ return baseclass.extend({
         link.setAttribute('aria-controls', submenu.id);
         link.addEventListener('click', (event) => {
           event.preventDefault();
-          const mobile = window.matchMedia('(max-width: 854px)').matches;
+          const mobile = this.isMobileLayout();
           if (mobile) {
             document.querySelectorAll('#topmenu > li.open').forEach((item) => {
               if (item !== li) {
@@ -165,7 +166,7 @@ return baseclass.extend({
               }
             });
           }
-          if (document.body.classList.contains('sidebar-collapsed')) {
+          if (!mobile && document.body.classList.contains('sidebar-collapsed')) {
             this.setSidebarCollapsed(false);
             li.classList.add('open');
           } else {
@@ -180,6 +181,11 @@ return baseclass.extend({
 
         submenu.addEventListener('click', (event) => {
           if (event.target && event.target.closest && event.target.closest('a'))
+            this.setMobileMenu(false);
+        });
+      } else {
+        link.addEventListener('click', () => {
+          if (this.isMobileLayout())
             this.setMobileMenu(false);
         });
       }
@@ -359,17 +365,23 @@ return baseclass.extend({
 
   setMobileMenu(open) {
     document.body.classList.toggle('mobile-menu-open', open);
-    const button = document.querySelector('.sidebar-toggle');
-    if (button && window.matchMedia('(max-width: 854px)').matches) {
-      button.setAttribute('aria-expanded', String(open));
-      button.textContent = open ? '\u00D7' : '\u2630';
-      button.title = open ? _('Close navigation') : _('Open navigation');
+    const mobileToggle = document.querySelector('.mobile-toggle');
+    if (mobileToggle) {
+      mobileToggle.setAttribute('aria-expanded', String(open));
+      mobileToggle.textContent = open ? '\u00D7' : '\u2630';
+      mobileToggle.title = open ? _('Close navigation') : _('Open navigation');
+    }
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    if (sidebarToggle && this.isMobileLayout()) {
+      sidebarToggle.setAttribute('aria-expanded', String(open));
+      sidebarToggle.textContent = '\u00D7';
+      sidebarToggle.title = _('Close navigation');
     }
   },
 
   setupSidebar() {
     const header = document.querySelector('header');
-    const mobileQuery = typeof window.matchMedia === 'function' ? window.matchMedia('(max-width: 854px)') : null;
+    const mobileQuery = typeof window.matchMedia === 'function' ? window.matchMedia(MOBILE_MEDIA_QUERY) : null;
     if (!header || header.querySelector('.sidebar-toggle'))
       return;
 
@@ -409,12 +421,33 @@ return baseclass.extend({
     button.addEventListener('click', () => {
       if (!document.body)
         return;
-      if (mobileQuery && mobileQuery.matches)
+      if (this.isMobileLayout())
         this.setMobileMenu(!document.body.classList.contains('mobile-menu-open'));
       else
         this.setSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed'));
     });
     header.appendChild(button);
+
+    let mobileToggle = document.querySelector('.mobile-toggle');
+    if (!mobileToggle) {
+      const mobileBar = document.querySelector('.mobile-bar');
+      if (mobileBar) {
+        mobileToggle = E('button', {
+          'type': 'button',
+          'class': 'mobile-toggle',
+          'aria-label': _('Toggle navigation'),
+          'aria-expanded': 'false'
+        }, ['\u2630']);
+        mobileBar.prepend(mobileToggle);
+      }
+    }
+    if (mobileToggle) {
+      mobileToggle.addEventListener('click', () => {
+        if (!document.body)
+          return;
+        this.setMobileMenu(!document.body.classList.contains('mobile-menu-open'));
+      });
+    }
 
     const closeMobileSections = () => {
       document.querySelectorAll('#topmenu > li.open').forEach((item) => {
@@ -428,10 +461,22 @@ return baseclass.extend({
     const syncNavigationMode = () => {
       if (!document.body)
         return;
-      if (mobileQuery && mobileQuery.matches) {
+      if (this.isMobileLayout()) {
         document.body.classList.remove('sidebar-collapsed');
         closeMobileSections();
         this.setMobileMenu(false);
+        const mToggle = document.querySelector('.mobile-toggle');
+        if (mToggle) {
+          mToggle.setAttribute('aria-expanded', 'false');
+          mToggle.textContent = '\u2630';
+          mToggle.title = _('Open navigation');
+        }
+        const sToggle = document.querySelector('.sidebar-toggle');
+        if (sToggle) {
+          sToggle.setAttribute('aria-expanded', 'false');
+          sToggle.textContent = '\u00D7';
+          sToggle.title = _('Close navigation');
+        }
       } else {
         this.setMobileMenu(false);
         this.setSidebarCollapsed(this.getPreference('streamline.sidebar') === 'collapsed');
@@ -444,16 +489,11 @@ return baseclass.extend({
       mobileQuery.addListener(syncNavigationMode);
 
     document.addEventListener('click', (event) => {
-      if (!mobileQuery || !mobileQuery.matches || !event.target || !event.target.closest)
+      if (!this.isMobileLayout() || !event.target || !event.target.closest)
         return;
-      if (event.target.closest('header'))
+      if (event.target.closest('header') || event.target.closest('.mobile-bar'))
         return;
-      document.querySelectorAll('#topmenu > li.open').forEach((item) => {
-        item.classList.remove('open');
-        const link = item.querySelector(':scope > a');
-        if (link)
-          link.setAttribute('aria-expanded', 'false');
-      });
+      closeMobileSections();
       this.setMobileMenu(false);
     });
 

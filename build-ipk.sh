@@ -2,7 +2,7 @@
 set -eu
 
 BASE_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-OUTPUT=${1:-"$BASE_DIR/luci-theme-streamline_1.0.28-1_all.ipk"}
+OUTPUT=${1:-"$BASE_DIR/luci-theme-streamline_1.0.33-1_all.ipk"}
 BUILD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/streamline-ipk.XXXXXX")
 trap 'rm -rf "$BUILD_DIR"' EXIT HUP INT TERM
 
@@ -37,6 +37,10 @@ tar --format=gnu --owner=0 --group=0 --numeric-owner --mtime='@0' \
 
 if command -v node >/dev/null 2>&1; then
 	node "$BASE_DIR/tools/verify-ipk.js" "$OUTPUT"
+fi
+
+if [ -d "$BASE_DIR/releases" ]; then
+	cp -f "$OUTPUT" "$BASE_DIR/releases/"
 fi
 
 echo "Criado: $OUTPUT"
