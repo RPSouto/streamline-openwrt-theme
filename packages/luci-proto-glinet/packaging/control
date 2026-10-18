@@ -1,0 +1,10 @@
+Package: luci-proto-glinet
+Version: 1.0.0-1
+Depends: libc, luci-base
+Source: luci-proto-glinet
+SourceName: luci-proto-glinet
+License: Apache-2.0
+Section: luci
+Architecture: all
+Installed-Size: 15000
+Description: LuCI support for GL.iNet unsupported network protocols (wgclient, wgserver, ovpnclient, ovpnserver, tethering). Displays interfaces cleanly in Network > Interfaces with real-time status and management options.

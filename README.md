@@ -33,6 +33,15 @@ scp luci-theme-streamline_1.0.33-1_all.ipk root@192.168.8.1:/tmp/
 ssh root@192.168.8.1 'opkg install /tmp/luci-theme-streamline_1.0.33-1_all.ipk'
 ```
 
+### Complementary Package: `luci-proto-glinet`
+
+To fix **"Unsupported protocol type"** in LuCI for GL.iNet's custom VPN protocols (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`):
+
+```sh
+scp luci-proto-glinet_1.0.0-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install /tmp/luci-proto-glinet_1.0.0-1_all.ipk'
+```
+
 Keep the SSH session open during the first test. Open LuCI again and perform a hard refresh (`Ctrl+F5`) if the previous theme is still cached.
 
 ## Direct installation from the source tree
