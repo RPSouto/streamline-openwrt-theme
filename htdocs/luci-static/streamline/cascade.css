@@ -600,14 +600,48 @@ body.modal-overlay-active {
 .modal > .right, .modal > div.right { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .modal > .right > *, .modal > div.right > * { margin: 0 !important; }
 
-/* Login Modal & sysauth styles */
+/* Login Screen Wallpaper & sysauth styles */
+body.login-page {
+  min-height: 100vh;
+  background-color: #0b0e14;
+  background-image:
+    radial-gradient(ellipse at center, rgba(11, 14, 20, 0.35) 0%, rgba(7, 9, 14, 0.88) 100%),
+    url('login-bg.jpg');
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+body.login-page #modal_overlay {
+  background: transparent !important;
+}
+
+#modal_overlay:has(.modal.login),
+#modal_overlay:has(.modal:has(#luci_password)) {
+  background-color: #0b0e14;
+  background-image:
+    radial-gradient(ellipse at center, rgba(11, 14, 20, 0.35) 0%, rgba(7, 9, 14, 0.88) 100%),
+    url('login-bg.jpg') !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
 .modal.login,
 .modal:has(#luci_password),
 .modal:has(#luci_username) {
   width: min(420px, calc(100% - 24px)) !important;
   margin-top: 11vh !important;
-  padding: 30px 26px !important;
+  padding: 32px 28px !important;
   overflow: visible !important;
+  background: rgba(17, 21, 29, 0.86) !important;
+  backdrop-filter: blur(16px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.3) !important;
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.28) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75), 0 0 50px rgba(var(--sl-accent-rgb), 0.12) !important;
 }
 .modal.login::before,
 .modal:has(#luci_password)::before {

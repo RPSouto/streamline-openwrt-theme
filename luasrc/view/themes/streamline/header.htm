@@ -30,7 +30,7 @@
     <script defer src="<%=media%>/pwa.js?v=1.0.34"></script>
     <script defer src="<%=media%>/dashboard.js?v=1.0.34"></script>
   </head>
-  <body class="lang_<%=luci.i18n.context.lang%>" data-page="<%=pcdata(table.concat(disp.context.requestpath, '-'))%>">
+  <body class="lang_<%=luci.i18n.context.lang%><% if blank_page then %> login-page<% end %>" data-page="<%=pcdata(table.concat(disp.context.requestpath, '-'))%>">
     <% if not blank_page then %>
     <div class="mobile-bar">
       <button type="button" class="mobile-toggle" aria-label="<%:Toggle navigation%>" aria-expanded="false">&#9776;</button>

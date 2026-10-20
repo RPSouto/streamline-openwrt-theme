@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   '/luci-static/streamline/icon-192.png',
   '/luci-static/streamline/icon-512.png',
   '/luci-static/streamline/manifest.json',
+  '/luci-static/streamline/login-bg.jpg',
   '/streamline-offline.html'
 ];
 

@@ -4,6 +4,7 @@
 
 return view.extend({
   render() {
+    document.body.classList.add('login-page');
     const section = document.querySelector('section');
     const form = document.querySelector('form');
     const btn = document.querySelector('button');
