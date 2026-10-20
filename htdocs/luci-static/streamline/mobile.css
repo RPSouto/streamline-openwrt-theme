@@ -380,10 +380,6 @@
   .sl-metric-detail { margin-top: 10px; font-size: .7rem; }
   .sl-palette-choices { grid-template-columns: 1fr; }
   .sl-font-choices { grid-template-columns: 1fr; }
-  .sl-traffic-strip { padding: 10px 14px; gap: 10px; justify-content: flex-start; }
-  .sl-traffic-item { min-width: 130px; flex: 1 1 130px; }
-  .sl-traffic-icon { width: 28px; height: 28px; font-size: .88rem; }
-  .sl-traffic-val { font-size: .95rem; }
   .sl-search-dialog { padding: 6vh 10px 18px !important; }
   .sl-search-box { max-height: 85vh !important; }
   .sl-search-hints span:not(:last-child) { display: none !important; }

@@ -29,8 +29,8 @@ Streamline is a dark, responsive theme for the OpenWrt LuCI web interface. Its v
 Copy the package to the router and install it with `opkg`:
 
 ```sh
-scp releases/luci-theme-streamline_1.0.37-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.37-1_all.ipk'
+scp releases/luci-theme-streamline_1.0.38-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.38-1_all.ipk'
 ```
 
 ### Complementary Package: `luci-proto-glinet`

@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.37';
+const THEME_VERSION = '1.0.38';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -93,7 +93,6 @@ return baseclass.extend({
     this.renderModeMenu(tree);
     this.setupSidebar();
     this.setupQuickSearch(tree);
-    this.setupClipboardHelper();
 
     if (dispatchpath.length >= 3) {
       for (let i = 0; i < 3 && node; i++) {
@@ -748,25 +747,5 @@ return baseclass.extend({
       else
         topmenu.prepend(item);
     }
-  },
-
-  setupClipboardHelper() {
-    document.addEventListener('dblclick', (event) => {
-      const target = event.target;
-      if (!target || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target.tagName))
-        return;
-      const text = (target.textContent || '').trim();
-      const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(text);
-      const isMac = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(text);
-      if (isIp || isMac) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(() => {
-            if (typeof ui !== 'undefined' && typeof ui.addNotification === 'function') {
-              ui.addNotification(null, E('p', {}, [_('Copied to clipboard: %s').format(text)]), 'info');
-            }
-          }).catch(() => {});
-        }
-      }
-    });
   }
 });

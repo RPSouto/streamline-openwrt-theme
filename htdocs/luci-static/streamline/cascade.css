@@ -494,70 +494,6 @@ h3 + .table, h3 + table { margin-top: 12px; }
 .streamline-overview > .cbi-section { border-top-color: rgba(var(--sl-accent-rgb),.38); }
 .streamline-overview .network-status-table + h3 { margin-top: 36px; margin-bottom: 14px; }
 
-/* Live Traffic & Clients Strip */
-.sl-traffic-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 14px 22px;
-  background: rgba(11, 14, 20, 0.65);
-  border-top: 1px solid var(--sl-border);
-}
-.sl-traffic-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 150px;
-}
-.sl-traffic-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--sl-border);
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1;
-}
-.sl-traffic-rx .sl-traffic-icon {
-  color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.35);
-  background: rgba(56, 189, 248, 0.09);
-}
-.sl-traffic-tx .sl-traffic-icon {
-  color: #a78bfa;
-  border-color: rgba(167, 139, 250, 0.35);
-  background: rgba(167, 139, 250, 0.09);
-}
-.sl-traffic-clients .sl-traffic-icon {
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.35);
-  background: rgba(52, 211, 153, 0.09);
-}
-.sl-traffic-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.sl-traffic-label {
-  font-size: 0.62rem;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  color: var(--sl-muted);
-  text-transform: uppercase;
-}
-.sl-traffic-val {
-  font-size: 1.05rem;
-  font-weight: 750;
-  color: var(--sl-text);
-  font-variant-numeric: tabular-nums;
-}
-
 @keyframes sl-health-pulse { 0%, 100% { opacity: .58; } 50% { opacity: 1; } }
 
 .alert-message { padding: 14px 16px; margin: 0 0 18px; border: 1px solid rgba(78,161,255,.35); border-radius: 11px; background: rgba(78,161,255,.09); color: #cfe5ff; }
@@ -671,7 +607,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.37') !important;
+    url('login-bg.jpg?v=1.0.38') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
@@ -714,7 +650,7 @@ body.login-page form.cbi-map::before {
   width: 52px;
   height: 52px;
   margin: 0 auto 18px;
-  background: url(logo.svg?v=1.0.37) center/contain no-repeat;
+  background: url(logo.svg?v=1.0.38) center/contain no-repeat;
   filter: drop-shadow(0 8px 20px rgba(var(--sl-accent-rgb), .4));
 }
 .modal.login > h4,

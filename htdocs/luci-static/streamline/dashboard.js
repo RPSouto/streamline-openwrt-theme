@@ -242,31 +242,7 @@
       tr('ROUTER HEALTH', 'ROUTER HEALTH') + '</span><h3>' +
       tr('System overview', 'System overview') + '</h3></div>' +
       '<div class="sl-live-status is-loading" role="status" aria-label="' +
-      tr('Loading…', 'Loading…') + '" title="' + tr('Loading…', 'Loading…') + '"><i></i></div></div>' +
-      '<div class="sl-metric-grid"></div>' +
-      '<div class="sl-traffic-strip">' +
-        '<div class="sl-traffic-item sl-traffic-rx">' +
-          '<span class="sl-traffic-icon">&darr;</span>' +
-          '<div class="sl-traffic-meta">' +
-            '<span class="sl-traffic-label">' + tr('WAN DOWNLOAD', 'WAN DOWNLOAD') + '</span>' +
-            '<strong class="sl-traffic-val">--</strong>' +
-          '</div>' +
-        '</div>' +
-        '<div class="sl-traffic-item sl-traffic-tx">' +
-          '<span class="sl-traffic-icon">&uarr;</span>' +
-          '<div class="sl-traffic-meta">' +
-            '<span class="sl-traffic-label">' + tr('WAN UPLOAD', 'WAN UPLOAD') + '</span>' +
-            '<strong class="sl-traffic-val">--</strong>' +
-          '</div>' +
-        '</div>' +
-        '<div class="sl-traffic-item sl-traffic-clients">' +
-          '<span class="sl-traffic-icon">&#9673;</span>' +
-          '<div class="sl-traffic-meta">' +
-            '<span class="sl-traffic-label">' + tr('ACTIVE CLIENTS', 'ACTIVE CLIENTS') + '</span>' +
-            '<strong class="sl-traffic-val">--</strong>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
+      tr('Loading…', 'Loading…') + '" title="' + tr('Loading…', 'Loading…') + '"><i></i></div></div><div class="sl-metric-grid"></div>';
 
     var grid = summary.querySelector('.sl-metric-grid');
     grid.appendChild(metric(tr('1 MIN LOAD', '1 MIN LOAD'), 'sl-load'));
@@ -301,70 +277,6 @@
     card.querySelector('.sl-metric-detail').textContent = available ? detail : tr('Loading…', 'Loading…');
   }
 
-  var lastWanStats = null;
-  var lastWanTime = null;
-
-  function formatRate(bps) {
-    if (!isFinite(bps) || bps < 0) return '0 B/s';
-    if (bps >= 1048576) {
-      return (bps / 1048576).toFixed(1) + ' MB/s';
-    } else if (bps >= 1024) {
-      return (bps / 1024).toFixed(0) + ' KB/s';
-    }
-    return Math.round(bps) + ' B/s';
-  }
-
-  function updateWanTraffic(summary) {
-    if (!summary || !window.L || typeof L.require !== 'function') return;
-    Promise.resolve(L.require('network')).then(function (network) {
-      if (!network || typeof network.getWAN !== 'function') return null;
-      return network.getWAN();
-    }).then(function (wan) {
-      if (!wan || typeof wan.getStats !== 'function') return null;
-      return wan.getStats();
-    }).then(function (stats) {
-      if (!stats) return;
-      var now = Date.now();
-      if (lastWanStats && lastWanTime) {
-        var dt = (now - lastWanTime) / 1000;
-        if (dt >= 1.0) {
-          var rxDiff = Number(stats.rx_bytes) - Number(lastWanStats.rx_bytes);
-          var txDiff = Number(stats.tx_bytes) - Number(lastWanStats.tx_bytes);
-          if (rxDiff >= 0 && txDiff >= 0) {
-            var rxVal = summary.querySelector('.sl-traffic-rx .sl-traffic-val');
-            var txVal = summary.querySelector('.sl-traffic-tx .sl-traffic-val');
-            if (rxVal) rxVal.textContent = formatRate(rxDiff / dt);
-            if (txVal) txVal.textContent = formatRate(txDiff / dt);
-          }
-        }
-      }
-      lastWanStats = stats;
-      lastWanTime = now;
-    }).catch(function () {});
-  }
-
-  function updateClientCount(summary) {
-    if (!summary) return;
-    var tables = document.querySelectorAll('#maincontent table, #maincontent .table');
-    var macRegex = /([0-9a-f]{2}[:-]){5}[0-9a-f]{2}/i;
-    var macSet = {};
-    for (var i = 0; i < tables.length; i++) {
-      var rows = tables[i].querySelectorAll('tr, .tr');
-      for (var r = 0; r < rows.length; r++) {
-        var txt = rows[r].textContent || '';
-        var match = txt.match(macRegex);
-        if (match) {
-          macSet[match[0].toLowerCase()] = true;
-        }
-      }
-    }
-    var count = Object.keys(macSet).length;
-    var clientsVal = summary.querySelector('.sl-traffic-clients .sl-traffic-val');
-    if (clientsVal) {
-      clientsVal.textContent = count > 0 ? String(count) : (attempts > 3 ? '0' : '--');
-    }
-  }
-
   function update() {
     var summary = build();
     var loadText;
@@ -393,9 +305,6 @@
     setMetric(summary, '.sl-memory', memory && memory.text, memory && memory.percent, tr('Physical memory', 'Physical memory'));
     setMetric(summary, '.sl-storage', storage && storage.text, storage && storage.percent, tr('Overlay storage', 'Overlay storage'));
     setMetric(summary, '.sl-uptime', compactUptime(uptime), uptime ? 100 : 0, tr('Since last restart', 'Since last restart'));
-
-    updateWanTraffic(summary);
-    updateClientCount(summary);
 
     if (loadText || memory || storage || uptime) {
       var live = summary.querySelector('.sl-live-status');

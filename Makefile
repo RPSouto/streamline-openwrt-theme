@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Streamline Theme
 LUCI_DEPENDS:=+luci-base
-PKG_VERSION:=1.0.37
+PKG_VERSION:=1.0.38
 PKG_RELEASE:=1
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=Streamline contributors
