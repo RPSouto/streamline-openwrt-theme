@@ -1,7 +1,7 @@
 /* Streamline PWA: dynamic LuCI and RPC requests are deliberately never cached. */
 'use strict';
 
-const CACHE = 'streamline-static-v35';
+const CACHE = 'streamline-static-v36';
 const STATIC_ASSETS = [
   '/luci-static/streamline/cascade.css',
   '/luci-static/streamline/mobile.css',

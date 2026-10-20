@@ -1,7 +1,4 @@
-    {%
-      let is_login = (blank_page || auth_fields || fuser != null || (!ctx.authsession && length(ctx.request_path) == 0));
-      if (!is_login && !blank_page):
-    %}
+    {% if (!blank_page): %}
     </div>
     <footer>
       <span>Streamline · <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }} {{ version.luciversion }}</a> / {{ version.distname }} {{ version.distversion }}</span>
