@@ -380,6 +380,13 @@
   .sl-metric-detail { margin-top: 10px; font-size: .7rem; }
   .sl-palette-choices { grid-template-columns: 1fr; }
   .sl-font-choices { grid-template-columns: 1fr; }
+  .sl-traffic-strip { padding: 10px 14px; gap: 10px; justify-content: flex-start; }
+  .sl-traffic-item { min-width: 130px; flex: 1 1 130px; }
+  .sl-traffic-icon { width: 28px; height: 28px; font-size: .88rem; }
+  .sl-traffic-val { font-size: .95rem; }
+  .sl-search-dialog { padding: 6vh 10px 18px !important; }
+  .sl-search-box { max-height: 85vh !important; }
+  .sl-search-hints span:not(:last-child) { display: none !important; }
 }
 
 @media (max-width: 480px) {
@@ -403,6 +410,6 @@
   #topmenu > li > a { min-height: 36px; padding: 0 10px; font-size: .86rem; }
   .dropdown-menu li a { min-height: 34px; padding: 6px 8px 6px 20px; font-size: .82rem; }
   #indicators { padding-top: 8px !important; gap: 6px !important; }
-  #indicators > [data-indicator], #indicators > .sidebar-home, #indicators > .sidebar-palette { min-height: 34px; padding: 6px 10px; font-size: .78rem; }
+  #indicators > [data-indicator], #indicators > .sidebar-home, #indicators > .sidebar-palette, #indicators > .sidebar-search { min-height: 34px; padding: 6px 10px; font-size: .78rem; }
   .container { min-height: calc(100vh - 44px); padding: 12px 10px 36px; }
 }
