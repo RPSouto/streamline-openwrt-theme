@@ -601,39 +601,51 @@ body.modal-overlay-active {
 .modal > .right > *, .modal > div.right > * { margin: 0 !important; }
 
 /* Login Screen Wallpaper & sysauth styles */
-body.login-page {
-  min-height: 100vh;
-  background-color: #0b0e14;
+html.login-page,
+body.login-page,
+body[data-page=""],
+body:has(input[name="luci_password"]),
+body:has(#luci_password),
+body:has(#focus_password) {
+  min-height: 100vh !important;
+  background-color: #0b0e14 !important;
   background-image:
-    radial-gradient(ellipse at center, rgba(11, 14, 20, 0.35) 0%, rgba(7, 9, 14, 0.88) 100%),
-    url('login-bg.jpg');
-  background-position: center center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-body.login-page #modal_overlay {
-  background: transparent !important;
-}
-
-#modal_overlay:has(.modal.login),
-#modal_overlay:has(.modal:has(#luci_password)) {
-  background-color: #0b0e14;
-  background-image:
-    radial-gradient(ellipse at center, rgba(11, 14, 20, 0.35) 0%, rgba(7, 9, 14, 0.88) 100%),
-    url('login-bg.jpg') !important;
+    radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
+    url('login-bg.jpg?v=1.0.35') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed !important;
 }
 
+body.login-page #modal_overlay,
+body[data-page=""] #modal_overlay,
+body:has(input[name="luci_password"]) #modal_overlay,
+#modal_overlay.login-overlay,
+#modal_overlay:has(.modal.login),
+#modal_overlay:has(.modal:has(#luci_password)) {
+  background: transparent !important;
+}
+
+body.login-page .container,
+body[data-page=""] .container,
+body:has(input[name="luci_password"]) .container {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 .modal.login,
 .modal:has(#luci_password),
-.modal:has(#luci_username) {
+.modal:has(#luci_username),
+body.login-page form.cbi-map,
+body[data-page=""] form.cbi-map,
+body:has(input[name="luci_password"]) form.cbi-map {
   width: min(420px, calc(100% - 24px)) !important;
-  margin-top: 11vh !important;
+  max-width: 420px !important;
+  margin: 11vh auto 24px auto !important;
   padding: 32px 28px !important;
   overflow: visible !important;
   background: rgba(17, 21, 29, 0.86) !important;
@@ -643,15 +655,19 @@ body.login-page #modal_overlay {
   border-radius: 16px !important;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75), 0 0 50px rgba(var(--sl-accent-rgb), 0.12) !important;
 }
+
 .modal.login::before,
-.modal:has(#luci_password)::before {
+.modal:has(#luci_password)::before,
+body.login-page form.cbi-map::before,
+body[data-page=""] form.cbi-map::before,
+body:has(input[name="luci_password"]) form.cbi-map::before {
   content: "";
   display: block;
   width: 52px;
   height: 52px;
   margin: 0 auto 18px;
-  background: url(logo.svg) center/contain no-repeat;
-  filter: drop-shadow(0 8px 20px rgba(var(--sl-accent-rgb),.4));
+  background: url(logo.svg?v=1.0.35) center/contain no-repeat;
+  filter: drop-shadow(0 8px 20px rgba(var(--sl-accent-rgb), .4));
 }
 .modal.login > h4,
 .modal:has(#luci_password) > h4 {

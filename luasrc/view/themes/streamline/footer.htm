@@ -1,5 +1,7 @@
-<%# SPDX-License-Identifier: Apache-2.0 -%>
-    <% if not blank_page then local ver = require "luci.version" %>
+    <%
+      local is_login = (blank_page or duser ~= nil or fuser ~= nil or (not luci.dispatcher.context.authsession and #disp.context.requestpath == 0))
+      if not is_login and not blank_page then local ver = require "luci.version"
+    %>
     </div>
     <footer>
       <span>Streamline · <a href="https://github.com/openwrt/luci">Powered by <%=ver.luciname%> (<%=ver.luciversion%>)</a> / <%=ver.distversion%></span>

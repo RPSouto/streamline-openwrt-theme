@@ -1,6 +1,7 @@
 <%# SPDX-License-Identifier: Apache-2.0 -%>
 <% blank_page = true; local login_util = require "luci.util"; local login_boardinfo = login_util.ubus("system", "board") or {} %>
 <%+header%>
+<script>document.documentElement.classList.add('login-page');if(document.body)document.body.classList.add('login-page');</script>
 <section hidden>
   <div class="login-hostname"><%=login_util.pcdata(login_boardinfo.hostname or "OpenWrt")%></div>
   <form method="post" class="cbi-map">

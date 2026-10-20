@@ -1,6 +1,7 @@
 {# SPDX-License-Identifier: Apache-2.0 #}
 {% const login_boardinfo = ubus.call('system', 'board') ?? {}; %}
 {% include('header', { blank_page: true }) %}
+<script>document.documentElement.classList.add('login-page');if(document.body)document.body.classList.add('login-page');</script>
 <section hidden>
   <div class="login-hostname">{{ entityencode(login_boardinfo.hostname ?? 'OpenWrt') }}</div>
   <form method="post" class="cbi-map">
