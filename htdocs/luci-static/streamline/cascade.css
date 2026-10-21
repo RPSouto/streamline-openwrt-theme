@@ -193,9 +193,6 @@ html[data-palette]:not([data-palette="streamline"]) .cbi-input-select,
 html[data-palette]:not([data-palette="streamline"]) .cbi-tabmenu,
 html[data-palette]:not([data-palette="streamline"]) .cbi-dynlist > .item,
 html[data-palette]:not([data-palette="streamline"]) .ifacebadge { background: var(--sl-input); }
-html[data-palette="glinet"] .brand::before,
-html[data-palette="glinet"] .mobile-brand::before,
-html[data-palette="glinet"] .modal.login::before { filter: hue-rotate(275deg) saturate(1.12) drop-shadow(0 7px 15px rgba(var(--sl-accent-rgb),.34)); }
 
 * { box-sizing: border-box; }
 html { min-height: 100%; background: var(--sl-bg); }
@@ -218,14 +215,14 @@ header {
   transition: width .3s cubic-bezier(.22,1,.36,1), padding .3s cubic-bezier(.22,1,.36,1);
 }
 .brand {
-  min-height: 58px; padding: 5px 8px 5px 54px; margin-bottom: 16px;
+  min-height: 48px; padding: 8px 14px; margin-bottom: 16px;
   display: flex; flex-direction: column; justify-content: center;
   color: var(--sl-text) !important; font-weight: 750; font-size: 1.08rem; overflow-wrap: anywhere;
   position: relative;
   transition: width .3s cubic-bezier(.22,1,.36,1), padding .3s cubic-bezier(.22,1,.36,1);
 }
-.brand > span { display: block; max-width: 150px; overflow: hidden; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .24s cubic-bezier(.22,1,.36,1), opacity .14s ease, transform .24s cubic-bezier(.22,1,.36,1); }
-.brand::before { content: ""; position: absolute; left: 4px; top: 8px; width: 38px; height: 38px; background: url(logo.svg) center/contain no-repeat; filter: drop-shadow(0 6px 12px rgba(var(--sl-accent-rgb),.35)); }
+.brand > span { display: block; max-width: 170px; overflow: hidden; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .24s cubic-bezier(.22,1,.36,1), opacity .14s ease, transform .24s cubic-bezier(.22,1,.36,1); }
+.brand::before { display: none !important; }
 .brand::after { content: "OPENWRT"; font-size: .57rem; letter-spacing: .22em; color: var(--sl-faint); font-weight: 700; margin-top: 3px; }
 
 .nav { list-style: none; padding: 0; margin: 0; }
@@ -607,7 +604,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.38') !important;
+    url('login-bg.jpg?v=1.0.39') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
@@ -645,13 +642,7 @@ body.login-page form.cbi-map {
 
 .modal.login::before,
 body.login-page form.cbi-map::before {
-  content: "";
-  display: block;
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 18px;
-  background: url(logo.svg?v=1.0.38) center/contain no-repeat;
-  filter: drop-shadow(0 8px 20px rgba(var(--sl-accent-rgb), .4));
+  display: none !important;
 }
 .modal.login > h4,
 .modal:has(#luci_password) > h4 {
@@ -1352,10 +1343,7 @@ p.spinning::before,
 
 @media (min-width: 992px) and (min-height: 551px) {
   body.sidebar-collapsed header { width: 76px; padding-left: 10px; padding-right: 10px; overflow-x: hidden; }
-  body.sidebar-collapsed .brand { width: 48px; padding: 5px; }
-  body.sidebar-collapsed .brand::before { left: 5px; }
-  body.sidebar-collapsed .brand::after { display: none; }
-  body.sidebar-collapsed .brand > span,
+  body.sidebar-collapsed .brand { display: none !important; }
   body.sidebar-collapsed #topmenu > li > a > .menu-label { max-width: 0; opacity: 0; transform: translateX(-8px); }
   body.sidebar-collapsed #topmenu > li > a { justify-content: center; padding: 0; }
   body.sidebar-collapsed #topmenu > li > a::before { flex: 0 0 18px; width: 18px; height: 18px; margin: 0; }
