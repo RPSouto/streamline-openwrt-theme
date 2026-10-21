@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.43';
+const THEME_VERSION = '1.0.44';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -777,15 +777,24 @@ return baseclass.extend({
         if (!countBadge) {
           countBadge = document.createElement('span');
           countBadge.className = 'sl-radio-count-badge';
+          countBadge.style.cursor = 'pointer';
+          countBadge.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            radioRow.classList.toggle('is-collapsed-radio');
+            updateChildrenVisibility();
+          });
           const statCell = radioRow.querySelector('[data-name="_stat"] big') || radioRow.querySelector('[data-name="_stat"]');
           if (statCell)
             statCell.appendChild(countBadge);
         }
         if (countBadge) {
-          if (isCollapsed && childRows.length) {
-            countBadge.textContent = '(' + childRows.length + (childRows.length === 1 ? ' network hidden' : ' networks hidden') + ')';
-            countBadge.style.display = 'inline-block';
+          if (childRows.length > 0) {
+            countBadge.textContent = childRows.length.toString();
+            countBadge.title = childRows.length === 1 ? '1 network' : childRows.length + ' networks';
+            countBadge.style.display = '';
           } else {
+            countBadge.textContent = '';
             countBadge.style.display = 'none';
           }
         }
@@ -826,20 +835,18 @@ return baseclass.extend({
             toggle.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
-              const collapsed = row.classList.toggle('is-collapsed-radio');
-              try {
-                localStorage.setItem('streamline.wifi_collapsed_' + currentRadioSid, collapsed ? '1' : '0');
-              } catch (_) {}
+              row.classList.toggle('is-collapsed-radio');
               updateChildrenVisibility();
             });
           }
 
-          let isCollapsed = false;
-          try {
-            isCollapsed = localStorage.getItem('streamline.wifi_collapsed_' + currentRadioSid) === '1';
-          } catch (_) {}
-          if (isCollapsed)
+          if (!row.hasAttribute('data-radio-init')) {
+            row.setAttribute('data-radio-init', '1');
             row.classList.add('is-collapsed-radio');
+            try {
+              localStorage.removeItem('streamline.wifi_collapsed_' + currentRadioSid);
+            } catch (_) {}
+          }
 
         } else if (row.querySelector('.enable-disable, .remove, [data-signal]')) {
           row.classList.add('is-ssid-row');
