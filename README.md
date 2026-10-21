@@ -1,112 +1,134 @@
 # Streamline for LuCI
 
-Streamline is a dark, responsive theme for the OpenWrt LuCI web interface. Its visual language is inspired by the Stremio Server dashboard: compact navigation, understated cards, purple accents, clear status colors, and high information density. It does not include Stremio code or branding.
+[![Release](https://img.shields.io/badge/release-v1.0.45-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
-## Highlights
+**Streamline** is a modern, high-density dark theme for the OpenWrt LuCI web interface. Its visual language features deep slate backgrounds, understated frosted cards, purple/cyan neon accents, crisp typography, and high information density.
 
-- Collapsible sidebar and expandable navigation sections, with their state saved in the browser.
-- Responsive layouts for desktop, tablet, and mobile devices.
-- Improved forms, tables, action buttons, interface cards, firewall zones, and package manager controls.
-- Full-width viewers with independent scrolling for system logs, kernel logs, and command output.
-- Login screen displaying the router hostname.
-- Clean login footer with OpenWrt attribution.
-- Home shortcut that closes open navigation sections and returns to the LuCI overview.
-- Persistent Router Health gauges that render immediately and fill in as data arrives.
-- Six switchable color palettes—Streamline, GL.iNet, Ocean, Forest, Sunset, and Rose—saved in the browser.
-- Four interface font options—System, Arial, Georgia, and Monospace—with a browser-local preference.
-- Optional Progressive Web App installation.
+---
 
-## Compatibility
+## ✨ Highlights
 
-- OpenWrt 21.02, 22.03, 23.05, 24.10, 25.12, and current LuCI releases.
-- Legacy Lua (`.htm`) and modern ucode (`.ut`) templates in the same package.
-- `opkg`/IPK, `apk`, and direct SSH installation.
-- Architecture-independent package (`all`): HTML, CSS, JavaScript, and SVG only.
-- GL.iNet Flint 2 (GL-MT6000). Streamline changes only the LuCI interface opened from **System → Advanced Settings**. It does not replace the main GL.iNet administration panel.
+* **Quick Search / Command Palette (`Ctrl + K` / `Cmd + K`)**: Instantly jump to any LuCI menu, page, or service with keyboard navigation and fuzzy search.
+* **Smart Collapsible Wireless Overview (`Network → Wireless`)**:
+  * **Collapsible Radio Groups**: Expand and collapse physical radios and virtual SSIDs with smooth animated chevron toggles. Radios are closed by default for a clean overview.
+  * **Interactive Network Counter**: Circular numeric pill badge showing the exact number of active virtual interfaces per radio.
+  * **Flicker-Free Polling**: Background statistics polling (`iwinfo` / assoclist every 5s) reconciles synchronously in microtasks, eliminating UI flashing and jitter.
+  * **Parent-Child Visual Hierarchy**: Virtual interfaces are indented with a tree branch indicator (`↳`) under their parent physical controller.
+* **Persistent Router Health Card**: Live CPU load, memory utilization, and flash storage meters rendered as unified full-width cards matching the system overview table.
+* **Modern Frosted Login Screen**: Sleek high-tech wallpaper, router hostname display, and minimalist frosted glass credential card.
+* **Collapsible Sidebar & Navigation**: Auto-saving collapsible sidebar on desktop and a clean sliding drawer for mobile and tablet screens.
+* **Full-Width Terminal Viewers**: Independent scrolling and monospaced typography for System Logs, Kernel Logs, and command output.
+* **Normalized Actions & Spacing**: Standardized button heights, responsive action toolbars, and dedicated card separation across Firewall tables, DHCP leases, and network interfaces.
+* **Six Color Palettes**: Switch effortlessly between **Streamline** (purple/cyan), **GL.iNet** (navy/turquoise), **Ocean** (blue/sea green), **Forest** (emerald/pine), **Sunset** (amber/orange), and **Rose** (plum/pink).
+* **Four Interface Fonts**: System, Arial, Georgia, or Monospace with instant browser-local persistence.
+* **Progressive Web App (PWA)**: Installable on desktop (Chrome, Edge) and Android home screens with static asset caching.
 
-## Install the IPK
+---
 
-Copy the package to the router and install it with `opkg`:
+## 💻 Compatibility
+
+* **OpenWrt Releases**: 21.02, 22.03, 23.05, 24.10, 25.12, and current snapshot releases.
+* **Template Engines**: Dual support for legacy Lua (`.htm`) and modern ucode (`.ut`) engines in the same package.
+* **Package Formats**: `opkg` (`.ipk`), `apk` (OpenWrt 25+), and direct SSH script installation.
+* **Target Devices**: Any OpenWrt-compatible hardware. Fully tested on the **GL.iNet Flint 2 (GL-MT6000)** (Streamline styles the LuCI interface opened via **System → Advanced Settings**).
+
+---
+
+## 📦 Installation
+
+### 1. Install via IPK (Recommended)
+
+Copy the pre-built release package to your router and install with `opkg`:
 
 ```sh
 scp releases/luci-theme-streamline_1.0.45-1_all.ipk root@192.168.8.1:/tmp/
 ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.45-1_all.ipk'
 ```
 
-### Complementary Package: `luci-proto-glinet`
+### 2. Complementary Package for GL.iNet Routers: `luci-proto-glinet`
 
-To fix **"Unsupported protocol type"** in LuCI for GL.iNet's custom VPN protocols (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`):
+If you run OpenWrt / LuCI on GL.iNet hardware and see **"Unsupported protocol type"** on VPN interfaces (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`):
 
 ```sh
 scp luci-proto-glinet_1.0.0-1_all.ipk root@192.168.8.1:/tmp/
 ssh root@192.168.8.1 'opkg install /tmp/luci-proto-glinet_1.0.0-1_all.ipk'
 ```
 
-Keep the SSH session open during the first test. Open LuCI again and perform a hard refresh (`Ctrl+F5`) if the previous theme is still cached.
+> **Note**: Perform a hard refresh (**`Ctrl + F5`** or **`Cmd + Shift + R`**) in your browser after installing to ensure cached static files are renewed.
 
-## Direct installation from the source tree
+---
 
-Copy the complete project directory to the router:
+## 🛠️ Direct Installation from Source
+
+To deploy directly without building a package:
 
 ```sh
 scp -r luci-theme-streamline root@192.168.8.1:/tmp/
 ssh root@192.168.8.1 'sh /tmp/luci-theme-streamline/install.sh'
 ```
 
-On a Flint 2, open **System → Advanced Settings → Go to LuCI** from the GL.iNet panel.
-
-To uninstall a direct installation:
+To remove a direct source installation:
 
 ```sh
 ssh root@192.168.8.1 'sh /tmp/luci-theme-streamline/uninstall.sh'
 ```
 
-## Recovery
+---
 
-Recovery always selects Bootstrap, the default OpenWrt LuCI theme. It does not depend on Argon or any other third-party theme.
+## 🔄 Emergency Recovery
 
-If LuCI fails to load after installation, run:
+Streamline's post-removal and recovery scripts always point back to **Bootstrap**, OpenWrt's native fallback theme:
 
 ```sh
+ssh root@192.168.8.1
 uci set luci.main.mediaurlbase='/luci-static/bootstrap'
 uci commit luci
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 /etc/init.d/uhttpd restart
 ```
 
-Then reload LuCI. Argon and other themes remain optional personal choices and are not part of the Streamline recovery path.
+---
 
-## Progressive Web App
+## 📱 Progressive Web App (PWA)
 
-Streamline includes a web app manifest and service worker. Open LuCI over HTTPS and choose **Install app** in Chrome or Edge, or **Add to Home screen** on Android.
+Streamline includes an offline-aware Web App Manifest and Service Worker:
+1. Access LuCI over **HTTPS** (ensure `luci-ssl` is installed).
+2. Click **Install app** in your browser's address bar (Chrome, Edge) or **Add to Home Screen** on mobile.
+3. The Service Worker caches strictly static assets (icons, CSS, stylesheets, fonts). **Dynamic LuCI API, RPC calls, ubus, and configuration changes are never cached.**
 
-The service worker caches only static theme assets and the offline information page. LuCI navigation, authentication, RPC/ubus requests, and configuration pages are never cached. When the router is unavailable, the PWA only explains how to reconnect to the local network or VPN.
+---
 
-If LuCI does not provide HTTPS yet, install the SSL variant appropriate for the firmware (`luci-ssl` on typical OpenWrt installations) and open the router's HTTPS address. A self-signed certificate must be accepted on the device before the browser can offer PWA installation.
+## 🎨 Palettes & Typography
 
-## Color palettes
+Open **Appearance** at the bottom of the desktop sidebar or within the mobile drawer:
+* **Palettes**:
+  * `Streamline` — Deep graphite with electric violet and sky blue accents.
+  * `GL.iNet` — Navy blue with turquoise highlights matching GL.iNet's aesthetic.
+  * `Ocean` — Marine blue with calm cyan and emerald hints.
+  * `Forest` — Dark moss with fresh green and pine accents.
+  * `Sunset` — Charcoal with warm amber, orange, and gold tones.
+  * `Rose` — Velvet plum with soft pink and indigo accents.
+* **Fonts**: Choose between `System`, `Arial`, `Georgia`, or `Monospace`.
+* Preferences are persisted locally in `localStorage` and applied before DOM paint to prevent flash of unstyled content (FOUC).
 
-Open **Appearance** at the bottom of the desktop sidebar or near the top of the mobile navigation drawer. Choose **Streamline** for purple and graphite, **GL.iNet** for navy and turquoise, **Ocean** for cool blue and deep sea, **Forest** for fresh green and pine, **Sunset** for warm orange and ember accents, or **Rose** for soft pink and plum. Choose a font in the same dialog: System, Arial, Georgia, or Monospace. Both preferences are stored locally in the browser and applied before the interface is drawn.
+---
 
-## Build an IPK
+## 🏗️ Building from Source
 
-On Linux, or another environment with POSIX shell tools and GNU `tar`, run:
+### Building the IPK on Linux or Windows (Git Bash)
+
+Ensure you have a POSIX shell with GNU `tar` and `gzip`:
 
 ```sh
-sh build-ipk.sh
+./build-ipk.sh releases/luci-theme-streamline_1.0.45-1_all.ipk
+node tools/verify-ipk.js releases/luci-theme-streamline_1.0.45-1_all.ipk
 ```
 
-The generated package is `luci-theme-streamline_1.0.28-1_all.ipk`. The outer package is a gzip-compressed GNU tar archive in the OpenWrt format and contains `debian-binary`, `control.tar.gz`, and `data.tar.gz`.
+### Building via OpenWrt SDK / Buildroot
 
-Validate the resulting package before uploading it:
-
-```sh
-node tools/verify-ipk.js luci-theme-streamline_1.0.28-1_all.ipk
-```
-
-## Build with the OpenWrt SDK or buildroot
-
-Copy this directory to `feeds/luci/themes/luci-theme-streamline` in the buildroot for the target OpenWrt release, then run:
+Copy the repository to `feeds/luci/themes/luci-theme-streamline` in your build environment:
 
 ```sh
 ./scripts/feeds update luci
@@ -114,12 +136,8 @@ Copy this directory to `feeds/luci/themes/luci-theme-streamline` in the buildroo
 make package/luci-theme-streamline/compile V=s
 ```
 
-The buildroot determines the output format: `opkg`-based releases produce an `.ipk`, while `apk`-based releases produce an `.apk`.
+---
 
-## Development
+## 📄 License
 
-The main colors and dimensions are CSS custom properties at the beginning of `htdocs/luci-static/streamline/cascade.css`. When changing PWA assets, increment `CACHE` in `htdocs/streamline-sw.js` so browsers discard the previous static cache.
-
-## License
-
-Apache-2.0. The LuCI integration follows the public APIs and reference templates of the LuCI project, which is also licensed under Apache-2.0.
+Licensed under the **Apache-2.0** License. See [LICENSE](LICENSE) for details.
