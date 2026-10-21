@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.45-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.46-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -43,8 +43,8 @@
 Copy the pre-built release package to your router and install with `opkg`:
 
 ```sh
-scp releases/luci-theme-streamline_1.0.45-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.45-1_all.ipk'
+scp releases/luci-theme-streamline_1.0.46-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.46-1_all.ipk'
 ```
 
 ### 2. Complementary Package for GL.iNet Routers: `luci-proto-glinet`

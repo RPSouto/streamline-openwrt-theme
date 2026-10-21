@@ -1,7 +1,7 @@
 /* Streamline PWA: dynamic LuCI and RPC requests are deliberately never cached. */
 'use strict';
 
-const CACHE = 'streamline-static-v45';
+const CACHE = 'streamline-static-v46';
 const STATIC_ASSETS = [
   '/luci-static/streamline/cascade.css',
   '/luci-static/streamline/mobile.css',
@@ -37,15 +37,17 @@ self.addEventListener('fetch', function (event) {
     return;
 
   if (url.pathname.indexOf('/luci-static/streamline/') === 0) {
-    event.respondWith(caches.match(request).then(function (cached) {
-      return cached || fetch(request).then(function (response) {
+    event.respondWith(
+      fetch(request).then(function (response) {
         if (response.ok) {
           const copy = response.clone();
           caches.open(CACHE).then(function (cache) { cache.put(request, copy); });
         }
         return response;
-      });
-    }));
+      }).catch(function () {
+        return caches.match(request);
+      })
+    );
     return;
   }
 
