@@ -38,16 +38,25 @@
 
 ## 📦 Installation
 
-### 1. Install via IPK (Recommended)
+### Option A: Install via IPK (OpenWrt 21.02 / 22.03 / 23.05 / GL.iNet)
 
-Copy the pre-built release package to your router and install with `opkg`:
+For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
 scp releases/luci-theme-streamline_1.0.46-1_all.ipk root@192.168.8.1:/tmp/
 ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.46-1_all.ipk'
 ```
 
-### 2. Complementary Package for GL.iNet Routers: `luci-proto-glinet`
+### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
+
+For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
+
+```sh
+scp releases/luci-theme-streamline_1.0.46-r1_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.46-r1_all.apk'
+```
+
+### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
 
 If you run OpenWrt / LuCI on GL.iNet hardware and see **"Unsupported protocol type"** on VPN interfaces (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`):
 
@@ -57,6 +66,20 @@ ssh root@192.168.8.1 'opkg install /tmp/luci-proto-glinet_1.0.0-1_all.ipk'
 ```
 
 > **Note**: Perform a hard refresh (**`Ctrl + F5`** or **`Cmd + Shift + R`**) in your browser after installing to ensure cached static files are renewed.
+
+---
+
+## 🔨 Building Release Packages
+
+To build release packages locally for both package managers:
+
+```sh
+# Build OPKG package (.ipk) for OpenWrt <= 23.05
+./build-ipk.sh
+
+# Build Alpine/OpenWrt APK package (.apk) for OpenWrt >= 24.10 / 25.12
+./build-apk.sh
+```
 
 ---
 
