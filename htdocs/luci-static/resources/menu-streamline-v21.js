@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.42';
+const THEME_VERSION = '1.0.43';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -751,16 +751,102 @@ return baseclass.extend({
   },
 
   setupWirelessLayout() {
+    const isWirelessPage = () => {
+      const page = document.body && document.body.getAttribute('data-page');
+      return page === 'admin-network-wireless' || window.location.pathname.indexOf('network/wireless') !== -1;
+    };
+
+    const updateChildrenVisibility = () => {
+      const radioRows = document.querySelectorAll('.cbi-section-table-row.is-radio-row');
+      radioRows.forEach((radioRow) => {
+        const radioId = radioRow.getAttribute('data-radio-id');
+        const isCollapsed = radioRow.classList.contains('is-collapsed-radio');
+        const childRows = document.querySelectorAll('.cbi-section-table-row.is-ssid-row[data-parent-radio="' + radioId + '"]');
+
+        childRows.forEach((childRow) => {
+          if (isCollapsed) {
+            childRow.style.display = 'none';
+            childRow.classList.add('is-collapsed-child');
+          } else {
+            childRow.style.display = '';
+            childRow.classList.remove('is-collapsed-child');
+          }
+        });
+
+        let countBadge = radioRow.querySelector('.sl-radio-count-badge');
+        if (!countBadge) {
+          countBadge = document.createElement('span');
+          countBadge.className = 'sl-radio-count-badge';
+          const statCell = radioRow.querySelector('[data-name="_stat"] big') || radioRow.querySelector('[data-name="_stat"]');
+          if (statCell)
+            statCell.appendChild(countBadge);
+        }
+        if (countBadge) {
+          if (isCollapsed && childRows.length) {
+            countBadge.textContent = '(' + childRows.length + (childRows.length === 1 ? ' network hidden' : ' networks hidden') + ')';
+            countBadge.style.display = 'inline-block';
+          } else {
+            countBadge.style.display = 'none';
+          }
+        }
+      });
+    };
+
     const applyClasses = () => {
+      if (!isWirelessPage()) return;
       const rows = document.querySelectorAll('.cbi-section-table-row[data-sid]');
       if (!rows.length) return;
+
+      let currentRadioSid = null;
+
       rows.forEach((row) => {
         if (row.querySelector('.cbi-button-add')) {
+          currentRadioSid = row.getAttribute('data-sid') || 'radio';
           row.classList.add('is-radio-row');
           row.classList.remove('is-ssid-row');
+          row.setAttribute('data-radio-id', currentRadioSid);
+
+          const firstCell = row.querySelector('td:first-child, .td:first-child');
+          if (firstCell && !firstCell.querySelector('.sl-radio-collapse-toggle')) {
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'sl-radio-collapse-toggle';
+            toggle.setAttribute('aria-label', 'Toggle networks');
+            toggle.title = 'Collapse / Expand';
+            toggle.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+            const center = firstCell.querySelector('.center') || firstCell;
+            const badge = center.querySelector('.ifacebadge') || center.firstChild;
+            if (badge) {
+              center.insertBefore(toggle, badge);
+            } else {
+              center.prepend(toggle);
+            }
+
+            toggle.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const collapsed = row.classList.toggle('is-collapsed-radio');
+              try {
+                localStorage.setItem('streamline.wifi_collapsed_' + currentRadioSid, collapsed ? '1' : '0');
+              } catch (_) {}
+              updateChildrenVisibility();
+            });
+          }
+
+          let isCollapsed = false;
+          try {
+            isCollapsed = localStorage.getItem('streamline.wifi_collapsed_' + currentRadioSid) === '1';
+          } catch (_) {}
+          if (isCollapsed)
+            row.classList.add('is-collapsed-radio');
+
         } else if (row.querySelector('.enable-disable, .remove, [data-signal]')) {
           row.classList.add('is-ssid-row');
           row.classList.remove('is-radio-row');
+          if (currentRadioSid)
+            row.setAttribute('data-parent-radio', currentRadioSid);
+
           const btn = row.querySelector('.enable-disable');
           if (btn && (btn.textContent.trim().toLowerCase() === 'enable' || btn.textContent.trim().toLowerCase() === 'ativar')) {
             row.classList.add('is-disabled-network');
@@ -769,12 +855,18 @@ return baseclass.extend({
           }
         }
       });
+
+      updateChildrenVisibility();
     };
 
     applyClasses();
     const main = document.querySelector('#maincontent') || document.body;
     if (main && window.MutationObserver) {
-      const observer = new MutationObserver(() => applyClasses());
+      let debounceTimer = null;
+      const observer = new MutationObserver(() => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyClasses, 60);
+      });
       observer.observe(main, { childList: true, subtree: true });
     }
   }
