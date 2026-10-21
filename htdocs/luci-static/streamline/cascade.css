@@ -434,8 +434,12 @@ td > input[type="radio"] {
   margin: 0;
 }
 
-.table + h3, table + h3, .network-status-table + h3 { margin-top: 34px; padding-top: 6px; }
-h3 + .table, h3 + table { margin-top: 12px; }
+.table + h3, table + h3, .network-status-table + h3 { margin-top: 36px; padding-top: 8px; }
+.table + h4, table + h4 { margin-top: 32px; padding-top: 6px; }
+h3 + .table, h3 + table { margin-top: 14px; }
+h4 + .table, h4 + table { margin-top: 14px; }
+.table + .table, table + table { margin-top: 26px; }
+.cbi-section + .cbi-section { margin-top: 24px; }
 .network-status-table + h3 + .table { margin-top: 14px; }
 .cbi-section > .table, .cbi-section > .cbi-section-node > .table, .cbi-section-node > .table, .cbi-section-table { border: 0; background: transparent; box-shadow: none; }
 .cbi-section > .table + .cbi-button, .cbi-section-node > .table + .cbi-button,
@@ -1753,6 +1757,219 @@ code { color: #d9e2f2; font-family: ui-monospace, SFMono-Regular, Consolas, "Lib
   border-radius: 4px !important;
   border: 1px solid var(--sl-border) !important;
   font-size: 0.68rem !important;
+}
+
+/* ==========================================================================
+   Firewall & Iptables / Nftables Chains & Tables
+   ========================================================================== */
+
+/* Action bar buttons on Status -> Firewall */
+body[data-page="admin-status-iptables"] #maincontent > .right,
+body[data-page="admin-status-nftables"] #maincontent > .right,
+div[data-tab="iptables"] ~ .right,
+div[data-tab="ip6tables"] ~ .right {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 14px 0 24px auto !important;
+  float: none !important;
+}
+
+/* Major table headings (Table: Filter, Table: NAT, Table: Mangle, Table: Raw) */
+[data-page="admin-status-iptables"] div[data-table] > h3,
+[data-page="admin-status-nftables"] div[data-table] > h3,
+div[data-tab="iptables"] div[data-table] > h3,
+div[data-tab="ip6tables"] div[data-table] > h3,
+div[data-table] > h3 {
+  margin-top: 42px !important;
+  margin-bottom: 20px !important;
+  padding: 12px 18px !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  color: #fff !important;
+  background: linear-gradient(90deg, rgba(var(--sl-accent-rgb), 0.18) 0%, rgba(var(--sl-accent-rgb), 0.04) 60%, transparent 100%) !important;
+  border-left: 4px solid var(--sl-accent) !important;
+  border-bottom: 1px solid var(--sl-border) !important;
+  border-radius: 6px 12px 12px 6px !important;
+}
+
+[data-page="admin-status-iptables"] div[data-table]:first-child > h3,
+[data-page="admin-status-nftables"] div[data-table]:first-child > h3,
+div[data-table]:first-child > h3 {
+  margin-top: 24px !important;
+}
+
+/* Individual Chain Cards (INPUT, FORWARD, OUTPUT, custom zone chains) */
+[data-page="admin-status-iptables"] div[data-chain],
+[data-page="admin-status-nftables"] div[data-chain],
+div[data-tab="iptables"] div[data-chain],
+div[data-tab="ip6tables"] div[data-chain],
+div[data-chain] {
+  margin-top: 28px !important;
+  margin-bottom: 28px !important;
+  background: rgba(17, 21, 29, 0.94) !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: var(--sl-radius, 14px) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+[data-page="admin-status-iptables"] div[data-chain]:hover,
+[data-page="admin-status-nftables"] div[data-chain]:hover,
+div[data-chain]:hover {
+  border-color: rgba(var(--sl-accent-rgb), 0.35) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Chain Card Header */
+[data-page="admin-status-iptables"] div[data-chain] > h4,
+[data-page="admin-status-nftables"] div[data-chain] > h4,
+div[data-tab="iptables"] div[data-chain] > h4,
+div[data-tab="ip6tables"] div[data-chain] > h4,
+div[data-chain] > h4 {
+  margin: 0 !important;
+  padding: 13px 18px !important;
+  background: var(--sl-surface-2, rgba(23, 28, 38, 0.98)) !important;
+  border-bottom: 1px solid var(--sl-border) !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px 12px !important;
+  color: var(--sl-text) !important;
+}
+
+/* Chain name badge inside h4 */
+[data-page="admin-status-iptables"] div[data-chain] > h4 > em:first-of-type,
+[data-page="admin-status-nftables"] div[data-chain] > h4 > em:first-of-type,
+div[data-chain] > h4 > em:first-of-type {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  font-size: 0.94rem !important;
+  letter-spacing: 0.02em !important;
+  color: #fff !important;
+  background: rgba(var(--sl-accent-rgb), 0.22) !important;
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.38) !important;
+  padding: 2px 10px !important;
+  border-radius: 6px !important;
+}
+
+/* Chain policy, packet counters, and references meta info */
+[data-page="admin-status-iptables"] div[data-chain] > h4 > span,
+[data-page="admin-status-nftables"] div[data-chain] > h4 > span,
+div[data-chain] > h4 > span {
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  color: var(--sl-muted) !important;
+  margin-left: auto !important;
+}
+
+[data-page="admin-status-iptables"] div[data-chain] > h4 > span em,
+[data-page="admin-status-nftables"] div[data-chain] > h4 > span em,
+div[data-chain] > h4 > span em {
+  font-style: normal !important;
+  font-weight: 600 !important;
+  color: #d7dbe5 !important;
+}
+
+/* Chain Table inside Card */
+[data-page="admin-status-iptables"] div[data-chain] > table,
+[data-page="admin-status-nftables"] div[data-chain] > table,
+div[data-tab="iptables"] div[data-chain] > table,
+div[data-tab="ip6tables"] div[data-chain] > table,
+div[data-chain] > table,
+div[data-chain] > .table {
+  margin: 0 !important;
+  width: 100% !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Table header columns within chains */
+[data-page="admin-status-iptables"] div[data-chain] table th,
+[data-page="admin-status-iptables"] div[data-chain] .table .th,
+div[data-chain] table th,
+div[data-chain] .table .th {
+  background: rgba(29, 34, 48, 0.75) !important;
+  padding: 10px 14px !important;
+  font-size: 0.72rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: var(--sl-muted) !important;
+  border-bottom: 1px solid var(--sl-border) !important;
+}
+
+/* Table cells within chains */
+[data-page="admin-status-iptables"] div[data-chain] table td,
+[data-page="admin-status-iptables"] div[data-chain] .table .td,
+div[data-chain] table td,
+div[data-chain] .table .td {
+  padding: 11px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  font-size: 0.85rem !important;
+}
+
+[data-page="admin-status-iptables"] div[data-chain] table tr:last-child td,
+[data-page="admin-status-iptables"] div[data-chain] .table .tr:last-child .td,
+div[data-chain] table tr:last-child td,
+div[data-chain] .table .tr:last-child .td {
+  border-bottom: 0 !important;
+}
+
+/* Jump target links in rule targets and chain tooltips */
+span.jump, .target.jump {
+  color: var(--sl-accent) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px dotted var(--sl-accent) !important;
+  cursor: pointer !important;
+  transition: color 0.15s ease !important;
+}
+span.jump:hover, .target.jump:hover {
+  color: #fff !important;
+  border-bottom-style: solid !important;
+}
+
+/* Flash animation when jumping to a chain anchor */
+@keyframes slChainFlash {
+  0% { background-color: rgba(var(--sl-accent-rgb), 0.5); }
+  100% { background-color: transparent; }
+}
+.flash {
+  animation: slChainFlash 1.5s ease-out !important;
+}
+
+@media (max-width: 991px) {
+  [data-page="admin-status-iptables"] div[data-chain],
+  [data-page="admin-status-nftables"] div[data-chain],
+  div[data-chain] {
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    border-radius: 12px !important;
+  }
+  [data-page="admin-status-iptables"] div[data-chain] > h4,
+  [data-page="admin-status-nftables"] div[data-chain] > h4,
+  div[data-chain] > h4 {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    padding: 12px 14px !important;
+  }
+  [data-page="admin-status-iptables"] div[data-chain] > h4 > span,
+  [data-page="admin-status-nftables"] div[data-chain] > h4 > span,
+  div[data-chain] > h4 > span {
+    margin-left: 0 !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
