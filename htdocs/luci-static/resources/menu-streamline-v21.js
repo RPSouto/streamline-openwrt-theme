@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.44';
+const THEME_VERSION = '1.0.45';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -765,15 +765,19 @@ return baseclass.extend({
 
         childRows.forEach((childRow) => {
           if (isCollapsed) {
-            childRow.style.display = 'none';
-            childRow.classList.add('is-collapsed-child');
+            if (!childRow.classList.contains('is-collapsed-child')) {
+              childRow.classList.add('is-collapsed-child');
+              childRow.style.display = 'none';
+            }
           } else {
-            childRow.style.display = '';
-            childRow.classList.remove('is-collapsed-child');
+            if (childRow.classList.contains('is-collapsed-child')) {
+              childRow.classList.remove('is-collapsed-child');
+              childRow.style.display = '';
+            }
           }
         });
 
-        let countBadge = radioRow.querySelector('.sl-radio-count-badge');
+        let countBadge = radioRow._countBadge || radioRow.querySelector('.sl-radio-count-badge');
         if (!countBadge) {
           countBadge = document.createElement('span');
           countBadge.className = 'sl-radio-count-badge';
@@ -784,18 +788,26 @@ return baseclass.extend({
             radioRow.classList.toggle('is-collapsed-radio');
             updateChildrenVisibility();
           });
-          const statCell = radioRow.querySelector('[data-name="_stat"] big') || radioRow.querySelector('[data-name="_stat"]');
-          if (statCell)
-            statCell.appendChild(countBadge);
+          radioRow._countBadge = countBadge;
         }
+
+        const statCell = radioRow.querySelector('[data-name="_stat"] big') || radioRow.querySelector('[data-name="_stat"]');
+        if (statCell && countBadge.parentNode !== statCell) {
+          statCell.appendChild(countBadge);
+        }
+
         if (countBadge) {
-          if (childRows.length > 0) {
-            countBadge.textContent = childRows.length.toString();
-            countBadge.title = childRows.length === 1 ? '1 network' : childRows.length + ' networks';
-            countBadge.style.display = '';
-          } else {
-            countBadge.textContent = '';
-            countBadge.style.display = 'none';
+          const countStr = childRows.length > 0 ? childRows.length.toString() : '';
+          if (countBadge.textContent !== countStr) {
+            countBadge.textContent = countStr;
+          }
+          const countTitle = childRows.length === 1 ? '1 network' : childRows.length + ' networks';
+          if (countBadge.title !== countTitle) {
+            countBadge.title = countTitle;
+          }
+          const expectedDisplay = childRows.length > 0 ? '' : 'none';
+          if (countBadge.style.display !== expectedDisplay) {
+            countBadge.style.display = expectedDisplay;
           }
         }
       });
@@ -811,11 +823,15 @@ return baseclass.extend({
       rows.forEach((row) => {
         if (row.querySelector('.cbi-button-add')) {
           currentRadioSid = row.getAttribute('data-sid') || 'radio';
-          row.classList.add('is-radio-row');
-          row.classList.remove('is-ssid-row');
-          row.setAttribute('data-radio-id', currentRadioSid);
+          if (!row.classList.contains('is-radio-row')) {
+            row.classList.add('is-radio-row');
+            row.classList.remove('is-ssid-row');
+          }
+          if (row.getAttribute('data-radio-id') !== currentRadioSid) {
+            row.setAttribute('data-radio-id', currentRadioSid);
+          }
 
-          const firstCell = row.querySelector('td:first-child, .td:first-child');
+          const firstCell = row.querySelector('td:first-child, .td:first-child, [data-name="_badge"]');
           if (firstCell && !firstCell.querySelector('.sl-radio-collapse-toggle')) {
             const toggle = document.createElement('button');
             toggle.type = 'button';
@@ -824,13 +840,7 @@ return baseclass.extend({
             toggle.title = 'Collapse / Expand';
             toggle.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>';
 
-            const center = firstCell.querySelector('.center') || firstCell;
-            const badge = center.querySelector('.ifacebadge') || center.firstChild;
-            if (badge) {
-              center.insertBefore(toggle, badge);
-            } else {
-              center.prepend(toggle);
-            }
+            firstCell.prepend(toggle);
 
             toggle.addEventListener('click', (e) => {
               e.preventDefault();
@@ -849,16 +859,19 @@ return baseclass.extend({
           }
 
         } else if (row.querySelector('.enable-disable, .remove, [data-signal]')) {
-          row.classList.add('is-ssid-row');
-          row.classList.remove('is-radio-row');
-          if (currentRadioSid)
+          if (!row.classList.contains('is-ssid-row')) {
+            row.classList.add('is-ssid-row');
+            row.classList.remove('is-radio-row');
+          }
+          if (currentRadioSid && row.getAttribute('data-parent-radio') !== currentRadioSid) {
             row.setAttribute('data-parent-radio', currentRadioSid);
+          }
 
           const btn = row.querySelector('.enable-disable');
           if (btn && (btn.textContent.trim().toLowerCase() === 'enable' || btn.textContent.trim().toLowerCase() === 'ativar')) {
-            row.classList.add('is-disabled-network');
+            if (!row.classList.contains('is-disabled-network')) row.classList.add('is-disabled-network');
           } else {
-            row.classList.remove('is-disabled-network');
+            if (row.classList.contains('is-disabled-network')) row.classList.remove('is-disabled-network');
           }
         }
       });
@@ -866,13 +879,34 @@ return baseclass.extend({
       updateChildrenVisibility();
     };
 
-    applyClasses();
+    let isMutating = false;
+    const syncWireless = () => {
+      if (isMutating) return;
+      isMutating = true;
+      try {
+        applyClasses();
+      } finally {
+        isMutating = false;
+      }
+    };
+
+    syncWireless();
     const main = document.querySelector('#maincontent') || document.body;
     if (main && window.MutationObserver) {
-      let debounceTimer = null;
-      const observer = new MutationObserver(() => {
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(applyClasses, 60);
+      const observer = new MutationObserver((mutations) => {
+        if (isMutating) return;
+        let relevant = false;
+        for (let i = 0; i < mutations.length; i++) {
+          const t = mutations[i].target;
+          if (t && t.classList && (t.classList.contains('sl-radio-collapse-toggle') || t.classList.contains('sl-radio-count-badge'))) {
+            continue;
+          }
+          relevant = true;
+          break;
+        }
+        if (relevant) {
+          syncWireless();
+        }
       });
       observer.observe(main, { childList: true, subtree: true });
     }
