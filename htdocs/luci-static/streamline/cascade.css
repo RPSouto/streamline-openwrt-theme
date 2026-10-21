@@ -377,17 +377,63 @@ input:focus, select:focus, textarea:focus { border-color: var(--sl-purple); box-
 input[type="checkbox"], input[type="radio"] { width: 17px; height: 17px; min-height: 17px; margin: 0; vertical-align: middle; cursor: pointer; accent-color: var(--sl-purple); }
 input[disabled], select[disabled], textarea[disabled] { opacity: .55; cursor: not-allowed; }
 
-.btn, .cbi-button, button {
-  display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 14px;
+.btn, .cbi-button, button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 15px;
   border: 1px solid #353d4d; border-radius: 9px; background: var(--sl-surface-2); color: #e8eaf0;
   font-family: inherit; font-size: .88rem; font-weight: 650; line-height: 1.2; cursor: pointer; box-shadow: none; transition: transform .15s ease, background .15s ease, border-color .15s ease;
+  white-space: nowrap;
 }
-.btn:hover, .cbi-button:hover, button:hover { background: #222938; border-color: #465064; color: #fff; transform: translateY(-1px); }
+.btn:hover, .cbi-button:hover, button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover {
+  background: #222938; border-color: #465064; color: #fff; transform: translateY(-1px);
+}
 .cbi-button-positive, .cbi-button-save, .cbi-button-apply, .important { background: linear-gradient(135deg, var(--sl-purple), var(--sl-purple-2)) !important; border-color: transparent !important; color: #fff !important; }
-.cbi-button-negative, .cbi-button-remove, .cbi-button-reset { color: #ffabb8 !important; border-color: rgba(255,100,124,.35) !important; }
-.cbi-page-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding: 14px 0; }
+.cbi-button-action, .cbi-button-edit { background: rgba(var(--sl-accent-rgb),.12) !important; border-color: rgba(var(--sl-accent-rgb),.35) !important; color: var(--sl-text) !important; }
+.cbi-button-action:hover, .cbi-button-edit:hover { background: rgba(var(--sl-accent-rgb),.24) !important; border-color: var(--sl-purple) !important; color: #fff !important; }
+.cbi-button-negative, .cbi-button-remove, .cbi-button-reset { color: #ffabb8 !important; border-color: rgba(255,100,124,.32) !important; background: rgba(255,100,124,.08) !important; }
+.cbi-button-negative:hover, .cbi-button-remove:hover, .cbi-button-reset:hover { color: #fff !important; border-color: #ff647c !important; background: rgba(255,100,124,.22) !important; }
+.cbi-page-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; padding: 14px 0; }
 .cbi-section-actions, .button-row { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
-.cbi-section-actions > *, .button-row > *, .cbi-page-actions > * { margin: 0 !important; }
+
+/* Universal fallback spacing: ensures spacing between any adjacent buttons or form actions */
+.cbi-button + .cbi-button,
+.btn + .btn,
+button + button,
+.cbi-button + button,
+button + .cbi-button,
+.btn + .cbi-button,
+.cbi-button + .btn,
+.btn + button,
+button + .btn,
+form + form,
+form + .cbi-button,
+.cbi-button + form,
+form + button,
+button + form,
+a.cbi-button + a.cbi-button,
+a.btn + a.btn,
+a.cbi-button + .cbi-button,
+.cbi-button + a.cbi-button,
+input[type="button"] + input[type="button"],
+input[type="submit"] + input[type="submit"],
+input[type="button"] + input[type="submit"],
+input[type="submit"] + input[type="button"],
+input[type="reset"] + input[type="button"],
+input[type="reset"] + input[type="submit"],
+.cbi-button + input[type="button"],
+.cbi-button + input[type="submit"],
+input[type="button"] + .cbi-button,
+input[type="submit"] + .cbi-button {
+  margin-left: 8px;
+}
+
+/* In flex containers with gap, do not double the spacing */
+.cbi-section-actions > *, .button-row > *, .cbi-page-actions > *, .control-group > * { margin: 0 !important; }
 
 table, .table { display: table; width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; text-align: left; }
 thead, .table-titles, .cbi-section-table-titles { display: table-header-group; }
@@ -470,7 +516,7 @@ h4 + .table, h4 + table { margin-top: 14px; }
 .network-status-table .ifacebadge img { flex-shrink: 0; }
 
 /* Overview dashboard: quick health metrics above the complete LuCI data. */
-.sl-dashboard-summary { max-width: 1480px; margin: 0 auto 22px; overflow: hidden; border: 1px solid var(--sl-border); border-radius: 16px; background: linear-gradient(145deg, rgba(20,24,33,.98), rgba(13,16,23,.98)); box-shadow: var(--sl-shadow); }
+.sl-dashboard-summary { width: 100%; max-width: 100%; margin: 0 0 22px; overflow: hidden; border: 1px solid var(--sl-border); border-radius: 16px; background: linear-gradient(145deg, rgba(20,24,33,.98), rgba(13,16,23,.98)); box-shadow: var(--sl-shadow); }
 .sl-dashboard-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; border-bottom: 1px solid var(--sl-border); }
 .sl-dashboard-heading span { display: block; margin-bottom: 5px; color: var(--sl-accent-label); font-size: .61rem; font-weight: 800; letter-spacing: .2em; }
 .sl-dashboard-heading h3 { margin: 0; font-size: 1.2rem; }
@@ -608,7 +654,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.39') !important;
+    url('login-bg.jpg?v=1.0.41') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
@@ -1507,43 +1553,96 @@ p.spinning::before,
   flex-shrink: 0;
   vertical-align: middle;
 }
-#cbi-network-interface .cbi-section-actions > div {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  flex-wrap: nowrap;
+/* Table action cells and action button groups across all LuCI tables (Interfaces, Devices, Wireless, Firewall, DHCP, etc.) */
+.cbi-section-actions,
+td.cbi-section-actions,
+.td.cbi-section-actions,
+.cbi-section-table-cell.cbi-section-actions {
+  text-align: right !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
 }
-#cbi-network-interface .cbi-section-actions .cbi-button {
-  min-height: 34px;
-  height: 34px;
-  padding: 0 12px;
-  font-size: .82rem;
-  font-weight: 650;
-  border-radius: 8px;
-  margin: 0;
-  line-height: 32px;
+
+.cbi-section-actions > div,
+td.cbi-section-actions > div,
+.td.cbi-section-actions > div,
+.cbi-section-table-cell.cbi-section-actions > div {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
 }
-#cbi-network-interface .cbi-section-actions .cbi-button-action {
-  background: rgba(var(--sl-accent-rgb), .12);
-  border-color: rgba(var(--sl-accent-rgb), .35);
-  color: var(--sl-text);
+
+.cbi-section-actions .cbi-button,
+.cbi-section-actions button,
+.cbi-section-actions .btn,
+.cbi-section-actions input[type="button"],
+.cbi-section-actions input[type="submit"],
+td.cbi-section-actions .cbi-button,
+td.cbi-section-actions button,
+td.cbi-section-actions .btn,
+.td.cbi-section-actions .cbi-button,
+.td.cbi-section-actions button,
+.td.cbi-section-actions .btn,
+.cbi-section-table-cell.cbi-section-actions .cbi-button,
+.cbi-section-table-cell.cbi-section-actions button {
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 13px !important;
+  font-size: .82rem !important;
+  font-weight: 650 !important;
+  border-radius: 8px !important;
+  margin: 0 !important;
+  line-height: 32px !important;
+  white-space: nowrap !important;
 }
-#cbi-network-interface .cbi-section-actions .cbi-button-action:hover {
-  background: rgba(var(--sl-accent-rgb), .24);
-  border-color: var(--sl-purple);
-  color: #fff;
+
+.cbi-section-actions .cbi-button-action,
+.cbi-section-actions .cbi-button-edit,
+td.cbi-section-actions .cbi-button-action,
+td.cbi-section-actions .cbi-button-edit,
+.td.cbi-section-actions .cbi-button-action,
+.td.cbi-section-actions .cbi-button-edit {
+  background: rgba(var(--sl-accent-rgb), .12) !important;
+  border-color: rgba(var(--sl-accent-rgb), .35) !important;
+  color: var(--sl-text) !important;
 }
-#cbi-network-interface .cbi-section-actions .cbi-button-remove,
-#cbi-network-interface .cbi-section-actions .cbi-button-negative {
-  background: rgba(255, 100, 124, .08);
-  border-color: rgba(255, 100, 124, .25);
+.cbi-section-actions .cbi-button-action:hover,
+.cbi-section-actions .cbi-button-edit:hover,
+td.cbi-section-actions .cbi-button-action:hover,
+td.cbi-section-actions .cbi-button-edit:hover,
+.td.cbi-section-actions .cbi-button-action:hover,
+.td.cbi-section-actions .cbi-button-edit:hover {
+  background: rgba(var(--sl-accent-rgb), .24) !important;
+  border-color: var(--sl-purple) !important;
+  color: #fff !important;
+}
+
+.cbi-section-actions .cbi-button-remove,
+.cbi-section-actions .cbi-button-negative,
+.cbi-section-actions .cbi-button-reset,
+td.cbi-section-actions .cbi-button-remove,
+td.cbi-section-actions .cbi-button-negative,
+td.cbi-section-actions .cbi-button-reset,
+.td.cbi-section-actions .cbi-button-remove,
+.td.cbi-section-actions .cbi-button-negative,
+.td.cbi-section-actions .cbi-button-reset {
+  background: rgba(255, 100, 124, .08) !important;
+  border-color: rgba(255, 100, 124, .3) !important;
   color: #ffabb8 !important;
 }
-#cbi-network-interface .cbi-section-actions .cbi-button-remove:hover,
-#cbi-network-interface .cbi-section-actions .cbi-button-negative:hover {
-  background: rgba(255, 100, 124, .2);
-  border-color: #ff647c;
+.cbi-section-actions .cbi-button-remove:hover,
+.cbi-section-actions .cbi-button-negative:hover,
+.cbi-section-actions .cbi-button-reset:hover,
+td.cbi-section-actions .cbi-button-remove:hover,
+td.cbi-section-actions .cbi-button-negative:hover,
+td.cbi-section-actions .cbi-button-reset:hover,
+.td.cbi-section-actions .cbi-button-remove:hover,
+.td.cbi-section-actions .cbi-button-negative:hover,
+.td.cbi-section-actions .cbi-button-reset:hover {
+  background: rgba(255, 100, 124, .22) !important;
+  border-color: #ff647c !important;
   color: #fff !important;
 }
 .nowrap { white-space: nowrap; }

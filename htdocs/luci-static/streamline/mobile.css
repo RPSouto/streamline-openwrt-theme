@@ -323,9 +323,11 @@
   #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacebox"] { width: 220px; min-width: 200px; max-width: 240px; padding: 12px; vertical-align: middle; }
   #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"] { width: 280px; min-width: 260px; padding: 12px 14px; vertical-align: middle; }
   #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"] strong { display: inline-block; min-width: 75px; color: var(--sl-muted); font-size: .78rem; text-transform: uppercase; }
-  #cbi-network-interface .cbi-section-table-row > .cbi-section-actions { width: 200px; min-width: 180px; padding: 12px; vertical-align: middle; }
+  .cbi-section-table-row > .cbi-section-actions,
+  .cbi-section-table-row > td.cbi-section-actions,
+  .cbi-section-table-row > .td.cbi-section-actions { width: auto; min-width: 170px; padding: 12px; vertical-align: middle; }
   #cbi-network-interface .ifacebox { width: 100%; max-width: 190px; }
-  #cbi-network-interface .cbi-section-actions > div { justify-content: flex-start; }
+  .cbi-section-actions > div { justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
   .cbi-tooltip { position: fixed; left: 14px !important; right: 14px; top: auto; bottom: 18px; width: auto; max-width: none; transform: translateY(8px); }
   .cbi-tooltip-container:hover > .cbi-tooltip:not(:empty), .cbi-tooltip-container:focus-within > .cbi-tooltip:not(:empty) { transform: translateY(0); }
   .zone-forwards { min-width: 230px; }
