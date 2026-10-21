@@ -654,7 +654,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.41') !important;
+    url('login-bg.jpg?v=1.0.42') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
@@ -2069,6 +2069,163 @@ span.jump:hover, .target.jump:hover {
   div[data-chain] > h4 > span {
     margin-left: 0 !important;
   }
+}
+
+/* ==========================================================================
+   Wireless Overview Hierarchy, Radio Cards & Station Table
+   ========================================================================== */
+
+/* Main Wireless Overview Section */
+[data-page="admin-network-wireless"] .cbi-section {
+  padding: 22px !important;
+  margin-bottom: 28px !important;
+  border-radius: var(--sl-radius, 14px) !important;
+}
+
+[data-page="admin-network-wireless"] .cbi-section-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--sl-border) !important;
+  background: var(--sl-surface) !important;
+}
+
+/* Radio Device Row (Parent Hardware Controller) */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add) {
+  background: linear-gradient(90deg, rgba(var(--sl-accent-rgb), 0.16) 0%, rgba(25, 30, 42, 0.96) 55%, rgba(20, 24, 34, 0.98) 100%) !important;
+  border-top: 1px solid rgba(var(--sl-accent-rgb), 0.3) !important;
+  border-bottom: 1px solid rgba(var(--sl-accent-rgb), 0.22) !important;
+}
+
+/* Clear visual break before subsequent radio devices (Radio 2, etc.) */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row:not(:first-child),
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add):not(:first-child) {
+  border-top: 4px solid var(--sl-border) !important;
+}
+
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row td,
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row .td,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add) td,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add) .td {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+}
+
+/* Radio Title & Specs */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row big strong,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add) big strong {
+  color: #fff !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+}
+
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row [data-name="_stat"] > div > div,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add) [data-name="_stat"] > div > div {
+  color: #c2c9d8 !important;
+  font-size: 0.84rem !important;
+  margin-top: 4px !important;
+}
+
+/* Radio Hardware Badge */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row .ifacebadge,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add) .ifacebadge {
+  background: rgba(var(--sl-accent-rgb), 0.22) !important;
+  border-color: rgba(var(--sl-accent-rgb), 0.45) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Radio Action Buttons */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-radio-row .cbi-button-add,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.cbi-button-add) .cbi-button-add {
+  background: linear-gradient(135deg, var(--sl-purple), var(--sl-purple-2)) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+
+/* SSID Network Row (Child Virtual Interface) */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-ssid-row,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has([data-signal]),
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.remove) {
+  background: rgba(14, 18, 26, 0.65) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  transition: background 0.15s ease !important;
+}
+
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-ssid-row:hover,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has([data-signal]):hover,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.remove):hover {
+  background: rgba(var(--sl-accent-rgb), 0.05) !important;
+}
+
+/* Child indentation with branch indicator for SSIDs */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-ssid-row td:first-child,
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-ssid-row .td:first-child,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has([data-signal]) td:first-child,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has([data-signal]) .td:first-child,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.remove) td:first-child,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.remove) .td:first-child {
+  padding-left: 32px !important;
+  position: relative;
+}
+
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-ssid-row td:first-child::before,
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-ssid-row .td:first-child::before,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has([data-signal]) td:first-child::before,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has([data-signal]) .td:first-child::before,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.remove) td:first-child::before,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.remove) .td:first-child::before {
+  content: "↳";
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sl-faint);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+/* SSID Typography */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-ssid-row [data-name="_stat"],
+[data-page="admin-network-wireless"] .cbi-section-table-row:has([data-signal]) [data-name="_stat"],
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.remove) [data-name="_stat"] {
+  font-size: 0.86rem !important;
+  line-height: 1.6 !important;
+}
+
+/* Disabled SSID styling */
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-disabled-network,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.enable-disable:not([class*="disable"])) {
+  opacity: 0.72;
+}
+[data-page="admin-network-wireless"] .cbi-section-table-row.is-disabled-network:hover,
+[data-page="admin-network-wireless"] .cbi-section-table-row:has(.enable-disable:not([class*="disable"])):hover {
+  opacity: 1;
+}
+
+/* Signal Badges on SSIDs */
+[data-page="admin-network-wireless"] .ifacebadge[data-signal] {
+  padding: 5px 10px !important;
+  border-radius: 7px !important;
+  font-size: 0.78rem !important;
+}
+
+[data-page="admin-network-wireless"] .ifacebadge[data-signal]:not([data-signal="0"]):not([data-signal=""]) {
+  background: rgba(57, 216, 170, 0.08) !important;
+  border-color: rgba(57, 216, 170, 0.28) !important;
+  color: #a9f5dc !important;
+}
+
+/* Associated Stations Section */
+[data-page="admin-network-wireless"] .cbi-section + .cbi-section {
+  margin-top: 36px !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

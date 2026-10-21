@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.41';
+const THEME_VERSION = '1.0.42';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -93,6 +93,7 @@ return baseclass.extend({
     this.renderModeMenu(tree);
     this.setupSidebar();
     this.setupQuickSearch(tree);
+    this.setupWirelessLayout();
 
     if (dispatchpath.length >= 3) {
       for (let i = 0; i < 3 && node; i++) {
@@ -746,6 +747,35 @@ return baseclass.extend({
         topmenu.insertBefore(item, home.nextSibling);
       else
         topmenu.prepend(item);
+    }
+  },
+
+  setupWirelessLayout() {
+    const applyClasses = () => {
+      const rows = document.querySelectorAll('.cbi-section-table-row[data-sid]');
+      if (!rows.length) return;
+      rows.forEach((row) => {
+        if (row.querySelector('.cbi-button-add')) {
+          row.classList.add('is-radio-row');
+          row.classList.remove('is-ssid-row');
+        } else if (row.querySelector('.enable-disable, .remove, [data-signal]')) {
+          row.classList.add('is-ssid-row');
+          row.classList.remove('is-radio-row');
+          const btn = row.querySelector('.enable-disable');
+          if (btn && (btn.textContent.trim().toLowerCase() === 'enable' || btn.textContent.trim().toLowerCase() === 'ativar')) {
+            row.classList.add('is-disabled-network');
+          } else {
+            row.classList.remove('is-disabled-network');
+          }
+        }
+      });
+    };
+
+    applyClasses();
+    const main = document.querySelector('#maincontent') || document.body;
+    if (main && window.MutationObserver) {
+      const observer = new MutationObserver(() => applyClasses());
+      observer.observe(main, { childList: true, subtree: true });
     }
   }
 });
