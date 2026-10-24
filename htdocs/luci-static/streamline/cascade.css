@@ -654,7 +654,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.46') !important;
+    url('login-bg.jpg?v=1.0.47') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
@@ -2312,6 +2312,304 @@ span.jump:hover, .target.jump:hover {
 /* Associated Stations Section */
 [data-page="admin-network-wireless"] .cbi-section + .cbi-section {
   margin-top: 36px !important;
+}
+
+/* ==========================================================================
+   REALTIME GRAPHS & METRICS NORMALIZATION (Status -> Realtime Graphs)
+   Traffic (Bandwidth), Load, Wireless, Connections
+   ========================================================================== */
+
+/* 1. Main Graph Container (Overrides LuCI's inline height:300px;border:1px solid #000;background:#fff) */
+[data-page*="realtime"] .cbi-section > div[style*="300px"],
+[data-page*="realtime"] .cbi-section > div[style*="background:#fff"],
+[data-page*="realtime"] .cbi-section > div[style*="background: #fff"],
+[data-page*="realtime"] .cbi-section > div:has(> svg),
+.cbi-section:has(svg polyline) > div[style*="300px"],
+.cbi-section:has(svg polyline) > div[style*="background:#fff"],
+.cbi-section:has(svg polyline) > div[style*="background: #fff"],
+.cbi-section:has(svg polyline) > div:has(> svg) {
+  width: 100% !important;
+  height: 300px !important;
+  background: var(--sl-surface-2) !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: var(--sl-radius) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden !important;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+/* Ensure inner SVG fills the styled container cleanly */
+[data-page*="realtime"] .cbi-section svg,
+.cbi-section:has(polyline) svg {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+}
+
+/* 2. SVG Grid Lines & Time Markers */
+[data-page*="realtime"] .cbi-section svg line,
+.cbi-section:has(polyline) svg line {
+  stroke: rgba(255, 255, 255, 0.08) !important;
+  stroke-width: 1px !important;
+  stroke-dasharray: 4, 4;
+}
+
+/* 3. SVG Axis Labels & Time Indicators */
+[data-page*="realtime"] .cbi-section svg text,
+.cbi-section:has(polyline) svg text {
+  fill: var(--sl-muted) !important;
+  font-family: var(--sl-font-family) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  text-shadow: none !important;
+}
+
+/* 4. Polylines: Bandwidth / Traffic */
+/* Inbound / Download (Cyan) */
+[data-page*="realtime"] svg polyline#rx,
+svg polyline#rx {
+  fill: rgba(34, 211, 238, 0.22) !important;
+  stroke: #22d3ee !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+/* Outbound / Upload (Purple) */
+[data-page*="realtime"] svg polyline#tx,
+svg polyline#tx {
+  fill: rgba(168, 85, 247, 0.22) !important;
+  stroke: #c084fc !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+
+/* 5. Polylines: System Load Average */
+/* 1-min Load (Rose) */
+[data-page*="realtime"] svg polyline#load01,
+svg polyline#load01 {
+  fill: rgba(244, 63, 94, 0.24) !important;
+  stroke: #f43f5e !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+/* 5-min Load (Amber) */
+[data-page*="realtime"] svg polyline#load05,
+svg polyline#load05 {
+  fill: rgba(245, 158, 11, 0.20) !important;
+  stroke: #fbbf24 !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+/* 15-min Load (Sky Blue) */
+[data-page*="realtime"] svg polyline#load15,
+svg polyline#load15 {
+  fill: rgba(14, 165, 233, 0.18) !important;
+  stroke: #38bdf8 !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+
+/* 6. Polylines: Wireless Signal, Noise & Bitrate */
+/* RSSI Signal (Emerald) */
+[data-page*="realtime"] svg polyline#rssi,
+svg polyline#rssi {
+  fill: rgba(16, 185, 129, 0.25) !important;
+  stroke: #34d399 !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+/* Noise Floor (Muted Crimson) */
+[data-page*="realtime"] svg polyline#noise,
+svg polyline#noise {
+  fill: rgba(244, 63, 94, 0.16) !important;
+  stroke: #fb7185 !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 4, 3;
+}
+/* PHY Rate (Neon Purple) */
+[data-page*="realtime"] svg polyline#rate,
+svg polyline#rate {
+  fill: rgba(168, 85, 247, 0.22) !important;
+  stroke: #c084fc !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+
+/* 7. Polylines: Connections (Conntrack) */
+/* TCP (Emerald) */
+[data-page*="realtime"] svg polyline#tcp,
+svg polyline#tcp {
+  fill: rgba(16, 185, 129, 0.22) !important;
+  stroke: #34d399 !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+/* UDP (Cyan) */
+[data-page*="realtime"] svg polyline#udp,
+svg polyline#udp {
+  fill: rgba(34, 211, 238, 0.22) !important;
+  stroke: #22d3ee !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+/* Other (Amber) */
+[data-page*="realtime"] svg polyline#other,
+svg polyline#other {
+  fill: rgba(245, 158, 11, 0.20) !important;
+  stroke: #fbbf24 !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+
+/* 8. Scale Indicator Badge (#scale, #scale2) */
+[data-page*="realtime"] .cbi-section .right,
+.cbi-section:has(polyline) .right {
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin: 6px 0 10px 0 !important;
+}
+[data-page*="realtime"] .cbi-section small#scale,
+[data-page*="realtime"] .cbi-section small#scale2,
+.cbi-section:has(polyline) small#scale,
+.cbi-section:has(polyline) small#scale2 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 14px !important;
+  background: var(--sl-surface-3) !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: 9999px !important;
+  color: var(--sl-muted) !important;
+  font-size: 0.76rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* 9. Metrics Table Card below the Graph */
+[data-page*="realtime"] .cbi-section table.table,
+.cbi-section:has(polyline) table.table {
+  width: 100% !important;
+  background: var(--sl-surface-2) !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: var(--sl-radius) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  margin-top: 10px !important;
+  margin-bottom: 20px !important;
+}
+[data-page*="realtime"] .cbi-section table.table tr.tr,
+.cbi-section:has(polyline) table.table tr.tr {
+  transition: background .15s ease;
+}
+[data-page*="realtime"] .cbi-section table.table tr.tr:not(:last-child) td.td,
+.cbi-section:has(polyline) table.table tr.tr:not(:last-child) td.td {
+  border-bottom: 1px solid var(--sl-border-subtle, rgba(255, 255, 255, 0.06)) !important;
+}
+[data-page*="realtime"] .cbi-section table.table td.td,
+.cbi-section:has(polyline) table.table td.td {
+  padding: 12px 14px !important;
+  vertical-align: middle !important;
+  font-size: 0.88rem !important;
+  color: var(--sl-text) !important;
+}
+[data-page*="realtime"] .cbi-section table.table tr.tr:hover,
+.cbi-section:has(polyline) table.table tr.tr:hover {
+  background: rgba(255, 255, 255, 0.025) !important;
+}
+
+/* Numeric Values: Monospaced Tabular Digits */
+[data-page*="realtime"] .cbi-section table.table td.td[id],
+.cbi-section:has(polyline) table.table td.td[id] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace !important;
+  font-weight: 600 !important;
+  color: var(--sl-text) !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Metric Column Header Labels (Average, Peak, etc.) */
+[data-page*="realtime"] .cbi-section table.table td.right:not(:has(strong[style*="border-bottom"])),
+.cbi-section:has(polyline) table.table td.right:not(:has(strong[style*="border-bottom"])) {
+  color: var(--sl-muted) !important;
+  font-weight: 500 !important;
+  font-size: 0.82rem !important;
+}
+
+/* 10. Styled Indicator Badges (Replacing harsh inline border-bottom) */
+/* Cyan / Download / Inbound / UDP */
+[data-page*="realtime"] table.table strong[style*="blue"],
+.cbi-section:has(polyline) table.table strong[style*="blue"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #22d3ee !important;
+  border-bottom: 2px solid #22d3ee !important;
+  padding-bottom: 2px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+/* Purple / Upload / Outbound / PHY Rate */
+[data-page*="realtime"] table.table strong[style*="green"],
+.cbi-section:has(polyline) table.table strong[style*="green"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #c084fc !important;
+  border-bottom: 2px solid #c084fc !important;
+  padding-bottom: 2px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+/* Rose / 1-min Load / RSSI */
+[data-page*="realtime"] table.table strong[style*="#f00"],
+[data-page*="realtime"] table.table strong[style*="red"],
+.cbi-section:has(polyline) table.table strong[style*="#f00"],
+.cbi-section:has(polyline) table.table strong[style*="red"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #f43f5e !important;
+  border-bottom: 2px solid #f43f5e !important;
+  padding-bottom: 2px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+/* Amber / 5-min Load / Other */
+[data-page*="realtime"] table.table strong[style*="#f60"],
+.cbi-section:has(polyline) table.table strong[style*="#f60"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #fbbf24 !important;
+  border-bottom: 2px solid #fbbf24 !important;
+  padding-bottom: 2px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+/* Sky Blue / 15-min Load */
+[data-page*="realtime"] table.table strong[style*="#fa0"],
+.cbi-section:has(polyline) table.table strong[style*="#fa0"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #38bdf8 !important;
+  border-bottom: 2px solid #38bdf8 !important;
+  padding-bottom: 2px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

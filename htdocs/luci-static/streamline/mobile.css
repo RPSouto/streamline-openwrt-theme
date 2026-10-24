@@ -379,6 +379,21 @@
   .sl-search-dialog { padding: 6vh 10px 18px !important; }
   .sl-search-box { max-height: 85vh !important; }
   .sl-search-hints span:not(:last-child) { display: none !important; }
+
+  /* Realtime graphs & metrics table on mobile */
+  [data-page*="realtime"] .cbi-section table.table,
+  .cbi-section:has(polyline) table.table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
+  }
+  [data-page*="realtime"] .cbi-section table.table td.td,
+  .cbi-section:has(polyline) table.table td.td {
+    padding: 10px 12px !important;
+    font-size: 0.82rem !important;
+  }
 }
 
 @media (max-width: 480px) {
