@@ -22,6 +22,7 @@ const PALETTES = {
 return baseclass.extend({
   __init__() {
     this.setupSidebar();
+    this.normalizeRealtimeGraphs();
     ui.menu.load()
       .then((tree) => this.render(tree))
       .catch(() => {
@@ -33,6 +34,38 @@ return baseclass.extend({
         console.warn('Streamline menu load fallback:', err);
       });
     this.preloadProtocols();
+  },
+
+  normalizeRealtimeGraphs() {
+    const applyStyles = () => {
+      const svgs = document.querySelectorAll('svg');
+      for (let i = 0; i < svgs.length; i++) {
+        const svg = svgs[i];
+        if (!svg.querySelector('polyline'))
+          continue;
+        const container = svg.parentElement;
+        if (container) {
+          container.classList.add('sl-realtime-graph');
+          container.style.setProperty('background', 'var(--sl-surface-2)', 'important');
+          container.style.setProperty('border', '1px solid var(--sl-border)', 'important');
+          container.style.setProperty('border-radius', 'var(--sl-radius)', 'important');
+          container.style.setProperty('overflow', 'hidden', 'important');
+          container.style.setProperty('box-shadow', '0 4px 20px -2px rgba(0, 0, 0, 0.4)', 'important');
+        }
+      }
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyStyles);
+    } else {
+      applyStyles();
+    }
+
+    const targetNode = document.querySelector('#view') || document.body;
+    if (targetNode && typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(() => applyStyles());
+      observer.observe(targetNode, { childList: true, subtree: true });
+    }
   },
 
   preloadProtocols() {
