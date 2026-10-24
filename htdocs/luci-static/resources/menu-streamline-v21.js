@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.48';
+const THEME_VERSION = '1.0.49';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -53,6 +53,20 @@ return baseclass.extend({
           container.style.setProperty('border-radius', 'var(--sl-radius)', 'important');
           container.style.setProperty('overflow', 'hidden', 'important');
           container.style.setProperty('box-shadow', '0 4px 20px -2px rgba(0, 0, 0, 0.4)', 'important');
+        }
+      }
+
+      const scaleBadges = document.querySelectorAll('#scale, #scale2');
+      for (let j = 0; j < scaleBadges.length; j++) {
+        const badge = scaleBadges[j];
+        const parent = badge.parentElement;
+        if (parent && parent.classList.contains('right')) {
+          parent.classList.add('sl-realtime-scale');
+          parent.style.setProperty('height', 'auto', 'important');
+          parent.style.setProperty('min-height', '0px', 'important');
+          parent.style.setProperty('background', 'transparent', 'important');
+          parent.style.setProperty('border', 'none', 'important');
+          parent.style.setProperty('box-shadow', 'none', 'important');
         }
       }
     };

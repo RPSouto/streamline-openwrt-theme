@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.48-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.49-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -44,8 +44,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.48-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.48-1_all.ipk'
+scp releases/luci-theme-streamline_1.0.49-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.49-1_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -53,8 +53,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.48-r1_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.48-r1_all.apk'
+scp releases/luci-theme-streamline_1.0.49-r1_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.49-r1_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
