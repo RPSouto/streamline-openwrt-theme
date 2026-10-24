@@ -18,17 +18,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title><%=striptags((boardinfo.hostname or "?") .. ((node and node.title) and " | " .. translate(node.title) or ""))%></title>
     <script>(function(){try{var d=document.documentElement,p=localStorage.getItem('streamline.palette'),f=localStorage.getItem('streamline.font'),c={streamline:'#0b0e14',glinet:'#111331',ocean:'#071521',forest:'#0a1511',sunset:'#17100f',rose:'#180f18'},fonts={system:1,arial:1,serif:1,mono:1};if(!Object.prototype.hasOwnProperty.call(c,p))p='streamline';if(!Object.prototype.hasOwnProperty.call(fonts,f))f='system';d.setAttribute('data-palette',p);d.setAttribute('data-font',f);document.querySelector('meta[name="theme-color"]').setAttribute('content',c[p])}catch(e){}}())</script>
-    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.47">
-    <link rel="stylesheet" href="<%=media%>/mobile.css?v=1.0.47" media="(max-width: 991px), (max-height: 550px) and (orientation: landscape)">
-    <link rel="icon" href="<%=media%>/logo.svg?v=1.0.47" sizes="any">
-    <script>if(document.documentElement.getAttribute('data-palette')==='glinet')document.querySelector('link[rel~="icon"]').href='<%=media%>/logo-glinet.svg?v=1.0.47'</script>
-    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.47">
+    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.48">
+    <link rel="stylesheet" href="<%=media%>/mobile.css?v=1.0.48" media="(max-width: 991px), (max-height: 550px) and (orientation: landscape)">
+    <link rel="icon" href="<%=media%>/logo.svg?v=1.0.48" sizes="any">
+    <script>if(document.documentElement.getAttribute('data-palette')==='glinet')document.querySelector('link[rel~="icon"]').href='<%=media%>/logo-glinet.svg?v=1.0.48'</script>
+    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.48">
     <% if node and node.css then %><link rel="stylesheet" href="<%=resource%>/<%=node.css%>"><% end %>
     <% if css then %><style><%=css%></style><% end %>
     <script src="<%=url('admin/translations', luci.i18n.context.lang)%>"></script>
     <script src="<%=resource%>/cbi.js"></script>
-    <script defer src="<%=media%>/pwa.js?v=1.0.47"></script>
-    <script defer src="<%=media%>/dashboard.js?v=1.0.47"></script>
+    <script defer src="<%=media%>/pwa.js?v=1.0.48"></script>
+    <script defer src="<%=media%>/dashboard.js?v=1.0.48"></script>
   </head>
   <body class="lang_<%=luci.i18n.context.lang%><% if blank_page then %> login-page<% end %>" data-page="<%=pcdata(table.concat(disp.context.requestpath, '-'))%>">
     <% if not blank_page then %>

@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.47';
+const THEME_VERSION = '1.0.48';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -43,6 +43,8 @@ return baseclass.extend({
         const svg = svgs[i];
         if (!svg.querySelector('polyline'))
           continue;
+        svg.style.setProperty('background', 'var(--sl-surface-2)', 'important');
+        svg.style.setProperty('border-radius', 'var(--sl-radius)', 'important');
         const container = svg.parentElement;
         if (container) {
           container.classList.add('sl-realtime-graph');
