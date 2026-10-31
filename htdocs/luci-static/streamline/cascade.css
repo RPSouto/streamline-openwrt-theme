@@ -313,7 +313,7 @@ footer span { display: inline-block; }
   align-items: center;
   gap: 5px;
   padding: 5px;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
   list-style: none;
   background: var(--sl-surface);
   border: 1px solid var(--sl-border);
@@ -333,7 +333,7 @@ footer span { display: inline-block; }
   align-items: center;
   gap: 6px;
   list-style: none;
-  margin: 0 0 18px;
+  margin: 0 0 16px;
   padding: 5px;
   border: 1px solid var(--sl-border);
   border-radius: 12px;
@@ -365,7 +365,24 @@ footer span { display: inline-block; }
   overflow: visible !important;
 }
 
+/* Tabbed sections and panes: eliminate top margins so active tabs have consistent, snug spacing below tab menus */
+[data-tab-title],
+[data-tab],
+.cbi-section[data-tab],
+.cbi-section[data-tab-title],
+.cbi-tabcontainer,
+.cbi-section[data-tab] + .cbi-section,
+.cbi-section[data-tab-title] + .cbi-section,
+.cbi-tabmenu + .cbi-section,
+.cbi-tabmenu ~ .cbi-section[data-tab],
+.tabs + .cbi-section,
+.tabs ~ .cbi-section[data-tab] {
+  margin-top: 0 !important;
+}
+
 #tabmenu:empty,
+.cbi-tabmenu:empty,
+.tabs:empty,
 .cbi-map-descr:empty,
 .cbi-section-descr:empty,
 .container > h2:empty,
@@ -375,6 +392,8 @@ footer span { display: inline-block; }
   display: none !important;
   margin: 0 !important;
   padding: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
 }
 
 .cbi-map-descr, .cbi-section-descr { max-width: 90ch; margin: 0 0 20px; line-height: 1.65; overflow-wrap: anywhere; }
@@ -538,7 +557,7 @@ td > input[type="radio"] {
 h3 + .table, h3 + table { margin-top: 14px; }
 h4 + .table, h4 + table { margin-top: 14px; }
 .table + .table, table + table { margin-top: 26px; }
-.cbi-section + .cbi-section { margin-top: 24px; }
+.cbi-section:not([data-tab]):not([data-tab-title]) + .cbi-section:not([data-tab]):not([data-tab-title]) { margin-top: 24px; }
 .network-status-table + h3 + .table { margin-top: 14px; }
 .cbi-section > .table, .cbi-section > .cbi-section-node > .table, .cbi-section-node > .table, .cbi-section-table { border: 0; background: transparent; box-shadow: none; }
 .cbi-section > .table + .cbi-button, .cbi-section-node > .table + .cbi-button,
@@ -800,7 +819,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.53') !important;
+    url('login-bg.jpg?v=1.0.54') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
