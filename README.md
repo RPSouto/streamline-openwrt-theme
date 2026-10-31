@@ -116,15 +116,6 @@ rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 
 ---
 
-## 📱 Progressive Web App (PWA)
-
-Streamline includes an offline-aware Web App Manifest and Service Worker:
-1. Access LuCI over **HTTPS** (ensure `luci-ssl` is installed).
-2. Click **Install app** in your browser's address bar (Chrome, Edge) or **Add to Home Screen** on mobile.
-3. The Service Worker caches strictly static assets (icons, CSS, stylesheets, fonts). **Dynamic LuCI API, RPC calls, ubus, and configuration changes are never cached.**
-
----
-
 ## 🎨 Palettes & Typography
 
 Open **Appearance** at the bottom of the desktop sidebar or within the mobile drawer:
