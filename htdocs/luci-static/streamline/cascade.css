@@ -308,22 +308,75 @@ footer span { display: inline-block; }
 .breadcrumb li a { color: var(--sl-muted); }
 .breadcrumb li.active a { color: var(--sl-text); }
 
-.tabs { display: flex; align-items: center; gap: 5px; padding: 5px; margin: 0 0 22px; list-style: none; background: var(--sl-surface); border: 1px solid var(--sl-border); border-radius: 12px; overflow-x: auto; }
+.tabs {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  margin: 0 0 20px;
+  list-style: none;
+  background: var(--sl-surface);
+  border: 1px solid var(--sl-border);
+  border-radius: 12px;
+  overflow-x: auto;
+  max-width: 100%;
+}
 .tabs li { flex: 0 0 auto; }
 .tabs li a { display: block; padding: 9px 13px; color: var(--sl-muted); border-radius: 8px; font-weight: 600; }
 .tabs li.active a, .tabs li a:hover { background: var(--sl-surface-3); color: var(--sl-text); }
 .tabs li.active a { box-shadow: inset 0 -2px var(--sl-purple); }
 
 /* LuCI form tabs use cbi-tabmenu, independently of the page navigation. */
-.cbi-tabmenu { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; list-style: none; margin: 0 0 16px; padding: 6px; border: 1px solid var(--sl-border); border-radius: 12px; background: #0d1118; }
+.cbi-tabmenu {
+  display: inline-flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 5px;
+  border: 1px solid var(--sl-border);
+  border-radius: 12px;
+  background: var(--sl-surface);
+  max-width: 100%;
+}
 .cbi-tabmenu > li { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; }
 .cbi-tabmenu > li > a { display: flex; align-items: center; justify-content: center; min-height: 36px; padding: 7px 14px; border: 1px solid var(--sl-border); border-radius: 8px; background: var(--sl-surface-2); color: #c3cad9; font-weight: 600; font-size: 0.88rem; line-height: 1.4; transition: all .15s ease; }
 .cbi-tabmenu > li > a:hover { background: var(--sl-surface-3); color: #fff; border-color: var(--sl-purple); }
 .cbi-tabmenu > .cbi-tab > a { background: rgba(var(--sl-accent-rgb),.18); border-color: var(--sl-purple); color: var(--sl-text); box-shadow: inset 0 -2px var(--sl-purple); }
 .cbi-tabmenu > li > a:focus-visible, .tabs a:focus-visible { outline: 2px solid var(--sl-purple); outline-offset: 3px; }
 .cbi-tab-disabled[data-errors]::after { content: attr(data-errors); margin: 0 6px; padding: 2px 6px; border-radius: 12px; background: var(--sl-red); color: #090b11; }
-[data-tab-title] { height: 0; opacity: 0; overflow: hidden; }
-[data-tab-active="true"] { height: auto; opacity: 1; overflow: visible; }
+
+/* Inactive tabs must not take up any space or leave ghost margins/padding */
+[data-tab-title]:not([data-tab-active="true"]) {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+}
+[data-tab-title][data-tab-active="true"] {
+  display: block !important;
+  height: auto !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+}
+
+#tabmenu:empty,
+.cbi-map-descr:empty,
+.cbi-section-descr:empty,
+.container > h2:empty,
+.cbi-map > h2:empty,
+.cbi-section > h3:empty,
+.cbi-section > h4:empty {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .cbi-map-descr, .cbi-section-descr { max-width: 90ch; margin: 0 0 20px; line-height: 1.65; overflow-wrap: anywhere; }
 .cbi-section > h3, .cbi-section > h4 { margin-bottom: 18px; }
 
@@ -747,7 +800,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.52') !important;
+    url('login-bg.jpg?v=1.0.53') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;

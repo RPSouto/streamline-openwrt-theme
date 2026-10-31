@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.52';
+const THEME_VERSION = '1.0.53';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -319,6 +319,12 @@ return baseclass.extend({
     this.setupQuickSearch(tree);
     this.setupWirelessLayout();
 
+    const tabmenuContainer = document.querySelector('#tabmenu');
+    if (tabmenuContainer) {
+      tabmenuContainer.innerHTML = '';
+      tabmenuContainer.style.display = 'none';
+    }
+
     if (dispatchpath.length >= 3) {
       for (let i = 0; i < 3 && node; i++) {
         node = node && node.children ? node.children[dispatchpath[i]] : null;
@@ -342,6 +348,8 @@ return baseclass.extend({
     let activeNode = null;
 
     children.forEach((child) => {
+      if (!child || !child.title)
+        return;
       const active = dispatchpath[3 + (level || 0)] === child.name;
       ul.appendChild(E('li', { 'class': 'tabmenu-item-%s%s'.format(child.name, active ? ' active' : '') }, [
         E('a', { 'href': this.menuUrl(url, child.name) }, [_(child.title)])
