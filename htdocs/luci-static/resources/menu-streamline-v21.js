@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.50';
+const THEME_VERSION = '1.0.51';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -37,23 +37,34 @@ return baseclass.extend({
   },
 
   normalizeRealtimeGraphs() {
+    const isRealtime = () => {
+      const page = document.body.getAttribute('data-page') || '';
+      return page.includes('realtime') || window.location.pathname.includes('realtime');
+    };
+
     const applyStyles = () => {
-      const svgs = document.querySelectorAll('svg');
+      if (!isRealtime())
+        return;
+
+      const svgs = document.querySelectorAll('#view svg, .cbi-section svg');
       for (let i = 0; i < svgs.length; i++) {
         const svg = svgs[i];
+        if (svg.closest('.sl-radio-collapse-toggle, button, a, .btn, .cbi-button'))
+          continue;
         if (!svg.querySelector('polyline'))
           continue;
+        const container = svg.parentElement;
+        if (!container || container.tagName === 'BUTTON' || container.tagName === 'A' || container.classList.contains('sl-radio-collapse-toggle'))
+          continue;
+
         svg.style.setProperty('background', 'var(--sl-surface-2)', 'important');
         svg.style.setProperty('border-radius', 'var(--sl-radius)', 'important');
-        const container = svg.parentElement;
-        if (container) {
-          container.classList.add('sl-realtime-graph');
-          container.style.setProperty('background', 'var(--sl-surface-2)', 'important');
-          container.style.setProperty('border', '1px solid var(--sl-border)', 'important');
-          container.style.setProperty('border-radius', 'var(--sl-radius)', 'important');
-          container.style.setProperty('overflow', 'hidden', 'important');
-          container.style.setProperty('box-shadow', '0 4px 20px -2px rgba(0, 0, 0, 0.4)', 'important');
-        }
+        container.classList.add('sl-realtime-graph');
+        container.style.setProperty('background', 'var(--sl-surface-2)', 'important');
+        container.style.setProperty('border', '1px solid var(--sl-border)', 'important');
+        container.style.setProperty('border-radius', 'var(--sl-radius)', 'important');
+        container.style.setProperty('overflow', 'hidden', 'important');
+        container.style.setProperty('box-shadow', '0 4px 20px -2px rgba(0, 0, 0, 0.4)', 'important');
       }
 
       const scaleBadges = document.querySelectorAll('#scale, #scale2');
@@ -903,7 +914,7 @@ return baseclass.extend({
             toggle.className = 'sl-radio-collapse-toggle';
             toggle.setAttribute('aria-label', 'Toggle networks');
             toggle.title = 'Collapse / Expand';
-            toggle.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+            toggle.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
             firstCell.prepend(toggle);
 

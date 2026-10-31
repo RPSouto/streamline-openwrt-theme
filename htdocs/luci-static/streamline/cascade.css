@@ -747,7 +747,7 @@ body.login-page {
   background-color: #0b0e14 !important;
   background-image:
     radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.50') !important;
+    url('login-bg.jpg?v=1.0.51') !important;
   background-position: center center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
@@ -2256,15 +2256,20 @@ span.jump:hover, .target.jump:hover {
 }
 
 /* Radio Collapse / Expand Toggle Button */
-.sl-radio-collapse-toggle {
+.sl-radio-collapse-toggle,
+button.sl-radio-collapse-toggle,
+.cbi-section-table-row .sl-radio-collapse-toggle {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
   height: 28px !important;
   min-height: 28px !important;
+  max-height: 28px !important;
   padding: 0 !important;
-  margin: 0 8px 0 0 !important;
+  margin: 0 10px 0 0 !important;
   border-radius: 7px !important;
   border: 1px solid var(--sl-border) !important;
   background: var(--sl-surface-3) !important;
@@ -2272,23 +2277,38 @@ span.jump:hover, .target.jump:hover {
   cursor: pointer !important;
   transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
   vertical-align: middle !important;
-  flex-shrink: 0 !important;
+  flex: 0 0 28px !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
 }
 
-.sl-radio-collapse-toggle:hover {
+.sl-radio-collapse-toggle:hover,
+button.sl-radio-collapse-toggle:hover {
   background: rgba(var(--sl-accent-rgb), 0.22) !important;
   border-color: var(--sl-purple) !important;
   color: #fff !important;
   transform: scale(1.05) !important;
 }
 
-.sl-radio-collapse-toggle svg {
+.sl-radio-collapse-toggle svg,
+button.sl-radio-collapse-toggle svg {
+  display: block !important;
+  width: 14px !important;
+  min-width: 14px !important;
+  max-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  max-height: 14px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
   transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1) !important;
   pointer-events: none !important;
 }
 
 /* Chevron rotates 90 degrees to point right when collapsed */
-.is-collapsed-radio .sl-radio-collapse-toggle svg {
+.is-collapsed-radio .sl-radio-collapse-toggle svg,
+.is-collapsed-radio button.sl-radio-collapse-toggle svg {
   transform: rotate(-90deg) !important;
 }
 
@@ -2413,12 +2433,13 @@ span.jump:hover, .target.jump:hover {
    ========================================================================== */
 
 /* 1. Main Graph Container (Overrides LuCI's inline height:300px;border:1px solid #000;background:#fff) */
-.sl-realtime-graph,
-div[style*="300px"],
-div[style*="height: 300px"],
-div[style*="height:300px"],
-div[style*="border:1px solid #000"],
-div[style*="border: 1px solid #000"] {
+[data-page*="realtime"] .sl-realtime-graph,
+[data-page*="realtime"] div[style*="300px"],
+[data-page*="realtime"] div[style*="height: 300px"],
+[data-page*="realtime"] div[style*="height:300px"],
+[data-page*="realtime"] div[style*="border:1px solid #000"],
+[data-page*="realtime"] div[style*="border: 1px solid #000"],
+.sl-realtime-graph:not(.sl-radio-collapse-toggle):not(button) {
   width: 100% !important;
   height: 300px !important;
   background: var(--sl-surface-2) !important;
@@ -2438,11 +2459,12 @@ div[style*="border: 1px solid #000"] {
 }
 
 /* Ensure inner SVG fills the container and has dark background */
-.sl-realtime-graph svg,
-div[style*="300px"] svg,
-div[style*="height: 300px"] svg,
-div[style*="height:300px"] svg,
-[data-page*="realtime"] svg {
+[data-page*="realtime"] .sl-realtime-graph svg,
+[data-page*="realtime"] div[style*="300px"] svg,
+[data-page*="realtime"] div[style*="height: 300px"] svg,
+[data-page*="realtime"] div[style*="height:300px"] svg,
+[data-page*="realtime"] svg:not(.sl-radio-collapse-toggle svg),
+.sl-realtime-graph:not(.sl-radio-collapse-toggle):not(button) svg {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
