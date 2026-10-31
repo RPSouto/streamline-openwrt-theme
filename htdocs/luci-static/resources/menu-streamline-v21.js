@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.51';
+const THEME_VERSION = '1.0.52';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -23,6 +23,7 @@ return baseclass.extend({
   __init__() {
     this.setupSidebar();
     this.normalizeRealtimeGraphs();
+    this.normalizeFirewallBadges();
     ui.menu.load()
       .then((tree) => this.render(tree))
       .catch(() => {
@@ -91,6 +92,159 @@ return baseclass.extend({
     const targetNode = document.querySelector('#view') || document.body;
     if (targetNode && typeof MutationObserver !== 'undefined') {
       const observer = new MutationObserver(() => applyStyles());
+      observer.observe(targetNode, { childList: true, subtree: true });
+    }
+  },
+
+  normalizeFirewallBadges() {
+    const parseRgb = (colorStr) => {
+      if (!colorStr) return null;
+      const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if (match) {
+        return [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)];
+      }
+      const hex = colorStr.replace('#', '').trim();
+      if (hex.length === 3) {
+        return [
+          parseInt(hex[0] + hex[0], 16),
+          parseInt(hex[1] + hex[1], 16),
+          parseInt(hex[2] + hex[2], 16)
+        ];
+      }
+      if (hex.length === 6) {
+        return [
+          parseInt(hex.substring(0, 2), 16),
+          parseInt(hex.substring(2, 4), 16),
+          parseInt(hex.substring(4, 6), 16)
+        ];
+      }
+      return null;
+    };
+
+    const applyFirewallStyles = () => {
+      const badges = document.querySelectorAll('.zonebadge');
+      for (let i = 0; i < badges.length; i++) {
+        const badge = badges[i];
+
+        if (badge.classList.contains('zonebadge-empty')) {
+          const txt = badge.textContent.trim().toUpperCase();
+          if (txt.includes('REJECT')) {
+            badge.style.setProperty('background-color', 'rgba(244, 63, 94, 0.12)', 'important');
+            badge.style.setProperty('border', '1px dashed rgba(244, 63, 94, 0.5)', 'important');
+            badge.style.setProperty('color', '#fda4af', 'important');
+          } else if (txt.includes('DROP')) {
+            badge.style.setProperty('background-color', 'rgba(239, 68, 68, 0.14)', 'important');
+            badge.style.setProperty('border', '1px dashed rgba(239, 68, 68, 0.55)', 'important');
+            badge.style.setProperty('color', '#fca5a5', 'important');
+          } else if (txt.includes('ACCEPT')) {
+            badge.style.setProperty('background-color', 'rgba(16, 185, 129, 0.12)', 'important');
+            badge.style.setProperty('border', '1px dashed rgba(16, 185, 129, 0.5)', 'important');
+            badge.style.setProperty('color', '#6ee7b7', 'important');
+          }
+          continue;
+        }
+
+        if (badge.classList.contains('sl-zonebadge-styled'))
+          continue;
+
+        const rawBg = badge.style.backgroundColor;
+        if (!rawBg)
+          continue;
+
+        badge.setAttribute('data-sl-rawbg', rawBg);
+        badge.classList.add('sl-zonebadge-styled');
+
+        const strongEl = badge.querySelector('strong');
+        const emEl = badge.querySelector('em');
+        const zoneName = (strongEl ? strongEl.textContent : badge.textContent).trim().toLowerCase();
+
+        let r = 139, g = 92, b = 246;
+        if (zoneName === 'lan') {
+          r = 16; g = 185; b = 129;
+        } else if (zoneName === 'wan' || zoneName === 'wan6') {
+          r = 244; g = 63; b = 94;
+        } else {
+          const rgb = parseRgb(rawBg);
+          if (rgb) {
+            [r, g, b] = rgb;
+          }
+        }
+
+        badge.style.setProperty('background-color', `rgba(${r}, ${g}, ${b}, 0.20)`, 'important');
+        badge.style.setProperty('border', `1px solid rgba(${r}, ${g}, ${b}, 0.55)`, 'important');
+        badge.style.setProperty('color', '#ffffff', 'important');
+        badge.style.setProperty('box-shadow', `0 2px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(${r}, ${g}, ${b}, 0.35)`, 'important');
+        badge.style.setProperty('text-shadow', '0 1px 2px rgba(0, 0, 0, 0.6)', 'important');
+
+        if (strongEl) {
+          strongEl.style.setProperty('color', '#ffffff', 'important');
+        }
+        if (emEl) {
+          emEl.style.setProperty('color', 'rgba(255, 255, 255, 0.75)', 'important');
+        }
+      }
+
+      const policyItems = document.querySelectorAll('.cbi-dropdown > ul:not(.dropdown) > li');
+      for (let k = 0; k < policyItems.length; k++) {
+        const item = policyItems[k];
+        const val = (item.getAttribute('data-value') || item.textContent).trim().toLowerCase();
+        if (val === 'accept') {
+          item.style.setProperty('color', '#34d399', 'important');
+          item.style.setProperty('font-weight', '600', 'important');
+        } else if (val === 'reject') {
+          item.style.setProperty('color', '#fbbf24', 'important');
+          item.style.setProperty('font-weight', '600', 'important');
+        } else if (val === 'drop') {
+          item.style.setProperty('color', '#f87171', 'important');
+          item.style.setProperty('font-weight', '600', 'important');
+        }
+      }
+
+      const policySelects = document.querySelectorAll('select.cbi-input-select');
+      for (let s = 0; s < policySelects.length; s++) {
+        const sel = policySelects[s];
+        const updateSelectColor = () => {
+          const v = sel.value.trim().toLowerCase();
+          if (v === 'accept') {
+            sel.style.setProperty('color', '#34d399', 'important');
+            sel.style.setProperty('font-weight', '600', 'important');
+          } else if (v === 'reject') {
+            sel.style.setProperty('color', '#fbbf24', 'important');
+            sel.style.setProperty('font-weight', '600', 'important');
+          } else if (v === 'drop') {
+            sel.style.setProperty('color', '#f87171', 'important');
+            sel.style.setProperty('font-weight', '600', 'important');
+          } else {
+            sel.style.removeProperty('color');
+            sel.style.removeProperty('font-weight');
+          }
+        };
+        if (!sel.hasAttribute('data-sl-firewall-bound')) {
+          sel.setAttribute('data-sl-firewall-bound', '1');
+          sel.addEventListener('change', updateSelectColor);
+        }
+        updateSelectColor();
+      }
+    };
+
+    let rafId = null;
+    const scheduleApply = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        applyFirewallStyles();
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', scheduleApply);
+    } else {
+      scheduleApply();
+    }
+
+    const targetNode = document.body;
+    if (targetNode && typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(() => scheduleApply());
       observer.observe(targetNode, { childList: true, subtree: true });
     }
   },
