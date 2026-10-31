@@ -322,6 +322,7 @@
     margin-top: 8px;
   }
   .cbi-section { padding: 14px; border-radius: 12px; overflow-x: auto; }
+  .network-status-table { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 12px; }
   .cbi-value { display: block; padding: 10px 0; }
   .cbi-value-title { display: block; width: 100%; padding: 0 0 7px; }
   .cbi-value-field { width: 100%; }
