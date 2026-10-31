@@ -812,16 +812,15 @@ body.modal-overlay-active {
 .modal > .right, .modal > div.right { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .modal > .right > *, .modal > div.right > * { margin: 0 !important; }
 
-/* Login Screen Wallpaper & sysauth styles */
+/* Login Screen: clean, distraction-free modern dark styling */
 html.login-page,
 body.login-page {
   min-height: 100vh !important;
-  background-color: #0b0e14 !important;
+  background-color: var(--sl-bg, #0b0e14) !important;
   background-image:
-    radial-gradient(ellipse at center, rgba(11, 14, 20, 0.2) 0%, rgba(7, 9, 14, 0.72) 100%),
-    url('login-bg.jpg?v=1.0.54') !important;
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--sl-accent-rgb, 139, 92, 246), 0.12), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 110%, rgba(var(--sl-accent-rgb, 139, 92, 246), 0.05), transparent 70%) !important;
   background-position: center center !important;
-  background-size: cover !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed !important;
 }

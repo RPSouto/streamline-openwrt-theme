@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.54-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.55-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -19,8 +19,8 @@
   * **Flicker-Free Polling**: Background statistics polling (`iwinfo` / assoclist every 5s) reconciles synchronously in microtasks, eliminating UI flashing and jitter.
   * **Parent-Child Visual Hierarchy**: Virtual interfaces are indented with a tree branch indicator (`↳`) under their parent physical controller.
 * **Persistent Router Health Card**: Live CPU load, memory utilization, and flash storage meters rendered as unified full-width cards matching the system overview table.
-* **Modern Frosted Login Screen**: Sleek high-tech wallpaper, router hostname display, and minimalist frosted glass credential card.
-* **Collapsible Sidebar & Navigation**: Auto-saving collapsible sidebar on desktop and a clean sliding drawer for mobile and tablet screens.
+* **Clean Modern Frosted Login Screen**: Distraction-free dark canvas with subtle glowing ambient aura matching the active palette, router hostname display, and floating frosted glass credential card.
+* **Collapsible Sidebar & Navigation**: Auto-saving collapsible sidebar on desktop, closed accordion panels by default upon login, and a clean sliding drawer for mobile and tablet screens.
 * **Full-Width Terminal Viewers**: Independent scrolling and monospaced typography for System Logs, Kernel Logs, and command output.
 * **Normalized Actions & Spacing**: Standardized button heights, responsive action toolbars, and dedicated card separation across Firewall tables, DHCP leases, and network interfaces.
 * **Six Color Palettes**: Switch effortlessly between **Streamline** (purple/cyan), **GL.iNet** (navy/turquoise), **Ocean** (blue/sea green), **Forest** (emerald/pine), **Sunset** (amber/orange), and **Rose** (plum/pink).
@@ -45,8 +45,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.54-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.54-1_all.ipk'
+scp releases/luci-theme-streamline_1.0.55-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.55-1_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -54,8 +54,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.54-r1_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.54-r1_all.apk'
+scp releases/luci-theme-streamline_1.0.55-r1_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.55-r1_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`

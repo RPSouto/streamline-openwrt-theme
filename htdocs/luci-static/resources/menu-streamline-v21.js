@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.54';
+const THEME_VERSION = '1.0.55';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -21,6 +21,7 @@ const PALETTES = {
 
 return baseclass.extend({
   __init__() {
+    this.initSession();
     this.setupSidebar();
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
@@ -35,6 +36,19 @@ return baseclass.extend({
         console.warn('Streamline menu load fallback:', err);
       });
     this.preloadProtocols();
+  },
+
+  initSession() {
+    const isLoginPage = typeof document !== 'undefined' && document.body && (document.body.classList.contains('login-page') || document.body.getAttribute('data-page') === 'admin-login');
+    try {
+      if (isLoginPage || !window.sessionStorage.getItem('streamline.session_init')) {
+        window.sessionStorage.setItem('streamline.session_init', '1');
+        Object.keys(window.localStorage).forEach((key) => {
+          if (key.startsWith('streamline.menu.'))
+            window.localStorage.removeItem(key);
+        });
+      }
+    } catch (e) {}
   },
 
   normalizeRealtimeGraphs() {
@@ -414,7 +428,7 @@ return baseclass.extend({
       const active = dispatchpath[(level || 0) + 1] === child.name;
       const path = url + '/' + child.name;
       const state = hasSubmenu ? this.getPreference('streamline.menu.' + path) : null;
-      const open = hasSubmenu && (active || state === 'open');
+      const open = hasSubmenu && state === 'open';
       const itemClass = 'menu-item-' + String(child.name || 'item').replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
       const li = E('li', { 'class': itemClass + ' ' + (hasSubmenu ? 'dropdown ' : '') + (active ? 'active ' : '') + (open ? 'open' : '') });
       const itemTitle = _(child.title || child.name || _('Menu'));
@@ -460,6 +474,17 @@ return baseclass.extend({
             this.setMobileMenu(false);
         });
       } else {
+        if (child.name === 'logout') {
+          link.addEventListener('click', () => {
+            try {
+              window.sessionStorage.removeItem('streamline.session_init');
+              Object.keys(window.localStorage).forEach((key) => {
+                if (key.startsWith('streamline.menu.'))
+                  window.localStorage.removeItem(key);
+              });
+            } catch (e) {}
+          });
+        }
         link.addEventListener('click', () => {
           if (this.isMobileLayout())
             this.setMobileMenu(false);

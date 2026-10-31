@@ -5,6 +5,14 @@
 return view.extend({
   render() {
     document.body.classList.add('login-page');
+    try {
+      window.sessionStorage.removeItem('streamline.session_init');
+      Object.keys(window.localStorage).forEach((key) => {
+        if (key.startsWith('streamline.menu.'))
+          window.localStorage.removeItem(key);
+      });
+    } catch (e) {}
+
     const section = document.querySelector('section');
     const form = document.querySelector('form');
     const btn = document.querySelector('button');
@@ -20,6 +28,13 @@ return view.extend({
     });
 
     btn.addEventListener('click', () => {
+      try {
+        window.sessionStorage.removeItem('streamline.session_init');
+        Object.keys(window.localStorage).forEach((key) => {
+          if (key.startsWith('streamline.menu.'))
+            window.localStorage.removeItem(key);
+        });
+      } catch (e) {}
       dlg.querySelectorAll('*').forEach((node) => { node.style.display = 'none'; });
       dlg.appendChild(E('div', { 'class': 'spinning' }, _('Logging in…')));
       form.submit();
