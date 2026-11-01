@@ -178,6 +178,103 @@ html[data-palette="rose"] {
   --sl-metric: rgba(29,18,30,.98);
 }
 
+html[data-palette="oled"] {
+  --sl-bg: #000000;
+  --sl-sidebar: #050506;
+  --sl-surface: #09090b;
+  --sl-surface-2: #121215;
+  --sl-surface-3: #18181b;
+  --sl-border: #27272a;
+  --sl-text: #f4f4f5;
+  --sl-muted: #a1a1aa;
+  --sl-faint: #71717a;
+  --sl-purple: #38bdf8;
+  --sl-purple-2: #0284c7;
+  --sl-accent-rgb: 56,189,248;
+  --sl-link: #38bdf8;
+  --sl-link-hover: #7dd3fc;
+  --sl-accent-label: #7dd3fc;
+  --sl-header-rgb: 0,0,0;
+  --sl-blue: #60a5fa;
+  --sl-green: #34d399;
+  --sl-gauge-track: #18181b;
+  --sl-gauge-inner: radial-gradient(circle at 50% 38%, #141416, #000000 72%);
+  --sl-panel: #09090b;
+  --sl-input: #050506;
+  --sl-menu: rgba(0,0,0,.99);
+  --sl-dropdown: rgba(18,18,21,.95);
+  --sl-metric: rgba(5,5,6,.98);
+}
+
+html[data-palette="light"] {
+  color-scheme: light;
+  --sl-bg: #f8fafc;
+  --sl-sidebar: #ffffff;
+  --sl-surface: #ffffff;
+  --sl-surface-2: #f1f5f9;
+  --sl-surface-3: #e2e8f0;
+  --sl-border: #cbd5e1;
+  --sl-text: #0f172a;
+  --sl-muted: #475569;
+  --sl-faint: #64748b;
+  --sl-purple: #6366f1;
+  --sl-purple-2: #4f46e5;
+  --sl-accent-rgb: 99,102,241;
+  --sl-link: #4f46e5;
+  --sl-link-hover: #4338ca;
+  --sl-accent-label: #4f46e5;
+  --sl-header-rgb: 248,250,252;
+  --sl-blue: #0284c7;
+  --sl-green: #059669;
+  --sl-amber: #d97706;
+  --sl-red: #e11d48;
+  --sl-panel: #ffffff;
+  --sl-input: #ffffff;
+  --sl-menu: rgba(255,255,255,.99);
+  --sl-dropdown: rgba(255,255,255,.98);
+  --sl-metric: #ffffff;
+  --sl-gauge-track: #e2e8f0;
+  --sl-gauge-inner: radial-gradient(circle at 50% 38%, #f8fafc, #ffffff 72%);
+}
+
+html[data-palette="light"] body {
+  background: var(--sl-bg);
+  color: var(--sl-text);
+}
+
+html[data-palette="light"] .cbi-section,
+html[data-palette="light"] .table,
+html[data-palette="light"] .network-status-table,
+html[data-palette="light"] .ifacebox {
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+html[data-palette="light"] header,
+html[data-palette="light"] .mobile-bar {
+  background: #ffffff;
+  border-bottom: 1px solid var(--sl-border);
+}
+
+html[data-palette="light"] .cbi-button {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+html[data-palette="light"] .cbi-button-positive,
+html[data-palette="light"] .cbi-button-apply {
+  background: var(--sl-purple) !important;
+  color: #ffffff !important;
+}
+
+html[data-palette="light"] .sl-gauge-value {
+  color: var(--sl-text);
+}
+
+html[data-palette="light"] .sl-gauge-label {
+  color: var(--sl-muted);
+}
+
 html[data-palette]:not([data-palette="streamline"]) .cbi-section,
 html[data-palette]:not([data-palette="streamline"]) .network-status-table,
 html[data-palette]:not([data-palette="streamline"]) .ifacebox,

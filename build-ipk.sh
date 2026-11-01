@@ -2,7 +2,7 @@
 set -eu
 
 BASE_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-OUTPUT=${1:-"$BASE_DIR/luci-theme-streamline_1.0.55-1_all.ipk"}
+OUTPUT=${1:-"$BASE_DIR/luci-theme-streamline_1.0.56-1_all.ipk"}
 BUILD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/streamline-ipk.XXXXXX")
 trap 'rm -rf "$BUILD_DIR"' EXIT HUP INT TERM
 
@@ -23,6 +23,9 @@ cp -R "$BASE_DIR/luasrc/." "$DATA_DIR/usr/lib/lua/luci/"
 cp -R "$BASE_DIR/ucode/." "$DATA_DIR/usr/share/ucode/luci/"
 cp -R "$BASE_DIR/root/." "$DATA_DIR/"
 chmod 0755 "$DATA_DIR/etc/uci-defaults/30_luci-theme-streamline"
+
+# Guarantee pure Unix LF line endings across all text files
+find "$BUILD_DIR" -type f \( -name "*.htm" -o -name "*.ut" -o -name "*.js" -o -name "*.css" -o -name "*.json" -o -name "*.svg" -o -name "*.sh" -o -name "control" -o -name "postinst" -o -name "postrm" -o -name "30_luci-theme-streamline" \) -exec sed -i 's/\r$//' {} +
 
 printf '2.0\n' > "$BUILD_DIR/debian-binary"
 tar --format=gnu --sort=name --owner=0 --group=0 --numeric-owner --mtime='@0' \

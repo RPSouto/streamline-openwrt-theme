@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.55';
+const THEME_VERSION = '1.0.56';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -16,7 +16,9 @@ const PALETTES = {
   ocean: { title: 'Ocean', description: 'Cool blue and deep sea', colors: ['#38bdf8', '#34d399', '#071521'], themeColor: '#071521' },
   forest: { title: 'Forest', description: 'Fresh green and pine', colors: ['#4ade80', '#60a5fa', '#0a1511'], themeColor: '#0a1511' },
   sunset: { title: 'Sunset', description: 'Warm orange and ember', colors: ['#fb923c', '#4ade80', '#17100f'], themeColor: '#17100f' },
-  rose: { title: 'Rose', description: 'Soft pink and plum', colors: ['#f472b6', '#818cf8', '#180f18'], themeColor: '#180f18' }
+  rose: { title: 'Rose', description: 'Soft pink and plum', colors: ['#f472b6', '#818cf8', '#180f18'], themeColor: '#180f18' },
+  oled: { title: 'OLED Black', description: 'Pure obsidian for AMOLED', colors: ['#38bdf8', '#34d399', '#000000'], themeColor: '#000000' },
+  light: { title: 'Light', description: 'Clean slate and neutral light', colors: ['#6366f1', '#0284c7', '#ffffff'], themeColor: '#f8fafc' }
 };
 
 return baseclass.extend({

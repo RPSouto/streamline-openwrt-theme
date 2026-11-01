@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Streamline Theme
 LUCI_DEPENDS:=+luci-base
-PKG_VERSION:=1.0.55
+PKG_VERSION:=1.0.56
 PKG_RELEASE:=1
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=Streamline contributors
@@ -12,6 +12,7 @@ PKG_MAINTAINER:=Streamline contributors
 define Package/luci-theme-streamline/postrm
 #!/bin/sh
 [ -n "$${IPKG_INSTROOT}" ] || {
+	[ "$$1" = "upgrade" ] && exit 0
 	uci -q delete luci.themes.Streamline
 	[ "$$(uci -q get luci.main.mediaurlbase)" = "/luci-static/streamline" ] && \
 		uci set luci.main.mediaurlbase='/luci-static/bootstrap'

@@ -3,8 +3,8 @@ set -eu
 
 BASE_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
-PKG_VERSION=$(grep '^PKG_VERSION:=' "$BASE_DIR/Makefile" | cut -d= -f2)
-PKG_RELEASE=$(grep '^PKG_RELEASE:=' "$BASE_DIR/Makefile" | cut -d= -f2)
+PKG_VERSION=$(grep '^PKG_VERSION:=' "$BASE_DIR/Makefile" | cut -d= -f2 | tr -d '\r')
+PKG_RELEASE=$(grep '^PKG_RELEASE:=' "$BASE_DIR/Makefile" | cut -d= -f2 | tr -d '\r')
 APK_VER="${PKG_VERSION}-r${PKG_RELEASE}"
 
 OUTPUT=${1:-"$BASE_DIR/releases/luci-theme-streamline_${APK_VER}_all.apk"}
@@ -25,6 +25,9 @@ cp -R "$BASE_DIR/luasrc/." "$DATA_DIR/usr/lib/lua/luci/"
 cp -R "$BASE_DIR/ucode/." "$DATA_DIR/usr/share/ucode/luci/"
 cp -R "$BASE_DIR/root/." "$DATA_DIR/"
 chmod 0755 "$DATA_DIR/etc/uci-defaults/30_luci-theme-streamline"
+
+# Guarantee pure Unix LF line endings across all text files
+find "$DATA_DIR" -type f \( -name "*.htm" -o -name "*.ut" -o -name "*.js" -o -name "*.css" -o -name "*.json" -o -name "*.svg" -o -name "*.sh" -o -name "30_luci-theme-streamline" \) -exec sed -i 's/\r$//' {} +
 
 # 2. Build data.tar.gz
 tar --format=gnu --sort=name --owner=0 --group=0 --numeric-owner --mtime='@0' \
@@ -57,6 +60,7 @@ EOF
 cp "$BASE_DIR/packaging/postinst" "$CONTROL_DIR/.post-install"
 cp "$BASE_DIR/packaging/postrm" "$CONTROL_DIR/.post-deinstall"
 chmod 0755 "$CONTROL_DIR/.post-install" "$CONTROL_DIR/.post-deinstall"
+find "$CONTROL_DIR" -type f -exec sed -i 's/\r$//' {} +
 
 # 5. Build control.tar.gz
 tar --format=gnu --sort=name --owner=0 --group=0 --numeric-owner --mtime='@0' \

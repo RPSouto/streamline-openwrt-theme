@@ -41,6 +41,24 @@ if (members[0].data.toString('ascii') !== '2.0\n')
 for (const member of members.slice(1)) {
   if (member.data[0] !== 0x1f || member.data[1] !== 0x8b)
     throw new Error(`${member.name} is not gzip data`);
+
+  const inner = zlib.gunzipSync(member.data);
+  let innerOff = 0;
+  while (innerOff + 512 <= inner.length) {
+    const ih = inner.subarray(innerOff, innerOff + 512);
+    if (ih.every(b => b === 0)) break;
+    const inName = ih.subarray(0, 100).toString('utf8').replace(/\0.*$/, '');
+    const inSize = parseInt(ih.subarray(124, 136).toString('ascii').replace(/\0.*$/, '').trim() || '0', 8);
+    const inData = inner.subarray(innerOff + 512, innerOff + 512 + inSize);
+    if (inName && inSize > 0) {
+      if (/\.(htm|ut|js|css|json|svg|sh)$/.test(inName) || /(control|postinst|postrm|30_luci-theme-streamline)$/.test(inName)) {
+        if (inData.includes(0x0d)) {
+          throw new Error(`CRLF line ending detected in ${member.name} -> ${inName}! OpenWrt LuCI requires pure LF.`);
+        }
+      }
+    }
+    innerOff += 512 + Math.ceil(inSize / 512) * 512;
+  }
 }
 
-console.log(`IPK OpenWrt tar.gz válido: ${file}`);
+console.log(`IPK OpenWrt tar.gz válido (pure Unix LF verificado): ${file}`);

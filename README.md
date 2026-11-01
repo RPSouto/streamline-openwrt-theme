@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.55-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.56-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -23,7 +23,7 @@
 * **Collapsible Sidebar & Navigation**: Auto-saving collapsible sidebar on desktop, closed accordion panels by default upon login, and a clean sliding drawer for mobile and tablet screens.
 * **Full-Width Terminal Viewers**: Independent scrolling and monospaced typography for System Logs, Kernel Logs, and command output.
 * **Normalized Actions & Spacing**: Standardized button heights, responsive action toolbars, and dedicated card separation across Firewall tables, DHCP leases, and network interfaces.
-* **Six Color Palettes**: Switch effortlessly between **Streamline** (purple/cyan), **GL.iNet** (navy/turquoise), **Ocean** (blue/sea green), **Forest** (emerald/pine), **Sunset** (amber/orange), and **Rose** (plum/pink).
+* **Eight Color Palettes**: Switch effortlessly between **Streamline** (purple/cyan), **GL.iNet** (navy/turquoise), **Ocean** (blue/sea green), **Forest** (emerald/pine), **Sunset** (amber/orange), **Rose** (plum/pink), **OLED Black** (pure AMOLED #000000), and **Light** (clean daytime slate).
 * **Four Interface Fonts**: System, Arial, Georgia, or Monospace with instant browser-local persistence.
 * **Progressive Web App (PWA)**: Installable on desktop (Chrome, Edge) and Android home screens with static asset caching.
 
@@ -45,8 +45,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.55-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.55-1_all.ipk'
+scp releases/luci-theme-streamline_1.0.56-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.56-1_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -54,8 +54,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.55-r1_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.55-r1_all.apk'
+scp releases/luci-theme-streamline_1.0.56-r1_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.56-r1_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
@@ -126,6 +126,8 @@ Open **Appearance** at the bottom of the desktop sidebar or within the mobile dr
   * `Forest` — Dark moss with fresh green and pine accents.
   * `Sunset` — Charcoal with warm amber, orange, and gold tones.
   * `Rose` — Velvet plum with soft pink and indigo accents.
+  * `OLED Black` — Pure obsidian `#000000` canvas with luminous neon accents for AMOLED displays.
+  * `Light` — Clean daytime slate `#f8fafc` with crisp white cards, dark typography, and indigo accents.
 * **Fonts**: Choose between `System`, `Arial`, `Georgia`, or `Monospace`.
 * Preferences are persisted locally in `localStorage` and applied before DOM paint to prevent flash of unstyled content (FOUC).
 
@@ -138,8 +140,8 @@ Open **Appearance** at the bottom of the desktop sidebar or within the mobile dr
 Ensure you have a POSIX shell with GNU `tar` and `gzip`:
 
 ```sh
-./build-ipk.sh releases/luci-theme-streamline_1.0.55-1_all.ipk
-node tools/verify-ipk.js releases/luci-theme-streamline_1.0.55-1_all.ipk
+./build-ipk.sh releases/luci-theme-streamline_1.0.56-1_all.ipk
+node tools/verify-ipk.js releases/luci-theme-streamline_1.0.56-1_all.ipk
 ```
 
 ### Building via OpenWrt SDK / Buildroot
