@@ -138,8 +138,8 @@ Open **Appearance** at the bottom of the desktop sidebar or within the mobile dr
 Ensure you have a POSIX shell with GNU `tar` and `gzip`:
 
 ```sh
-./build-ipk.sh releases/luci-theme-streamline_1.0.45-1_all.ipk
-node tools/verify-ipk.js releases/luci-theme-streamline_1.0.45-1_all.ipk
+./build-ipk.sh releases/luci-theme-streamline_1.0.55-1_all.ipk
+node tools/verify-ipk.js releases/luci-theme-streamline_1.0.55-1_all.ipk
 ```
 
 ### Building via OpenWrt SDK / Buildroot
