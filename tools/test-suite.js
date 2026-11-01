@@ -111,19 +111,32 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.56'), 'Makefile PKG_VERSION is 1.0.56');
-assert(control.includes('Version: 1.0.56-1'), 'packaging/control Version is 1.0.56-1');
-assert(buildIpk.includes('1.0.56-1'), 'build-ipk.sh default target is 1.0.56-1');
-assert(menuJs.includes("THEME_VERSION = '1.0.56'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.56');
-assert(swJs.includes('streamline-static-v56'), 'streamline-sw.js CACHE_NAME matches v56');
-assert(headerHtm.includes('?v=1.0.56'), 'header.htm asset query param matches v1.0.56');
-assert(headerUt.includes('?v=1.0.56'), 'header.ut asset query param matches v1.0.56');
+assert(makefile.includes('PKG_VERSION:=1.0.57'), 'Makefile PKG_VERSION is 1.0.57');
+assert(control.includes('Version: 1.0.57-1'), 'packaging/control Version is 1.0.57-1');
+assert(buildIpk.includes('1.0.57-1'), 'build-ipk.sh default target is 1.0.57-1');
+assert(menuJs.includes("THEME_VERSION = '1.0.57'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57');
+assert(swJs.includes('streamline-static-v57'), 'streamline-sw.js CACHE_NAME matches v57');
+assert(headerHtm.includes('?v=1.0.57'), 'header.htm asset query param matches v1.0.57');
+assert(headerUt.includes('?v=1.0.57'), 'header.ut asset query param matches v1.0.57');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
 assert(!postinst.includes('/etc/init.d/uhttpd restart') && !postinst.includes('/etc/init.d/rpcd restart'),
   'postinst does not restart uhttpd/rpcd (prevents "XHR request aborted by browser")',
   'Restarting web server in postinst drops the HTTP connection when installing via Web GUI');
+
+// Test 9: Verify Click-to-Copy implementation & exclusions
+console.log('\n9. Verifying Click-to-Copy implementation and exclusions...');
+assert(menuJs.includes('setupClickToCopy()'), 'menu-streamline-v21.js defines setupClickToCopy()');
+assert(menuJs.includes('this.setupClickToCopy()'), 'menu-streamline-v21.js initializes setupClickToCopy in __init__');
+assert(menuJs.includes('isCopyExcluded(target)'), 'menu-streamline-v21.js implements isCopyExcluded()');
+assert(menuJs.includes('.modal, .modal-dialog, .cbi-modal'), 'isCopyExcluded() excludes modal windows');
+assert(menuJs.includes('button, .btn, .cbi-button'), 'isCopyExcluded() excludes buttons');
+assert(menuJs.includes('form, input, textarea, select'), 'isCopyExcluded() excludes forms and form inputs');
+assert(menuJs.includes('fallbackCopy(text)'), 'menu-streamline-v21.js implements fallbackCopy for plain HTTP OpenWrt routers');
+assert(menuJs.includes('showToast(value, type)'), 'menu-streamline-v21.js implements showToast()');
+assert(cascadeCss.includes('.sl-copyable-address'), 'cascade.css contains .sl-copyable-address styling');
+assert(cascadeCss.includes('.sl-toast-container') && cascadeCss.includes('.sl-toast'), 'cascade.css contains toast notification styles');
 
 // Summary
 console.log(`\n========================================`);

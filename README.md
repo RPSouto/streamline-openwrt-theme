@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.56-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.57-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -10,6 +10,7 @@
 
 ## ✨ Highlights
 
+* **Click-to-Copy for IP & MAC Addresses**: Click directly on any IPv4, IPv6, or MAC address across overview tables, status dashboards, wireless clients, DHCP leases, and routing tables to instantly copy it to your clipboard. Features a subtle hover affordance and sleek frosted glass toast notifications (smartly excludes forms, input fields, buttons, and modal dialogs, with HTTP fallback support).
 * **Quick Search / Command Palette (`Ctrl + K` / `Cmd + K`)**: Instantly jump to any LuCI menu, page, or service with keyboard navigation and fuzzy search.
 * **Harmonized Firewall Zone Badges (`Network → Firewall`)**: Dynamic color normalization and dark glassmorphic styling for all firewall zone badges (`lan`, `wan`, and user-defined zones). Eliminates harsh pastel blocks and black text with sleek dark-tinted surfaces, neon glowing borders, and crisp high-contrast white typography.
 * **Normalized Realtime Graphs (`Status → Realtime Graphs`)**: Full dark-theme integration for Bandwidth, CPU Load, Wireless, and Connections SVG charts. Replaces legacy white boxes and harsh primary colors with theme-calibrated neon traces (cyan, purple, emerald, rose), technical dashed gridlines, and card-styled metrics tables.
@@ -45,8 +46,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.56-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.56-1_all.ipk'
+scp releases/luci-theme-streamline_1.0.57-1_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.57-1_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -54,8 +55,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.56-r1_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.56-r1_all.apk'
+scp releases/luci-theme-streamline_1.0.57-r1_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.57-r1_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
@@ -140,8 +141,8 @@ Open **Appearance** at the bottom of the desktop sidebar or within the mobile dr
 Ensure you have a POSIX shell with GNU `tar` and `gzip`:
 
 ```sh
-./build-ipk.sh releases/luci-theme-streamline_1.0.56-1_all.ipk
-node tools/verify-ipk.js releases/luci-theme-streamline_1.0.56-1_all.ipk
+./build-ipk.sh releases/luci-theme-streamline_1.0.57-1_all.ipk
+node tools/verify-ipk.js releases/luci-theme-streamline_1.0.57-1_all.ipk
 ```
 
 ### Building via OpenWrt SDK / Buildroot

@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.56';
+const THEME_VERSION = '1.0.57';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -27,6 +27,7 @@ return baseclass.extend({
     this.setupSidebar();
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
+    this.setupClickToCopy();
     ui.menu.load()
       .then((tree) => this.render(tree))
       .catch(() => {
@@ -1175,5 +1176,252 @@ return baseclass.extend({
       });
       observer.observe(main, { childList: true, subtree: true });
     }
+  },
+
+  setupClickToCopy() {
+    document.addEventListener('mouseover', (e) => {
+      const target = e.target;
+      if (!target || this.isCopyExcluded(target))
+        return;
+
+      if (!target.hasAttribute('data-sl-copy-bound')) {
+        target.setAttribute('data-sl-copy-bound', '1');
+        const addr = this.resolveAddressFromElement(target, e);
+        if (addr) {
+          target.classList.add('sl-copyable-address');
+          if (!target.getAttribute('title')) {
+            const isPt = (document.documentElement.lang || '').startsWith('pt') ||
+                         ((document.body && document.body.className) || '').includes('lang_pt');
+            const hint = isPt ? 'Clique para copiar' : 'Click to copy';
+            target.setAttribute('title', `${hint} (${addr.value})`);
+          }
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('click', (e) => {
+      const sel = window.getSelection ? window.getSelection().toString().trim() : '';
+      if (sel && sel.length > 0)
+        return;
+
+      const target = e.target;
+      if (!target || this.isCopyExcluded(target))
+        return;
+
+      const addr = this.resolveAddressFromElement(target, e);
+      if (!addr)
+        return;
+
+      this.copyToClipboard(addr.value).then(() => {
+        this.showToast(addr.value, addr.type);
+      }).catch((err) => {
+        console.warn('Streamline click-to-copy failed:', err);
+      });
+    });
+  },
+
+  isCopyExcluded(target) {
+    if (!target || typeof target.closest !== 'function')
+      return true;
+
+    // Exclude modal windows / dialogs
+    if (target.closest('.modal, .modal-dialog, .cbi-modal, [role="dialog"], [aria-modal="true"], #modal_overlay'))
+      return true;
+
+    // Exclude buttons
+    if (target.closest('button, .btn, .cbi-button, [role="button"], a.btn, input[type="button"], input[type="submit"], input[type="reset"], .mobile-toggle, .sl-quick-search-trigger, .sidebar-toggle, .sl-radio-collapse-toggle'))
+      return true;
+
+    // Exclude forms and form inputs
+    if (target.closest('form, input, textarea, select, option, label, .cbi-dropdown, .cbi-input-text, .cbi-input-select, .cbi-input-checkbox, .cbi-input-radio, .cbi-value-field, [contenteditable="true"]'))
+      return true;
+
+    // Exclude theme navigation & chrome
+    if (target.closest('.mobile-bar, header, nav, #topmenu, #modemenu, #tabmenu, .sl-sidebar, .sl-quick-search-modal, .sl-toast-container, .sl-palette-choices, .sl-font-choices'))
+      return true;
+
+    // Exclude active anchor links
+    const anchor = target.closest('a');
+    if (anchor && anchor.getAttribute('href') && !/^#|^javascript:/i.test(anchor.getAttribute('href')))
+      return true;
+
+    return false;
+  },
+
+  extractAddress(text) {
+    if (!text || typeof text !== 'string')
+      return null;
+
+    const clean = text.trim();
+
+    // 1. MAC Address (e.g. 00:11:22:33:44:55 or 00-11-22-33-44-55)
+    const macMatch = clean.match(/\b([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})\b/);
+    if (macMatch) {
+      return { type: 'MAC', value: macMatch[1].toUpperCase() };
+    }
+
+    // 2. IPv4 Address (e.g. 192.168.1.1 or 192.168.1.1/24)
+    const ipv4Match = clean.match(/\b((?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9]))(?:\/\d+)?\b/);
+    if (ipv4Match) {
+      return { type: 'IPv4', value: ipv4Match[1] };
+    }
+
+    // 3. IPv6 Address (e.g. fe80::1, fd00::1/60, 2001:db8::1)
+    const isIPv6 = (str) => {
+      const c = str.replace(/^\s*\[?|\s*\]?$/g, '').replace(/\/\d+$/, '');
+      if ((c.match(/:/g) || []).length < 2) return false;
+      if ((c.match(/::/g) || []).length > 1) return false;
+      const parts = c.split('::');
+      if (parts.length === 1) {
+        const groups = c.split(':');
+        if (groups.length !== 8) return false;
+        return groups.every(g => /^[0-9a-fA-F]{1,4}$/.test(g));
+      } else {
+        const left = parts[0] ? parts[0].split(':') : [];
+        const right = parts[1] ? parts[1].split(':') : [];
+        if (left.length + right.length > 7) return false;
+        return left.concat(right).every(g => /^[0-9a-fA-F]{1,4}$/.test(g));
+      }
+    };
+
+    const tokens = clean.split(/[\s,()\[\]"']+/);
+    for (let i = 0; i < tokens.length; i++) {
+      const candidate = tokens[i].replace(/\/\d+$/, '');
+      if (isIPv6(candidate)) {
+        return { type: 'IPv6', value: candidate };
+      }
+    }
+
+    return null;
+  },
+
+  resolveAddressFromElement(target, e) {
+    if (!target)
+      return null;
+
+    if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+      let textNode = null;
+      let offset = 0;
+
+      if (document.caretPositionFromPoint) {
+        try {
+          const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+          if (pos && pos.offsetNode && pos.offsetNode.nodeType === Node.TEXT_NODE) {
+            textNode = pos.offsetNode;
+            offset = pos.offset;
+          }
+        } catch (err) {}
+      } else if (document.caretRangeFromPoint) {
+        try {
+          const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+          if (range && range.startContainer && range.startContainer.nodeType === Node.TEXT_NODE) {
+            textNode = range.startContainer;
+            offset = range.startOffset;
+          }
+        } catch (err) {}
+      }
+
+      if (textNode && textNode.textContent) {
+        const fullText = textNode.textContent;
+        let start = Math.max(0, Math.min(offset, fullText.length));
+        let end = start;
+
+        while (start > 0 && !/[\s,()\[\]"';<>]/.test(fullText.charAt(start - 1))) {
+          start--;
+        }
+        while (end < fullText.length && !/[\s,()\[\]"';<>]/.test(fullText.charAt(end))) {
+          end++;
+        }
+        const token = fullText.slice(start, end);
+        const tokenAddr = this.extractAddress(token);
+        if (tokenAddr)
+          return tokenAddr;
+      }
+    }
+
+    const text = target.textContent || '';
+    if (text.length <= 120) {
+      return this.extractAddress(text);
+    }
+
+    return null;
+  },
+
+  copyToClipboard(text) {
+    return new Promise((resolve, reject) => {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(resolve).catch(() => {
+          this.fallbackCopy(text) ? resolve() : reject(new Error('Copy rejected'));
+        });
+      } else {
+        this.fallbackCopy(text) ? resolve() : reject(new Error('Fallback copy failed'));
+      }
+    });
+  },
+
+  fallbackCopy(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.top = '-9999px';
+    textArea.style.left = '-9999px';
+    textArea.style.opacity = '0';
+    textArea.setAttribute('readonly', '');
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    let success = false;
+    try {
+      success = document.execCommand('copy');
+    } catch (err) {
+      success = false;
+    }
+    document.body.removeChild(textArea);
+    return success;
+  },
+
+  showToast(value, type) {
+    let container = document.getElementById('sl-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'sl-toast-container';
+      container.className = 'sl-toast-container';
+      document.body.appendChild(container);
+    }
+
+    container.innerHTML = '';
+
+    const isPt = (document.documentElement.lang || '').startsWith('pt') ||
+                 ((document.body && document.body.className) || '').includes('lang_pt');
+    const labelText = isPt ? 'Copiado' : 'Copied';
+
+    const toast = document.createElement('div');
+    toast.className = 'sl-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.innerHTML =
+      '<div class="sl-toast-icon">' +
+        '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>' +
+      '</div>' +
+      '<div class="sl-toast-body">' +
+        '<span class="sl-toast-label">' + labelText + ':</span>' +
+        '<code class="sl-toast-val">' + value.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code>' +
+      '</div>';
+
+    container.appendChild(toast);
+
+    window.requestAnimationFrame(() => {
+      toast.classList.add('is-visible');
+    });
+
+    setTimeout(() => {
+      toast.classList.remove('is-visible');
+      toast.classList.add('is-hiding');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, 2400);
   }
 });
