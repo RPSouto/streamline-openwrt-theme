@@ -319,8 +319,8 @@ header {
   transition: width .3s cubic-bezier(.22,1,.36,1), padding .3s cubic-bezier(.22,1,.36,1);
 }
 .brand > span { display: block; max-width: 170px; overflow: hidden; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .24s cubic-bezier(.22,1,.36,1), opacity .14s ease, transform .24s cubic-bezier(.22,1,.36,1); }
-.brand::before { display: none !important; }
-.brand::after { content: "OPENWRT"; font-size: .57rem; letter-spacing: .22em; color: var(--sl-faint); font-weight: 700; margin-top: 3px; }
+.brand::after { content: attr(data-sub); font-size: .57rem; letter-spacing: .22em; color: var(--sl-faint); font-weight: 700; margin-top: 3px; }
+.brand:not([data-sub])::after, .brand[data-sub=""]::after { content: "OPENWRT"; }
 
 .nav { list-style: none; padding: 0; margin: 0; }
 .mobile-home { display: none; }

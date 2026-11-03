@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-5';
+const THEME_VERSION = '1.0.57-6';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -25,6 +25,7 @@ return baseclass.extend({
   __init__() {
     this.initSession();
     this.setupSidebar();
+    this.setupBrandVersion();
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
     this.normalizeWirelessOverview();
@@ -829,6 +830,7 @@ return baseclass.extend({
   },
 
   setupSidebar() {
+    this.setupBrandVersion();
     const header = document.querySelector('header');
     const mobileQuery = typeof window.matchMedia === 'function' ? window.matchMedia(MOBILE_MEDIA_QUERY) : null;
     if (!header || header.querySelector('.sidebar-toggle'))
@@ -958,6 +960,66 @@ return baseclass.extend({
         this.setMobileMenu(false);
       }
     });
+  },
+
+  setupBrandVersion() {
+    const applyBrand = (label) => {
+      if (!label) return;
+      const brands = document.querySelectorAll('.brand, .mobile-brand');
+      brands.forEach((b) => {
+        if (b.getAttribute('data-sub') !== label) {
+          b.setAttribute('data-sub', label);
+        }
+      });
+    };
+
+    // 1. Check if cached in sessionStorage
+    try {
+      const cached = window.sessionStorage.getItem('streamline.openwrt_version');
+      if (cached) {
+        applyBrand(cached);
+        return;
+      }
+    } catch (_) {}
+
+    // 2. Check if already present on DOM
+    const existing = document.querySelector('.brand[data-sub], .mobile-brand[data-sub]');
+    if (existing) {
+      const val = existing.getAttribute('data-sub');
+      if (val && val !== 'OPENWRT') {
+        try {
+          window.sessionStorage.setItem('streamline.openwrt_version', val);
+        } catch (_) {}
+        applyBrand(val);
+        return;
+      }
+    }
+
+    // 3. Query system.board via LuCI RPC
+    if (typeof L !== 'undefined' && typeof L.require === 'function') {
+      L.require('rpc').then((rpc) => {
+        const callBoard = rpc.declare({
+          object: 'system',
+          method: 'board',
+          expect: { release: {} }
+        });
+        callBoard().then((board) => {
+          const rel = (board && board.release) || {};
+          const dist = (rel.distribution && rel.distribution.trim()) ? rel.distribution.toUpperCase() : 'OPENWRT';
+          const match = rel.version ? String(rel.version).match(/^(\d+)/) : null;
+          let label = dist;
+          if (match) {
+            label = dist + ' ' + match[1];
+          } else if (rel.version && /snapshot/i.test(String(rel.version))) {
+            label = dist + ' SNAPSHOT';
+          }
+          applyBrand(label);
+          try {
+            window.sessionStorage.setItem('streamline.openwrt_version', label);
+          } catch (_) {}
+        }).catch(() => {});
+      }).catch(() => {});
+    }
   },
 
   buildSearchIndex(tree) {

@@ -141,13 +141,17 @@
     display: none !important;
   }
   .brand::after {
-    content: "OPENWRT";
+    content: attr(data-sub);
     display: block !important;
     font-size: .57rem;
     letter-spacing: .22em;
     color: var(--sl-faint);
     font-weight: 700;
     margin-top: 3px;
+  }
+  .brand:not([data-sub])::after,
+  .brand[data-sub=""]::after {
+    content: "OPENWRT";
   }
 
   /* Drawer close button (sidebar-toggle) */

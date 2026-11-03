@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=5'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 5');
-assert(control.includes('Version: 1.0.57-5'), 'packaging/control Version is 1.0.57-5');
-assert(buildIpk.includes('1.0.57-5'), 'build-ipk.sh default target is 1.0.57-5');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-5'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-5');
-assert(swJs.includes('streamline-static-v57-5'), 'streamline-sw.js CACHE_NAME matches v57-5');
-assert(headerHtm.includes('?v=1.0.57.5'), 'header.htm asset query param matches v1.0.57.5');
-assert(headerUt.includes('?v=1.0.57.5'), 'header.ut asset query param matches v1.0.57.5');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=6'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 6');
+assert(control.includes('Version: 1.0.57-6'), 'packaging/control Version is 1.0.57-6');
+assert(buildIpk.includes('1.0.57-6'), 'build-ipk.sh default target is 1.0.57-6');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-6'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-6');
+assert(swJs.includes('streamline-static-v57-6'), 'streamline-sw.js CACHE_NAME matches v57-6');
+assert(headerHtm.includes('?v=1.0.57.6'), 'header.htm asset query param matches v1.0.57.6');
+assert(headerUt.includes('?v=1.0.57.6'), 'header.ut asset query param matches v1.0.57.6');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -276,6 +276,41 @@ assert(formatModes('802.11be') === '802.11 be',
   'formatModes adds space to single mode 802.11be -> 802.11 be');
 assert(formatModes('802.11 Wireless Controller') === '802.11 Wireless Controller',
   'formatModes preserves non-mode text safely');
+
+// Test 17: Verify OpenWrt distribution version display in brand header
+console.log('\n17. Verifying OpenWrt distribution version in brand header...');
+assert(cascadeCss.includes('.brand::after { content: attr(data-sub);') && cascadeCss.includes('.brand:not([data-sub])::after, .brand[data-sub=""]::after { content: "OPENWRT"; }'),
+  'cascade.css supports data-sub attribute with OPENWRT fallback');
+assert(mobileCss.includes('content: attr(data-sub);') && mobileCss.includes('.brand:not([data-sub])::after'),
+  'mobile.css supports data-sub attribute with OPENWRT fallback in mobile drawer');
+assert(headerHtm.includes('data-sub="<%=pcdata(brand_sub)%>"') && headerHtm.includes('rel.version:match("^(%d+)")'),
+  'header.htm extracts major version and sets data-sub on brand');
+assert(headerUt.includes('data-sub="{{ entityencode(brand_sub) }}"') && headerUt.includes('match(rel.version, /^(\\d+)/)'),
+  'header.ut extracts major version and sets data-sub on brand');
+assert(menuJs.includes('setupBrandVersion()') && menuJs.includes('this.setupBrandVersion()'),
+  'menu-streamline-v21.js defines and initializes setupBrandVersion');
+
+// Unit test of brand label extraction algorithm
+const getBrandLabel = (dist, ver) => {
+  const d = (dist && dist.trim()) ? dist.toUpperCase() : 'OPENWRT';
+  const match = ver ? String(ver).match(/^(\d+)/) : null;
+  if (match) return d + ' ' + match[1];
+  if (ver && /snapshot/i.test(String(ver))) return d + ' SNAPSHOT';
+  return d;
+};
+
+assert(getBrandLabel('OpenWrt', '21.02-SNAPSHOT') === 'OPENWRT 21',
+  'getBrandLabel converts OpenWrt 21.02-SNAPSHOT to OPENWRT 21 (GL-MT6000)');
+assert(getBrandLabel('OpenWrt', '23.05.3') === 'OPENWRT 23',
+  'getBrandLabel converts OpenWrt 23.05.3 to OPENWRT 23');
+assert(getBrandLabel('OpenWrt', '24.10.0') === 'OPENWRT 24',
+  'getBrandLabel converts OpenWrt 24.10.0 to OPENWRT 24');
+assert(getBrandLabel('ImmortalWrt', '23.05.1') === 'IMMORTALWRT 23',
+  'getBrandLabel converts ImmortalWrt 23.05.1 to IMMORTALWRT 23');
+assert(getBrandLabel('OpenWrt', 'SNAPSHOT') === 'OPENWRT SNAPSHOT',
+  'getBrandLabel converts SNAPSHOT to OPENWRT SNAPSHOT');
+assert(getBrandLabel('', '') === 'OPENWRT',
+  'getBrandLabel falls back to OPENWRT when empty');
 
 // Summary
 console.log(`\n========================================`);
