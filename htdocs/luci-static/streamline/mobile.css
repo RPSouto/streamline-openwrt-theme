@@ -337,18 +337,21 @@
   .cbi-section > div,
   .cbi-section-node,
   .table-wrapper,
-  div[data-chain],
-  #view table.table,
-  [data-page*="realtime"] table.table,
-  table[style*="table-layout:fixed"] {
+  div[data-chain] {
+    width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto !important;
+    overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior-x: contain !important;
     touch-action: pan-x pan-y !important;
   }
 
   /* Table Width & Sizing: Prevent Squishing, Unlock Horizontal Drag */
+  #view table,
+  #view table.table,
+  #view .table,
+  #view .cbi-section-table,
   .cbi-section > div > table,
   .cbi-section > div > .table,
   .cbi-section > table,
@@ -380,14 +383,20 @@
   }
 
   /* Active DHCP Leases & Associated Stations on Mobile */
+  #view table#status_leases,
+  #view table#status_leases6,
+  #view table.leases,
+  #view table.leases6,
+  #view table#wifi_assoclist_table,
+  #view table.assoclist,
   table#status_leases,
   table#status_leases6,
   table.leases,
   table.leases6,
   #status_leases,
   #status_leases6,
-  table#wifi_assoclist_table,
   table.assoclist,
+  table#wifi_assoclist_table,
   #wifi_assoclist_table {
     display: table !important;
     width: max-content !important;
@@ -398,6 +407,18 @@
     margin-top: 8px !important;
     margin-bottom: 20px !important;
   }
+  #view table#status_leases th,
+  #view table#status_leases td,
+  #view table#status_leases6 th,
+  #view table#status_leases6 td,
+  #view table.leases th,
+  #view table.leases td,
+  #view table.leases6 th,
+  #view table.leases6 td,
+  #view table#wifi_assoclist_table th,
+  #view table#wifi_assoclist_table td,
+  #view table.assoclist th,
+  #view table.assoclist td,
   table#status_leases th,
   table#status_leases td,
   table#status_leases6 th,
@@ -412,6 +433,8 @@
   table.assoclist td {
     padding: 10px 14px !important;
     white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
     font-size: 0.84rem !important;
     vertical-align: middle !important;
   }
@@ -428,12 +451,16 @@
   }
 
   /* Table cells spacing and wrapping control across all mobile tables */
+  #view th, #view td,
+  #view .th, #view .td,
   th, td, .th, .td,
   .cbi-section-table-titles .cbi-section-table-cell,
   .cbi-section-table-row .cbi-section-table-cell {
     white-space: nowrap !important;
     min-width: 90px;
     padding: 10px 14px;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
     text-align: left;
     font-size: 0.84rem;
     vertical-align: middle;
@@ -466,10 +493,12 @@
     -webkit-overflow-scrolling: touch !important;
   }
   [data-page="admin-network-wireless"] .cbi-section-table {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
+    display: table !important;
     min-width: 640px !important;
     width: max-content !important;
+    max-width: none !important;
+    table-layout: auto !important;
+    overflow: visible !important;
   }
   [data-page="admin-network-wireless"] .cbi-section-table-row > td:last-child,
   [data-page="admin-network-wireless"] .cbi-section-table-row > .td:last-child {
@@ -600,7 +629,7 @@
   /* Realtime graphs & metrics table on mobile */
   [data-page*="realtime"] .cbi-section table.table,
   .cbi-section:has(polyline) table.table,
-  table[style*="table-layout:fixed"] {
+  [data-page*="realtime"] table[style*="table-layout:fixed"] {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -611,14 +640,14 @@
   }
   [data-page*="realtime"] .cbi-section table.table > tbody,
   .cbi-section:has(polyline) table.table > tbody,
-  table[style*="table-layout:fixed"] > tbody {
+  [data-page*="realtime"] table[style*="table-layout:fixed"] > tbody {
     display: table !important;
     width: max-content !important;
     min-width: 100% !important;
   }
   [data-page*="realtime"] .cbi-section table.table td.td,
   .cbi-section:has(polyline) table.table td.td,
-  table[style*="table-layout:fixed"] td.td {
+  [data-page*="realtime"] table[style*="table-layout:fixed"] td.td {
     padding: 10px 12px !important;
     font-size: 0.82rem !important;
     white-space: nowrap !important;
