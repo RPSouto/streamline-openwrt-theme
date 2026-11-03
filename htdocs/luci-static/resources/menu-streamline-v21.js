@@ -1477,9 +1477,16 @@ return baseclass.extend({
         return;
       }
 
-      const container = target.closest('.cbi-section-node, div[data-chain], .table-wrapper, [data-page="admin-network-wireless"] .cbi-section-table, table.table');
-      if (!container) return;
-      if (container.scrollWidth <= container.clientWidth) return;
+      let container = target.closest(
+        '.table-wrapper, .cbi-section > div, .cbi-section-node, div[data-chain], [data-page="admin-network-wireless"] .cbi-section-table, .cbi-section, table.table, table.leases, table.leases6, table#status_leases, table#status_leases6'
+      );
+      while (container && (container.tagName === 'TABLE' || container.scrollWidth <= container.clientWidth)) {
+        if (container.tagName !== 'TABLE' && container.scrollWidth > container.clientWidth) break;
+        container = container.parentElement ? container.parentElement.closest(
+          '.table-wrapper, .cbi-section > div, .cbi-section-node, div[data-chain], [data-page="admin-network-wireless"] .cbi-section-table, .cbi-section, table.table, table.leases, table.leases6, table#status_leases, table#status_leases6'
+        ) : null;
+      }
+      if (!container || container.scrollWidth <= container.clientWidth) return;
 
       activeContainer = container;
       startX = e.pageX - container.getBoundingClientRect().left;

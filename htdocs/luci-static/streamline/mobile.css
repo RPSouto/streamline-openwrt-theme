@@ -328,11 +328,12 @@
   .cbi-value-field { width: 100%; }
 
   /* Responsive Horizontal Scrolling Table Containers */
+  .cbi-section,
+  .cbi-section > div,
   .cbi-section-node,
   .table-wrapper,
   div[data-chain],
   #view table.table,
-  .cbi-section table.table,
   [data-page*="realtime"] table.table,
   table[style*="table-layout:fixed"] {
     max-width: 100% !important;
@@ -341,32 +342,62 @@
   }
 
   /* Table Width & Sizing: Prevent Squishing, Unlock Horizontal Drag */
+  .cbi-section > div > table,
+  .cbi-section > div > .table,
+  .cbi-section > table,
+  .cbi-section > .table,
   .cbi-section-node > table,
   .cbi-section-node > .table,
   .cbi-section-node > .cbi-section-table,
   .table-wrapper > table,
   .table-wrapper > .table,
+  table.leases,
+  table.leases6,
+  table#status_leases,
+  table#status_leases6,
+  #status_leases,
+  #status_leases6,
   div[data-chain] > table,
-  div[data-chain] > .table {
+  div[data-chain] > .table,
+  table,
+  .table {
     display: table !important;
     width: max-content !important;
     min-width: 100% !important;
+    overflow: visible !important;
   }
 
-  /* Standalone Tables without wrapper */
-  table, .table {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-  table > thead,
-  table > tbody,
-  table > tfoot {
+  /* Active DHCP Leases on Mobile */
+  table#status_leases,
+  table#status_leases6,
+  table.leases,
+  table.leases6,
+  #status_leases,
+  #status_leases6 {
     display: table !important;
     width: max-content !important;
     min-width: 100% !important;
+    overflow: visible !important;
+    margin-top: 8px !important;
+    margin-bottom: 20px !important;
+  }
+  table#status_leases th,
+  table#status_leases td,
+  table#status_leases6 th,
+  table#status_leases6 td,
+  table.leases th,
+  table.leases td,
+  table.leases6 th,
+  table.leases6 td {
+    padding: 10px 12px !important;
+    white-space: nowrap !important;
+    font-size: 0.85rem !important;
+  }
+  table#status_leases .cbi-button,
+  table#status_leases6 .cbi-button {
+    white-space: nowrap !important;
+    min-height: 32px !important;
+    padding: 4px 10px !important;
   }
 
   /* Table cells spacing and wrapping control */

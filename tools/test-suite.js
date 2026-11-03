@@ -167,6 +167,19 @@ assert(menuJs.includes('setupResponsiveTables()'), 'menu-streamline-v21.js defin
 assert(menuJs.includes('this.setupResponsiveTables()'), 'menu-streamline-v21.js initializes setupResponsiveTables in __init__');
 assert(menuJs.includes('setupTableDragScroll()'), 'menu-streamline-v21.js enables mouse/touch table drag scrolling');
 
+// Test 11: Verify Active DHCP Leases and Status table responsiveness
+console.log('\n11. Verifying Active DHCP Leases table responsiveness and layout...');
+assert(cascadeCss.includes('table#status_leases') && cascadeCss.includes('min-width: max-content !important'),
+  'cascade.css ensures Active DHCP leases have min-width: max-content to prevent column clipping');
+assert(cascadeCss.includes('.cbi-section > div, .cbi-section-node, .table-wrapper { width: 100%; max-width: 100%; overflow-x: auto;'),
+  'cascade.css enables horizontal scrolling on .cbi-section > div containers');
+assert(mobileCss.includes('table#status_leases') && mobileCss.includes('width: max-content !important'),
+  'mobile.css ensures Active DHCP leases have max-content width on mobile');
+assert(mobileCss.includes('.cbi-section > div,') && mobileCss.includes('overflow-x: auto !important'),
+  'mobile.css enables horizontal scrolling on .cbi-section and .cbi-section > div');
+assert(menuJs.includes('table#status_leases') && menuJs.includes('.cbi-section > div'),
+  'menu-streamline-v21.js table drag scroll includes DHCP leases table and status containers');
+
 // Summary
 console.log(`\n========================================`);
 if (failures === 0) {
