@@ -627,13 +627,16 @@ tr:last-child td, .tr:last-child .td { border-bottom: 0; }
 tr:hover td, .tr:hover .td { background: rgba(var(--sl-accent-rgb),.035); }
 .td[data-title]::before, td[data-title]::before { color: var(--sl-muted); }
 
-/* Active DHCP Leases & Status Tables (Status -> Overview) */
+/* Active DHCP Leases & Associated Stations Tables (Status -> Overview) */
 table#status_leases,
 table#status_leases6,
 table.leases,
 table.leases6,
 #status_leases,
-#status_leases6 {
+#status_leases6,
+table#wifi_assoclist_table,
+table.assoclist,
+#wifi_assoclist_table {
   display: table !important;
   width: 100% !important;
   min-width: max-content !important;
@@ -654,7 +657,11 @@ table#status_leases6 td,
 table.leases th,
 table.leases td,
 table.leases6 th,
-table.leases6 td {
+table.leases6 td,
+table#wifi_assoclist_table th,
+table#wifi_assoclist_table td,
+table.assoclist th,
+table.assoclist td {
   padding: 11px 14px !important;
   vertical-align: middle !important;
   white-space: nowrap !important;
@@ -662,9 +669,15 @@ table.leases6 td {
 }
 
 table#status_leases .cbi-button,
-table#status_leases6 .cbi-button {
+table#status_leases6 .cbi-button,
+table#wifi_assoclist_table .cbi-button,
+table.assoclist .cbi-button {
   margin: 0 !important;
   white-space: nowrap !important;
+}
+
+table#wifi_assoclist_table .hide-xs {
+  display: table-cell !important;
 }
 
 /* Form controls inside table cells: aligned with cell padding */

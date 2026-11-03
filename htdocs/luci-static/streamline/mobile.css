@@ -344,6 +344,8 @@
     max-width: 100% !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    touch-action: pan-x pan-y !important;
   }
 
   /* Table Width & Sizing: Prevent Squishing, Unlock Horizontal Drag */
@@ -362,6 +364,9 @@
   table#status_leases6,
   #status_leases,
   #status_leases6,
+  table.assoclist,
+  table#wifi_assoclist_table,
+  #wifi_assoclist_table,
   div[data-chain] > table,
   div[data-chain] > .table,
   table,
@@ -372,13 +377,16 @@
     overflow: visible !important;
   }
 
-  /* Active DHCP Leases on Mobile */
+  /* Active DHCP Leases & Associated Stations on Mobile */
   table#status_leases,
   table#status_leases6,
   table.leases,
   table.leases6,
   #status_leases,
-  #status_leases6 {
+  #status_leases6,
+  table#wifi_assoclist_table,
+  table.assoclist,
+  #wifi_assoclist_table {
     display: table !important;
     width: max-content !important;
     min-width: 100% !important;
@@ -393,23 +401,59 @@
   table.leases th,
   table.leases td,
   table.leases6 th,
-  table.leases6 td {
-    padding: 10px 12px !important;
+  table.leases6 td,
+  table#wifi_assoclist_table th,
+  table#wifi_assoclist_table td,
+  table.assoclist th,
+  table.assoclist td {
+    padding: 10px 14px !important;
     white-space: nowrap !important;
-    font-size: 0.85rem !important;
+    font-size: 0.84rem !important;
+    vertical-align: middle !important;
   }
   table#status_leases .cbi-button,
-  table#status_leases6 .cbi-button {
+  table#status_leases6 .cbi-button,
+  table#wifi_assoclist_table .cbi-button,
+  table.assoclist .cbi-button {
     white-space: nowrap !important;
     min-height: 32px !important;
     padding: 4px 10px !important;
   }
+  table#wifi_assoclist_table .hide-xs {
+    display: table-cell !important;
+  }
 
-  /* Table cells spacing and wrapping control */
-  th, td, .th, .td { min-width: 90px; padding: 10px 12px; text-align: left; }
-  th, .th, .cbi-section-table-titles .cbi-section-table-cell { white-space: nowrap !important; }
+  /* Table cells spacing and wrapping control across all mobile tables */
+  th, td, .th, .td,
+  .cbi-section-table-titles .cbi-section-table-cell,
+  .cbi-section-table-row .cbi-section-table-cell {
+    white-space: nowrap !important;
+    min-width: 90px;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 0.84rem;
+    vertical-align: middle;
+  }
   th:first-child, td:first-child, .th:first-child, .td:first-child { padding-left: 14px; }
   th:last-child, td:last-child, .th:last-child, .td:last-child { padding-right: 14px; }
+
+  /* Mobile scrollbar indicators */
+  .table-wrapper::-webkit-scrollbar,
+  .cbi-section-node::-webkit-scrollbar,
+  .cbi-section > div::-webkit-scrollbar {
+    height: 4px !important;
+  }
+  .table-wrapper::-webkit-scrollbar-thumb,
+  .cbi-section-node::-webkit-scrollbar-thumb,
+  .cbi-section > div::-webkit-scrollbar-thumb {
+    background: rgba(var(--sl-accent-rgb), 0.4) !important;
+    border-radius: 99px !important;
+  }
+  .table-wrapper::-webkit-scrollbar-track,
+  .cbi-section-node::-webkit-scrollbar-track,
+  .cbi-section > div::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
 
   /* Wireless Overview: Unlock hidden overflow, protect action buttons */
   [data-page="admin-network-wireless"] .cbi-section-node {

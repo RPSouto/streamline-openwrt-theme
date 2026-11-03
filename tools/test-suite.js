@@ -193,6 +193,19 @@ assert(mobileCss.includes('.network-status-table { grid-template-columns: 1fr !i
 assert(menuJs.includes('normalizeWirelessOverview()') && menuJs.includes('this.normalizeWirelessOverview()'),
   'menu-streamline-v21.js defines and initializes normalizeWirelessOverview');
 
+// Test 13: Verify Associated Stations table and mobile touch drag scrolling
+console.log('\n13. Verifying Associated Stations table responsiveness and mobile touch drag scrolling...');
+assert(cascadeCss.includes('table#wifi_assoclist_table') && cascadeCss.includes('table.assoclist'),
+  'cascade.css styles Associated Stations table with non-clipping max-content width');
+assert(mobileCss.includes('table#wifi_assoclist_table') && mobileCss.includes('table.assoclist'),
+  'mobile.css ensures Associated Stations table has max-content width on mobile');
+assert(mobileCss.includes('white-space: nowrap !important;\n    min-width: 90px;\n    padding: 10px 14px;'),
+  'mobile.css prevents awkward cell word wrapping across all mobile table cells');
+assert(menuJs.includes('touchstart') && menuJs.includes('touchmove') && menuJs.includes('touchend'),
+  'menu-streamline-v21.js implements touch drag scrolling for mobile devices');
+assert(menuJs.includes('table#wifi_assoclist_table'),
+  'menu-streamline-v21.js table drag scroll includes Associated Stations table');
+
 // Summary
 console.log(`\n========================================`);
 if (failures === 0) {

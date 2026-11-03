@@ -1544,6 +1544,20 @@ return baseclass.extend({
     let scrollLeft = 0;
     let isDragging = false;
 
+    const findScrollContainer = (target) => {
+      let container = target.closest(
+        '.table-wrapper, .cbi-section > div, .cbi-section-node, div[data-chain], [data-page="admin-network-wireless"] .cbi-section-table, .cbi-section, table.table, table.leases, table.leases6, table#status_leases, table#status_leases6, table.assoclist, table#wifi_assoclist_table, #wifi_assoclist_table'
+      );
+      while (container && (container.tagName === 'TABLE' || container.scrollWidth <= container.clientWidth)) {
+        if (container.tagName !== 'TABLE' && container.scrollWidth > container.clientWidth) break;
+        container = container.parentElement ? container.parentElement.closest(
+          '.table-wrapper, .cbi-section > div, .cbi-section-node, div[data-chain], [data-page="admin-network-wireless"] .cbi-section-table, .cbi-section, table.table, table.leases, table.leases6, table#status_leases, table#status_leases6, table.assoclist, table#wifi_assoclist_table, #wifi_assoclist_table'
+        ) : null;
+      }
+      return container;
+    };
+
+    // Mouse drag scroll
     document.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       const target = e.target;
@@ -1552,15 +1566,7 @@ return baseclass.extend({
         return;
       }
 
-      let container = target.closest(
-        '.table-wrapper, .cbi-section > div, .cbi-section-node, div[data-chain], [data-page="admin-network-wireless"] .cbi-section-table, .cbi-section, table.table, table.leases, table.leases6, table#status_leases, table#status_leases6'
-      );
-      while (container && (container.tagName === 'TABLE' || container.scrollWidth <= container.clientWidth)) {
-        if (container.tagName !== 'TABLE' && container.scrollWidth > container.clientWidth) break;
-        container = container.parentElement ? container.parentElement.closest(
-          '.table-wrapper, .cbi-section > div, .cbi-section-node, div[data-chain], [data-page="admin-network-wireless"] .cbi-section-table, .cbi-section, table.table, table.leases, table.leases6, table#status_leases, table#status_leases6'
-        ) : null;
-      }
+      const container = findScrollContainer(target);
       if (!container || container.scrollWidth <= container.clientWidth) return;
 
       activeContainer = container;
@@ -1593,5 +1599,40 @@ return baseclass.extend({
 
     document.addEventListener('mouseup', endDrag, { passive: true });
     document.addEventListener('mouseleave', endDrag, { passive: true });
+
+    // Touch drag scroll support for mobile
+    let touchContainer = null;
+    let touchStartX = 0;
+    let touchScrollLeft = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      const target = e.touches[0].target;
+      if (!target) return;
+      if (target.closest('button, a, input, select, textarea, .cbi-button, .sl-copyable-address, [role="button"], label')) {
+        return;
+      }
+
+      const container = findScrollContainer(target);
+      if (!container || container.scrollWidth <= container.clientWidth) return;
+
+      touchContainer = container;
+      touchStartX = e.touches[0].pageX - container.getBoundingClientRect().left;
+      touchScrollLeft = container.scrollLeft;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!touchContainer || !e.touches || e.touches.length !== 1) return;
+      const x = e.touches[0].pageX - touchContainer.getBoundingClientRect().left;
+      const walk = x - touchStartX;
+      touchContainer.scrollLeft = touchScrollLeft - walk;
+    }, { passive: true });
+
+    const endTouch = () => {
+      touchContainer = null;
+    };
+
+    document.addEventListener('touchend', endTouch, { passive: true });
+    document.addEventListener('touchcancel', endTouch, { passive: true });
   }
 });
