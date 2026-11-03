@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-9';
+const THEME_VERSION = '1.0.57-10';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -1102,10 +1102,11 @@ return baseclass.extend({
       const footerSpan = document.querySelector('footer > span');
       if (!footerSpan) return;
       const text = footerSpan.textContent || '';
-      if (/Powered by LuCI/i.test(text)) {
-        const match = text.match(/Streamline\s*·\s*Powered by LuCI[^\/]*\/\s*(.*)/i);
-        if (match && match[1]) {
-          footerSpan.textContent = 'Streamline · ' + match[1].trim();
+      if (/Powered by LuCI/i.test(text) || /-SNAPSHOT|r\d+\+/i.test(text) || /\sr\d+/i.test(text)) {
+        const clean = text.replace(/Powered by LuCI[^\/]*\/\s*/i, '');
+        const match = clean.match(/^(?:Streamline\s*·\s*)?([A-Za-z0-9_-]+)\s+(\d+\.\d+(?:\.\d+)?)/i);
+        if (match) {
+          footerSpan.textContent = 'Streamline · ' + match[1] + ' ' + match[2];
         }
       }
     };

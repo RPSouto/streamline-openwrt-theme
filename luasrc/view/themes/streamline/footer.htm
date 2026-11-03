@@ -1,14 +1,17 @@
 <%# SPDX-License-Identifier: Apache-2.0 -%>
     <% if not blank_page then
       local ver = require "luci.version"
-      local dist = ver.distversion or ""
-      if ver.distname and not dist:find(ver.distname, 1, true) then
-        dist = ver.distname .. " " .. dist
+      local d = (ver.distname and #ver.distname > 0) and ver.distname or "OpenWrt"
+      local str = ver.distversion or ""
+      if d and str:lower():find(d:lower(), 1, true) == 1 then
+        str = str:sub(#d + 1):match("^%s*(.-)$")
       end
+      local v = str:match("(%d+%.%d+[%d%.]*)")
+      local footer_ver = v and (d .. " " .. v) or (str:find("[Ss][Nn][Aa][Pp][Ss][Hh][Oo][Tt]") and (d .. " SNAPSHOT") or (d .. (#str > 0 and (" " .. str) or "")))
     %>
     </div>
     <footer>
-      <span>Streamline · <%=pcdata(dist)%></span>
+      <span>Streamline · <%=pcdata(footer_ver)%></span>
       <ul class="breadcrumb pull-right" id="modemenu" style="display:none"></ul>
     </footer>
     <script>L.require('menu-streamline-v21')</script>

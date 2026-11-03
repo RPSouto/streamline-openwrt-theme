@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=9'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 9');
-assert(control.includes('Version: 1.0.57-9'), 'packaging/control Version is 1.0.57-9');
-assert(buildIpk.includes('1.0.57-9'), 'build-ipk.sh default target is 1.0.57-9');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-9'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-9');
-assert(swJs.includes('streamline-static-v57-9'), 'streamline-sw.js CACHE_NAME matches v57-9');
-assert(headerHtm.includes('?v=1.0.57.9'), 'header.htm asset query param matches v1.0.57.9');
-assert(headerUt.includes('?v=1.0.57.9'), 'header.ut asset query param matches v1.0.57.9');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=10'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 10');
+assert(control.includes('Version: 1.0.57-10'), 'packaging/control Version is 1.0.57-10');
+assert(buildIpk.includes('1.0.57-10'), 'build-ipk.sh default target is 1.0.57-10');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-10'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-10');
+assert(swJs.includes('streamline-static-v57-10'), 'streamline-sw.js CACHE_NAME matches v57-10');
+assert(headerHtm.includes('?v=1.0.57.10'), 'header.htm asset query param matches v1.0.57.10');
+assert(headerUt.includes('?v=1.0.57.10'), 'header.ut asset query param matches v1.0.57.10');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -349,13 +349,34 @@ assert(cascadeCss.includes('footer {') && cascadeCss.includes('justify-content: 
 assert(mobileCss.includes('footer {') && mobileCss.includes('justify-content: flex-end !important;'),
   'mobile.css right-aligns footer on mobile devices');
 const footerHtm = fs.readFileSync(path.join(rootDir, 'luasrc/view/themes/streamline/footer.htm'), 'utf8');
-assert(!footerHtm.includes('Powered by') && footerHtm.includes('<span>Streamline · <%=pcdata(dist)%></span>'),
-  'footer.htm simplifies footer to only theme name and OpenWrt version');
+assert(!footerHtm.includes('Powered by') && footerHtm.includes('<span>Streamline · <%=pcdata(footer_ver)%></span>'),
+  'footer.htm simplifies footer to only theme name and clean OpenWrt version');
 const footerUt = fs.readFileSync(path.join(rootDir, 'ucode/template/themes/streamline/footer.ut'), 'utf8');
-assert(!footerUt.includes('Powered by') && footerUt.includes('<span>Streamline · {{ entityencode(dist) }}</span>'),
-  'footer.ut simplifies footer to only theme name and OpenWrt version');
+assert(!footerUt.includes('Powered by') && footerUt.includes('<span>Streamline · {{ entityencode(footer_ver) }}</span>'),
+  'footer.ut simplifies footer to only theme name and clean OpenWrt version');
 assert(menuJs.includes('setupFooter()') && menuJs.includes('this.setupFooter()'),
   'menu-streamline-v21.js defines and initializes setupFooter()');
+
+// Unit tests of footer version extraction algorithm
+const cleanFooterVer = (distname, rawVer) => {
+  const d = (distname && distname.trim()) ? distname.trim() : 'OpenWrt';
+  let str = (rawVer || '').trim();
+  if (str.toLowerCase().startsWith(d.toLowerCase())) {
+    str = str.slice(d.length).trim();
+  }
+  const m = str.match(/^(\d+\.\d+(?:\.\d+)?)/);
+  if (m) return d + ' ' + m[1];
+  if (/snapshot/i.test(str)) return d + ' SNAPSHOT';
+  return str ? (d + ' ' + str) : d;
+};
+assert(cleanFooterVer('OpenWrt', '21.02-SNAPSHOT r15812+1095-46b6ee7ffc') === 'OpenWrt 21.02',
+  'cleanFooterVer converts 21.02-SNAPSHOT r... to OpenWrt 21.02 (GL-MT6000)');
+assert(cleanFooterVer('OpenWrt', 'OpenWrt 21.02-SNAPSHOT r15812+1095-46b6ee7ffc') === 'OpenWrt 21.02',
+  'cleanFooterVer strips leading duplicate OpenWrt');
+assert(cleanFooterVer('OpenWrt', '23.05.3 r23809-234f1a2efa') === 'OpenWrt 23.05.3',
+  'cleanFooterVer converts 23.05.3 to OpenWrt 23.05.3');
+assert(cleanFooterVer('ImmortalWrt', '23.05-SNAPSHOT r1234') === 'ImmortalWrt 23.05',
+  'cleanFooterVer preserves ImmortalWrt distname with clean version');
 
 // Summary
 console.log(`\n========================================`);

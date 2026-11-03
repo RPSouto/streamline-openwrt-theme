@@ -1,11 +1,14 @@
     {% if (!blank_page):
-      let dist = version.distversion ?? '';
-      if (version.distname && !match(dist, version.distname))
-        dist = `${version.distname} ${dist}`;
+      let d = version.distname ? trim(version.distname) : 'OpenWrt';
+      let str = trim(version.distversion ?? '');
+      if (index(lc(str), lc(d)) == 0)
+        str = trim(substr(str, length(d)));
+      let v = match(str, /^(\d+\.\d+(?:\.\d+)?)/)?.[1];
+      let footer_ver = v ? `${d} ${v}` : (match(str, /snapshot/i) ? `${d} SNAPSHOT` : (length(str) ? `${d} ${str}` : d));
     %}
     </div>
     <footer>
-      <span>Streamline · {{ entityencode(dist) }}</span>
+      <span>Streamline · {{ entityencode(footer_ver) }}</span>
       <ul class="breadcrumb pull-right" id="modemenu" style="display:none"></ul>
     </footer>
     <script>L.require('menu-streamline-v21')</script>

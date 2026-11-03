@@ -1,5 +1,5 @@
 Package: luci-theme-streamline
-Version: 1.0.57-9
+Version: 1.0.57-10
 Depends: libc, luci-base
 Source: luci-theme-streamline
 SourceName: luci-theme-streamline
