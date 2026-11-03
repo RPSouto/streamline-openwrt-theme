@@ -11,8 +11,8 @@ const FONTS = {
   mono: { title: 'Monospace', description: 'Technical fixed-width', family: 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace' }
 };
 const PALETTES = {
-  streamline: { title: 'Streamline', description: 'Purple and graphite', colors: ['#8b5cf6', '#4ea1ff', '#090b11'], themeColor: '#0b0e14' },
   glinet: { title: 'GL.iNet', description: 'Turquoise and navy', colors: ['#00d6c6', '#25aee8', '#080b25'], themeColor: '#111331' },
+  streamline: { title: 'Streamline', description: 'Purple and graphite', colors: ['#8b5cf6', '#4ea1ff', '#090b11'], themeColor: '#0b0e14' },
   ocean: { title: 'Ocean', description: 'Cool blue and deep sea', colors: ['#38bdf8', '#34d399', '#071521'], themeColor: '#071521' },
   forest: { title: 'Forest', description: 'Fresh green and pine', colors: ['#4ade80', '#60a5fa', '#0a1511'], themeColor: '#0a1511' },
   sunset: { title: 'Sunset', description: 'Warm orange and ember', colors: ['#fb923c', '#4ade80', '#17100f'], themeColor: '#17100f' },
@@ -524,7 +524,7 @@ return baseclass.extend({
   },
 
   applyPalette(name) {
-    const palette = Object.prototype.hasOwnProperty.call(PALETTES, name) ? name : 'streamline';
+    const palette = Object.prototype.hasOwnProperty.call(PALETTES, name) ? name : 'glinet';
     document.documentElement.setAttribute('data-palette', palette);
     this.setPreference('streamline.palette', palette);
     const themeColor = document.querySelector('meta[name="theme-color"]');
@@ -545,7 +545,7 @@ return baseclass.extend({
 
   showPalettePicker() {
     const savedPalette = this.getPreference('streamline.palette');
-    const current = Object.prototype.hasOwnProperty.call(PALETTES, savedPalette) ? savedPalette : 'streamline';
+    const current = Object.prototype.hasOwnProperty.call(PALETTES, savedPalette) ? savedPalette : 'glinet';
     const choices = E('div', { 'class': 'sl-palette-choices' });
     const savedFont = this.getPreference('streamline.font');
     const currentFont = Object.prototype.hasOwnProperty.call(FONTS, savedFont) ? savedFont : 'system';

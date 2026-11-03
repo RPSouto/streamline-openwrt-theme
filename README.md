@@ -24,7 +24,7 @@
 * **Collapsible Sidebar & Navigation**: Auto-saving collapsible sidebar on desktop, closed accordion panels by default upon login, and a clean sliding drawer for mobile and tablet screens.
 * **Full-Width Terminal Viewers**: Independent scrolling and monospaced typography for System Logs, Kernel Logs, and command output.
 * **Normalized Actions & Spacing**: Standardized button heights, responsive action toolbars, and dedicated card separation across Firewall tables, DHCP leases, and network interfaces.
-* **Eight Color Palettes**: Switch effortlessly between **Streamline** (purple/cyan), **GL.iNet** (navy/turquoise), **Ocean** (blue/sea green), **Forest** (emerald/pine), **Sunset** (amber/orange), **Rose** (plum/pink), **OLED Black** (pure AMOLED #000000), and **Light** (clean daytime slate).
+* **Eight Color Palettes**: Switch effortlessly between **GL.iNet** (navy/turquoise — default), **Streamline** (purple/cyan), **Ocean** (blue/sea green), **Forest** (emerald/pine), **Sunset** (amber/orange), **Rose** (plum/pink), **OLED Black** (pure AMOLED #000000), and **Light** (clean daytime slate).
 * **Four Interface Fonts**: System, Arial, Georgia, or Monospace with instant browser-local persistence.
 * **Progressive Web App (PWA)**: Installable on desktop (Chrome, Edge) and Android home screens with static asset caching.
 
@@ -121,8 +121,8 @@ rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 
 Open **Appearance** at the bottom of the desktop sidebar or within the mobile drawer:
 * **Palettes**:
+  * `GL.iNet` — Navy blue with turquoise highlights matching GL.iNet's aesthetic (default).
   * `Streamline` — Deep graphite with electric violet and sky blue accents.
-  * `GL.iNet` — Navy blue with turquoise highlights matching GL.iNet's aesthetic.
   * `Ocean` — Marine blue with calm cyan and emerald hints.
   * `Forest` — Dark moss with fresh green and pine accents.
   * `Sunset` — Charcoal with warm amber, orange, and gold tones.

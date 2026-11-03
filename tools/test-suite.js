@@ -86,21 +86,30 @@ assert(postrm.includes('[ "$1" = "upgrade" ] && exit 0'),
   'postrm exits cleanly on upgrade without resetting theme to bootstrap',
   'Missing $1 = upgrade check causes opkg to reset mediaurlbase on upgrade');
 
-// Test 6: Verify OLED and Light palettes synchronization
-console.log('\n6. Verifying OLED and Light palette consistency across templates and CSS...');
+// Test 6: Verify Palettes synchronization, order, and GL.iNet default
+console.log('\n6. Verifying Palette consistency, GL.iNet default, and list ordering...');
 const cascadeCss = fs.readFileSync(path.join(rootDir, 'htdocs/luci-static/streamline/cascade.css'), 'utf8');
+assert(cascadeCss.includes('html[data-palette="glinet"]'), 'cascade.css contains glinet palette CSS rules');
 assert(cascadeCss.includes('html[data-palette="oled"]'), 'cascade.css contains oled palette CSS rules');
 assert(cascadeCss.includes('html[data-palette="light"]'), 'cascade.css contains light palette CSS rules');
 
 const headerHtm = fs.readFileSync(path.join(rootDir, 'luasrc/view/themes/streamline/header.htm'), 'utf8');
+assert(headerHtm.includes("p='glinet'"), 'header.htm predefines glinet as default palette');
+assert(headerHtm.includes("logo-glinet.svg"), 'header.htm predefines logo-glinet.svg as default favicon');
 assert(headerHtm.includes("oled:'#000000'") && headerHtm.includes("light:'#f8fafc'"),
   'header.htm inline script contains oled and light palette definitions');
 
 const headerUt = fs.readFileSync(path.join(rootDir, 'ucode/template/themes/streamline/header.ut'), 'utf8');
+assert(headerUt.includes("p='glinet'"), 'header.ut predefines glinet as default palette');
+assert(headerUt.includes("logo-glinet.svg"), 'header.ut predefines logo-glinet.svg as default favicon');
 assert(headerUt.includes("oled:'#000000'") && headerUt.includes("light:'#f8fafc'"),
   'header.ut inline script contains oled and light palette definitions');
 
 const menuJs = fs.readFileSync(path.join(rootDir, 'htdocs/luci-static/resources/menu-streamline-v21.js'), 'utf8');
+assert(/const PALETTES\s*=\s*\{\s*glinet:/.test(menuJs),
+  'menu-streamline-v21.js PALETTES has glinet as the first entry in the list');
+assert(menuJs.includes("name : 'glinet'") && menuJs.includes("savedPalette : 'glinet'"),
+  'menu-streamline-v21.js defaults to glinet in applyPalette and showPalettePicker');
 assert(menuJs.includes("oled: { title: 'OLED Black'") && menuJs.includes("light: { title: 'Light'"),
   'menu-streamline-v21.js PALETTES contains oled and light entries');
 
