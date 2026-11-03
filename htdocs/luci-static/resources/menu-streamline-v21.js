@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-6';
+const THEME_VERSION = '1.0.57-7';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -701,12 +701,16 @@ return baseclass.extend({
       const palette = PALETTES[id];
       const swatches = E('span', { 'class': 'sl-palette-swatches', 'aria-hidden': 'true' },
         palette.colors.map((color) => E('i', { 'style': 'background:' + color })));
+      const text = E('div', { 'class': 'sl-palette-text' }, [
+        E('strong', {}, [_(palette.title)]),
+        E('small', {}, [_(palette.description)])
+      ]);
       const button = E('button', {
         'type': 'button',
         'class': 'sl-palette-choice' + (id === current ? ' active' : ''),
         'data-palette': id,
         'aria-pressed': String(id === current)
-      }, [swatches, E('strong', {}, [_(palette.title)]), E('small', {}, [_(palette.description)])]);
+      }, [swatches, text]);
 
       button.addEventListener('click', () => {
         this.applyPalette(id);

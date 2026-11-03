@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=6'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 6');
-assert(control.includes('Version: 1.0.57-6'), 'packaging/control Version is 1.0.57-6');
-assert(buildIpk.includes('1.0.57-6'), 'build-ipk.sh default target is 1.0.57-6');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-6'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-6');
-assert(swJs.includes('streamline-static-v57-6'), 'streamline-sw.js CACHE_NAME matches v57-6');
-assert(headerHtm.includes('?v=1.0.57.6'), 'header.htm asset query param matches v1.0.57.6');
-assert(headerUt.includes('?v=1.0.57.6'), 'header.ut asset query param matches v1.0.57.6');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=7'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 7');
+assert(control.includes('Version: 1.0.57-7'), 'packaging/control Version is 1.0.57-7');
+assert(buildIpk.includes('1.0.57-7'), 'build-ipk.sh default target is 1.0.57-7');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-7'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-7');
+assert(swJs.includes('streamline-static-v57-7'), 'streamline-sw.js CACHE_NAME matches v57-7');
+assert(headerHtm.includes('?v=1.0.57.7'), 'header.htm asset query param matches v1.0.57.7');
+assert(headerUt.includes('?v=1.0.57.7'), 'header.ut asset query param matches v1.0.57.7');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -311,6 +311,19 @@ assert(getBrandLabel('OpenWrt', 'SNAPSHOT') === 'OPENWRT SNAPSHOT',
   'getBrandLabel converts SNAPSHOT to OPENWRT SNAPSHOT');
 assert(getBrandLabel('', '') === 'OPENWRT',
   'getBrandLabel falls back to OPENWRT when empty');
+
+// Test 18: Verify Appearance modal alignment and text wrapping
+console.log('\n18. Verifying Appearance modal alignment and text wrapping...');
+assert(cascadeCss.includes('.modal.streamline-palette-dialog') && cascadeCss.includes('min(600px, calc(100% - 24px))'),
+  'cascade.css gives appearance dialog adequate width min(600px, calc(100% - 24px))');
+assert(cascadeCss.includes('.sl-palette-choice {') && cascadeCss.includes('display: flex !important;'),
+  'cascade.css sets .sl-palette-choice to flex container');
+assert(cascadeCss.includes('.sl-palette-text {') && cascadeCss.includes('white-space: normal !important;'),
+  'cascade.css overrides LuCI button nowrap on .sl-palette-text');
+assert(cascadeCss.includes('overflow-wrap: break-word !important;'),
+  'cascade.css enforces word breaking on modal card text');
+assert(menuJs.includes("E('div', { 'class': 'sl-palette-text' }"),
+  'menu-streamline-v21.js wraps palette card text in dedicated sl-palette-text div');
 
 // Summary
 console.log(`\n========================================`);
