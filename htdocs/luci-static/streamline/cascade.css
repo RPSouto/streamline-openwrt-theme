@@ -500,7 +500,24 @@ footer span { display: inline-block; }
 .cbi-section, .network-status-table, .ifacebox, .table, .cbi-tabcontainer {
   background: rgba(17,21,29,.94); border: 1px solid var(--sl-border); border-radius: var(--sl-radius); box-shadow: var(--sl-shadow);
 }
-.cbi-section { padding: 20px; margin: 0 0 18px; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.cbi-section {
+  padding: 20px;
+  margin: 0 0 18px;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  contain: layout style;
+  box-sizing: border-box;
+}
+
+/* Prevent LuCI periodic polling from blinking/fading sections */
+.cbi-section.fade-in,
+#view .fade-in,
+.fade-in {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
 .cbi-section > h3, .cbi-section > h4 { padding-bottom: 13px; border-bottom: 1px solid var(--sl-border); }
 .cbi-section > div, .cbi-section-node, .table-wrapper { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .cbi-section-node > .cbi-dynlist { width: 100%; padding: 18px; border: 1px solid var(--sl-border); border-radius: var(--sl-radius); background: rgba(17,21,29,.94); box-shadow: var(--sl-shadow); }
@@ -790,6 +807,8 @@ table + table,
   box-shadow: none !important;
   margin: 0 0 24px 0 !important;
   width: 100% !important;
+  contain: layout;
+  box-sizing: border-box !important;
 }
 
 .network-status-table .ifacebox {
@@ -797,20 +816,22 @@ table + table,
   flex-direction: column !important;
   width: 100% !important;
   min-width: 0 !important;
+  min-height: 220px !important;
   height: 100% !important;
+  box-sizing: border-box !important;
   margin: 0 !important;
   border: 1px solid var(--sl-border) !important;
   border-radius: var(--sl-radius) !important;
   background: var(--sl-surface-2) !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
   overflow: hidden !important;
-  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease !important;
 }
 
 .network-status-table .ifacebox:hover {
   border-color: rgba(var(--sl-accent-rgb), 0.35) !important;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
   transform: translateY(-2px) !important;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease !important;
 }
 
 /* Radio Card Header */
@@ -818,6 +839,8 @@ table + table,
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  min-height: 48px !important;
+  box-sizing: border-box !important;
   padding: 12px 18px !important;
   border-bottom: 1px solid var(--sl-border) !important;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), var(--sl-surface-3) !important;
@@ -971,6 +994,7 @@ table + table,
   width: 100% !important;
   min-width: 0 !important;
   min-height: 64px !important;
+  box-sizing: border-box !important;
   margin: 0 !important;
   padding: 13px 16px !important;
   gap: 14px !important;
@@ -981,14 +1005,6 @@ table + table,
   line-height: 1.5 !important;
   color: var(--sl-text) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
-  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease !important;
-  position: relative !important;
-}
-  font-size: 0.82rem !important;
-  line-height: 1.5 !important;
-  color: var(--sl-text) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
-  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease !important;
   position: relative !important;
 }
 
@@ -997,6 +1013,7 @@ table + table,
   background: rgba(255, 255, 255, 0.035) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important;
   transform: translateY(-1px) !important;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease !important;
 }
 
 /* Wi-Fi Signal / State Icon */

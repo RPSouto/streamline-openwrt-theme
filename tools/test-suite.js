@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=3'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 3');
-assert(control.includes('Version: 1.0.57-3'), 'packaging/control Version is 1.0.57-3');
-assert(buildIpk.includes('1.0.57-3'), 'build-ipk.sh default target is 1.0.57-3');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-3'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-3');
-assert(swJs.includes('streamline-static-v57-3'), 'streamline-sw.js CACHE_NAME matches v57-3');
-assert(headerHtm.includes('?v=1.0.57.3'), 'header.htm asset query param matches v1.0.57.3');
-assert(headerUt.includes('?v=1.0.57.3'), 'header.ut asset query param matches v1.0.57.3');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=4'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 4');
+assert(control.includes('Version: 1.0.57-4'), 'packaging/control Version is 1.0.57-4');
+assert(buildIpk.includes('1.0.57-4'), 'build-ipk.sh default target is 1.0.57-4');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-4'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-4');
+assert(swJs.includes('streamline-static-v57-4'), 'streamline-sw.js CACHE_NAME matches v57-4');
+assert(headerHtm.includes('?v=1.0.57.4'), 'header.htm asset query param matches v1.0.57.4');
+assert(headerUt.includes('?v=1.0.57.4'), 'header.ut asset query param matches v1.0.57.4');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -222,6 +222,23 @@ assert(cascadeCss.includes('.table-wrapper + h3') && cascadeCss.includes('h3 + .
   'cascade.css standardizes spacing between table wrappers and headings');
 assert(mobileCss.includes('.table-wrapper + h3') && mobileCss.includes('.table-wrapper + .table-wrapper'),
   'mobile.css standardizes spacing between table wrappers and headings on mobile');
+
+// Test 15: Verify Section and Layout Stability During Polling Refresh
+console.log('\n15. Verifying section and card layout stability during refresh...');
+assert(cascadeCss.includes('contain: layout style;') && cascadeCss.includes('.cbi-section {'),
+  'cascade.css provides layout containment for .cbi-section to prevent shift');
+assert(cascadeCss.includes('.cbi-section.fade-in') && cascadeCss.includes('animation: none !important;'),
+  'cascade.css disables fadeIn opacity blink on periodic status poll refresh');
+assert(cascadeCss.includes('.network-status-table .ifacebox') && cascadeCss.includes('min-height: 220px !important;'),
+  'cascade.css locks card minimum height to prevent collapse during data reload');
+assert(cascadeCss.includes('.network-status-table .ifacebox-head') && cascadeCss.includes('min-height: 48px !important;'),
+  'cascade.css locks card header minimum height to prevent reflow on band pill insertion');
+assert(mobileCss.includes('.cbi-section {') && mobileCss.includes('contain: layout style;'),
+  'mobile.css provides layout containment for sections on mobile');
+assert(menuJs.includes('runEnhance') && !menuJs.includes('scheduleEnhance'),
+  'menu-streamline-v21.js enhances wireless cards synchronously in microtask without paint delay');
+assert(menuJs.includes("parent.closest('.table-wrapper, .modal, .modal-body, .cbi-tooltip, .cbi-section, .cbi-section-node')"),
+  'menu-streamline-v21.js does not wrap tables already inside .cbi-section to prevent poll reflow');
 
 // Summary
 console.log(`\n========================================`);

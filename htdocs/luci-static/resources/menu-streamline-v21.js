@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-3';
+const THEME_VERSION = '1.0.57-4';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -344,24 +344,26 @@ return baseclass.extend({
       });
     };
 
-    let rafId = null;
-    const scheduleEnhance = () => {
-      if (rafId) return;
-      rafId = window.requestAnimationFrame(() => {
-        rafId = null;
+    let isMutating = false;
+    const runEnhance = () => {
+      if (isMutating) return;
+      isMutating = true;
+      try {
         enhance();
-      });
+      } finally {
+        isMutating = false;
+      }
     };
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', scheduleEnhance);
+      document.addEventListener('DOMContentLoaded', runEnhance);
     } else {
-      scheduleEnhance();
+      runEnhance();
     }
 
     const targetNode = document.querySelector('#view') || document.querySelector('#maincontent') || document.body;
     if (targetNode && typeof MutationObserver !== 'undefined') {
-      const observer = new MutationObserver(() => scheduleEnhance());
+      const observer = new MutationObserver(() => runEnhance());
       observer.observe(targetNode, { childList: true, subtree: true });
     }
   },
@@ -1537,7 +1539,10 @@ return baseclass.extend({
           parent.hasAttribute('data-chain') ||
           parent.classList.contains('modal') ||
           parent.classList.contains('modal-body') ||
-          tbl.closest('.table-wrapper, .modal, .modal-body, .cbi-tooltip')
+          parent.closest('.table-wrapper, .modal, .modal-body, .cbi-tooltip, .cbi-section, .cbi-section-node') ||
+          (parent.tagName === 'DIV' && parent.parentElement && parent.parentElement.classList.contains('cbi-section')) ||
+          tbl.rows.length <= 1 ||
+          tbl.querySelector('.cbi-progressbar')
         ) {
           return;
         }
@@ -1552,10 +1557,15 @@ return baseclass.extend({
 
     const main = document.querySelector('#maincontent') || document.body;
     if (main && window.MutationObserver) {
-      let timeout = null;
+      let isMutating = false;
       const observer = new MutationObserver(() => {
-        if (timeout) clearTimeout(timeout);
-        timeout = setTimeout(wrapTables, 100);
+        if (isMutating) return;
+        isMutating = true;
+        try {
+          wrapTables();
+        } finally {
+          isMutating = false;
+        }
       });
       observer.observe(main, { childList: true, subtree: true });
     }
