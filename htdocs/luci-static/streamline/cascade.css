@@ -640,6 +640,7 @@ table.assoclist,
   display: table !important;
   width: 100% !important;
   min-width: max-content !important;
+  max-width: none !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
   background: var(--sl-surface-2) !important;
@@ -2363,10 +2364,13 @@ code { color: #d9e2f2; font-family: ui-monospace, SFMono-Regular, Consolas, "Lib
   th:first-child, td:first-child, .th:first-child, .td:first-child { padding-left: 12px; }
   th:last-child, td:last-child, .th:last-child, .td:last-child { padding-right: 12px; }
   .sl-metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  table, .table, .cbi-section-node, .table-wrapper, div[data-chain] {
+  .cbi-section-node, .table-wrapper, div[data-chain] {
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+  table, .table {
+    max-width: none;
   }
 }
 
@@ -2779,7 +2783,6 @@ span.jump:hover, .target.jump:hover {
 [data-page="admin-network-wireless"] .cbi-section-table {
   border-collapse: separate !important;
   border-spacing: 0 !important;
-  overflow: hidden;
   border-radius: 12px !important;
   border: 1px solid var(--sl-border) !important;
   background: var(--sl-surface) !important;
@@ -3250,7 +3253,6 @@ table[style*="table-layout:fixed"] {
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
-  overflow: hidden;
   margin-top: 4px !important;
   margin-bottom: 24px !important;
 }

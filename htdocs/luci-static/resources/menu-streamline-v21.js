@@ -1503,7 +1503,7 @@ return baseclass.extend({
 
   setupResponsiveTables() {
     const wrapTables = () => {
-      const tables = document.querySelectorAll('table.table, .cbi-section-table');
+      const tables = document.querySelectorAll('table.table, .cbi-section-table, table');
       tables.forEach((tbl) => {
         const parent = tbl.parentElement;
         if (!parent) return;
@@ -1512,7 +1512,8 @@ return baseclass.extend({
           parent.classList.contains('table-wrapper') ||
           parent.hasAttribute('data-chain') ||
           parent.classList.contains('modal') ||
-          parent.classList.contains('modal-body')
+          parent.classList.contains('modal-body') ||
+          tbl.closest('.table-wrapper, .modal, .modal-body, .cbi-tooltip')
         ) {
           return;
         }
@@ -1557,7 +1558,7 @@ return baseclass.extend({
       return container;
     };
 
-    // Mouse drag scroll
+    // Mouse drag scroll (for desktop click-and-drag with mouse)
     document.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       const target = e.target;
@@ -1600,7 +1601,7 @@ return baseclass.extend({
     document.addEventListener('mouseup', endDrag, { passive: true });
     document.addEventListener('mouseleave', endDrag, { passive: true });
 
-    // Touch drag scroll support for mobile
+    // Touch drag scroll tracking for mobile (complements native touch scrolling)
     let touchContainer = null;
     let touchStartX = 0;
     let touchScrollLeft = 0;
@@ -1609,7 +1610,7 @@ return baseclass.extend({
       if (!e.touches || e.touches.length !== 1) return;
       const target = e.touches[0].target;
       if (!target) return;
-      if (target.closest('button, a, input, select, textarea, .cbi-button, .sl-copyable-address, [role="button"], label')) {
+      if (target.closest('button, a, input, select, textarea, .cbi-button, [role="button"], label')) {
         return;
       }
 
@@ -1623,9 +1624,7 @@ return baseclass.extend({
 
     document.addEventListener('touchmove', (e) => {
       if (!touchContainer || !e.touches || e.touches.length !== 1) return;
-      const x = e.touches[0].pageX - touchContainer.getBoundingClientRect().left;
-      const walk = x - touchStartX;
-      touchContainer.scrollLeft = touchScrollLeft - walk;
+      touchScrollLeft = touchContainer.scrollLeft;
     }, { passive: true });
 
     const endTouch = () => {

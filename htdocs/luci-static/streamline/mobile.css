@@ -374,6 +374,8 @@
     display: table !important;
     width: max-content !important;
     min-width: 100% !important;
+    max-width: none !important;
+    table-layout: auto !important;
     overflow: visible !important;
   }
 
@@ -390,6 +392,8 @@
     display: table !important;
     width: max-content !important;
     min-width: 100% !important;
+    max-width: none !important;
+    table-layout: auto !important;
     overflow: visible !important;
     margin-top: 8px !important;
     margin-bottom: 20px !important;
