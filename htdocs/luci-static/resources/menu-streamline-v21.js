@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-4';
+const THEME_VERSION = '1.0.57-5';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -28,6 +28,7 @@ return baseclass.extend({
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
     this.normalizeWirelessOverview();
+    this.setupWirelessLayout();
     this.setupClickToCopy();
     this.setupResponsiveTables();
     ui.menu.load()
@@ -268,6 +269,40 @@ return baseclass.extend({
     }
   },
 
+  formatWirelessModes(str) {
+    if (!str || typeof str !== 'string') return str;
+    const modeRegex = /\b802\.11(?:\s*(?:[\/+,]\s*)?(?:ax|ac|be|ad|ay|ah|[abgn]))+\b/gi;
+    return str.replace(modeRegex, (match) => {
+      const after = match.slice(6);
+      const tokens = after.match(/ax|ac|be|ad|ay|ah|[abgn]/gi);
+      if (!tokens || !tokens.length) return match;
+      return '802.11 ' + tokens.map((t) => t.toLowerCase()).join('/');
+    });
+  },
+
+  formatWirelessTextNodes(element) {
+    if (!element || typeof document === 'undefined') return;
+    if (element.nodeType === 3 /* Node.TEXT_NODE */) {
+      if (element.nodeValue && /\b802\.11/i.test(element.nodeValue)) {
+        const formatted = this.formatWirelessModes(element.nodeValue);
+        if (formatted !== element.nodeValue) {
+          element.nodeValue = formatted;
+        }
+      }
+      return;
+    }
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.nodeValue && /\b802\.11/i.test(node.nodeValue)) {
+        const formatted = this.formatWirelessModes(node.nodeValue);
+        if (formatted !== node.nodeValue) {
+          node.nodeValue = formatted;
+        }
+      }
+    }
+  },
+
   normalizeWirelessOverview() {
     const enhance = () => {
       const boxes = document.querySelectorAll('.network-status-table .ifacebox');
@@ -300,6 +335,14 @@ return baseclass.extend({
           const strayBand = head.querySelector('.sl-radio-band');
           if (strayBand) strayBand.remove();
           return;
+        }
+
+        // Format Wi-Fi modes (e.g. MediaTek 802.11bgnax -> MediaTek 802.11 b/g/n/ax)
+        if (strong) {
+          this.formatWirelessTextNodes(strong);
+        }
+        if (telemetry) {
+          this.formatWirelessTextNodes(telemetry);
         }
 
         // 1. Detect Frequency Band & inject Frequency pill in Header
@@ -1119,9 +1162,17 @@ return baseclass.extend({
   },
 
   setupWirelessLayout() {
+    if (this._wirelessLayoutSetup) return;
+    this._wirelessLayoutSetup = true;
+
     const isWirelessPage = () => {
-      const page = document.body && document.body.getAttribute('data-page');
-      return page === 'admin-network-wireless' || window.location.pathname.indexOf('network/wireless') !== -1;
+      const page = typeof document !== 'undefined' && document.body && document.body.getAttribute('data-page');
+      const path = (typeof window !== 'undefined' && window.location ? (window.location.pathname || '') + (window.location.hash || '') : '');
+      const dispatch = this.getDispatchPath().join('/');
+      return page === 'admin-network-wireless' ||
+             path.indexOf('network/wireless') !== -1 ||
+             dispatch.indexOf('network/wireless') !== -1 ||
+             (typeof document !== 'undefined' && document.querySelector('.cbi-button-add') !== null && document.querySelector('.cbi-section-table') !== null);
     };
 
     const updateChildrenVisibility = () => {
@@ -1163,6 +1214,9 @@ return baseclass.extend({
         if (statCell && countBadge.parentNode !== statCell) {
           statCell.appendChild(countBadge);
         }
+        if (statCell) {
+          this.formatWirelessTextNodes(statCell);
+        }
 
         if (countBadge) {
           const countStr = childRows.length > 0 ? childRows.length.toString() : '';
@@ -1197,6 +1251,11 @@ return baseclass.extend({
           }
           if (row.getAttribute('data-radio-id') !== currentRadioSid) {
             row.setAttribute('data-radio-id', currentRadioSid);
+          }
+
+          const statCell = row.querySelector('[data-name="_stat"]');
+          if (statCell) {
+            this.formatWirelessTextNodes(statCell);
           }
 
           const firstCell = row.querySelector('td:first-child, .td:first-child, [data-name="_badge"]');
@@ -1243,6 +1302,12 @@ return baseclass.extend({
           }
         }
       });
+
+      const sectionNode = document.querySelector('[data-page="admin-network-wireless"] .cbi-section-node, #cbi-wireless .cbi-section-node');
+      if (sectionNode) {
+        const headings = sectionNode.querySelectorAll('big, strong, .cbi-section-descr');
+        headings.forEach((h) => this.formatWirelessTextNodes(h));
+      }
 
       updateChildrenVisibility();
     };

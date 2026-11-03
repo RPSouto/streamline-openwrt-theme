@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=4'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 4');
-assert(control.includes('Version: 1.0.57-4'), 'packaging/control Version is 1.0.57-4');
-assert(buildIpk.includes('1.0.57-4'), 'build-ipk.sh default target is 1.0.57-4');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-4'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-4');
-assert(swJs.includes('streamline-static-v57-4'), 'streamline-sw.js CACHE_NAME matches v57-4');
-assert(headerHtm.includes('?v=1.0.57.4'), 'header.htm asset query param matches v1.0.57.4');
-assert(headerUt.includes('?v=1.0.57.4'), 'header.ut asset query param matches v1.0.57.4');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=5'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 5');
+assert(control.includes('Version: 1.0.57-5'), 'packaging/control Version is 1.0.57-5');
+assert(buildIpk.includes('1.0.57-5'), 'build-ipk.sh default target is 1.0.57-5');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-5'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-5');
+assert(swJs.includes('streamline-static-v57-5'), 'streamline-sw.js CACHE_NAME matches v57-5');
+assert(headerHtm.includes('?v=1.0.57.5'), 'header.htm asset query param matches v1.0.57.5');
+assert(headerUt.includes('?v=1.0.57.5'), 'header.ut asset query param matches v1.0.57.5');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -240,6 +240,43 @@ assert(menuJs.includes('runEnhance') && !menuJs.includes('scheduleEnhance'),
 assert(menuJs.includes("parent.closest('.table-wrapper, .modal, .modal-body, .cbi-tooltip, .cbi-section, .cbi-section-node')"),
   'menu-streamline-v21.js does not wrap tables already inside .cbi-section to prevent poll reflow');
 
+// Test 16: Verify Wi-Fi network modes formatting (spaces and slash separators)
+console.log('\n16. Verifying Wi-Fi modes formatting (spaces and slash separators)...');
+assert(menuJs.includes('formatWirelessModes(str)') && menuJs.includes('formatWirelessTextNodes(element)'),
+  'menu-streamline-v21.js defines formatWirelessModes and formatWirelessTextNodes');
+assert(menuJs.includes('this.setupWirelessLayout()') && menuJs.includes('this.normalizeWirelessOverview()'),
+  'menu-streamline-v21.js initializes wireless layout and overview normalizers in __init__');
+assert(menuJs.includes('this.formatWirelessTextNodes(statCell)'),
+  'setupWirelessLayout formats wireless hardware modes in radio rows');
+assert(menuJs.includes('this.formatWirelessTextNodes(strong)') && menuJs.includes('this.formatWirelessTextNodes(telemetry)'),
+  'normalizeWirelessOverview formats wireless hardware modes in overview cards');
+
+// Direct unit test of formatWirelessModes algorithm
+const modeRegex = /\b802\.11(?:\s*(?:[\/+,]\s*)?(?:ax|ac|be|ad|ay|ah|[abgn]))+\b/gi;
+const formatModes = (str) => {
+  return str.replace(modeRegex, (match) => {
+    const after = match.slice(6);
+    const tokens = after.match(/ax|ac|be|ad|ay|ah|[abgn]/gi);
+    if (!tokens || !tokens.length) return match;
+    return '802.11 ' + tokens.map((t) => t.toLowerCase()).join('/');
+  });
+};
+
+assert(formatModes('MediaTek 802.11bgnax') === 'MediaTek 802.11 b/g/n/ax',
+  'formatModes converts MediaTek 802.11bgnax to MediaTek 802.11 b/g/n/ax');
+assert(formatModes('MediaTek 802.11anacax') === 'MediaTek 802.11 a/n/ac/ax',
+  'formatModes converts MediaTek 802.11anacax to MediaTek 802.11 a/n/ac/ax');
+assert(formatModes('Generic MAC80211 802.11bgn') === 'Generic MAC80211 802.11 b/g/n',
+  'formatModes converts 802.11bgn to 802.11 b/g/n');
+assert(formatModes('Qualcomm 802.11an+ac') === 'Qualcomm 802.11 a/n/ac',
+  'formatModes converts 802.11an+ac to 802.11 a/n/ac');
+assert(formatModes('802.11ax') === '802.11 ax',
+  'formatModes adds space to single mode 802.11ax -> 802.11 ax');
+assert(formatModes('802.11be') === '802.11 be',
+  'formatModes adds space to single mode 802.11be -> 802.11 be');
+assert(formatModes('802.11 Wireless Controller') === '802.11 Wireless Controller',
+  'formatModes preserves non-mode text safely');
+
 // Summary
 console.log(`\n========================================`);
 if (failures === 0) {
@@ -249,4 +286,5 @@ if (failures === 0) {
   console.error(`💥 ${failures} TEST(S) FAILED. Fix issues before releasing.\n`);
   process.exit(1);
 }
+
 
