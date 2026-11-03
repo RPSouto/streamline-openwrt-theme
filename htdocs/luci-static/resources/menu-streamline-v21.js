@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-2';
+const THEME_VERSION = '1.0.57-3';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -274,17 +274,42 @@ return baseclass.extend({
       if (!boxes || !boxes.length) return;
 
       boxes.forEach((box) => {
-        // 1. Detect Frequency Band & inject Frequency pill in Header
         const head = box.querySelector('.ifacebox-head');
+        if (!head) return;
+
+        // Ensure upstream network cards NEVER get Wi-Fi frequency badges or icons
+        const headText = head.textContent || '';
+        if (/upstream/i.test(headText)) {
+          head.classList.add('is-upstream');
+          const strayBand = head.querySelector('.sl-radio-band');
+          if (strayBand) strayBand.remove();
+          return;
+        }
+
+        // Check for wireless indicators: wireless controller in strong, or channel/freq/SSID in body
+        const strong = head.querySelector('strong');
         const telemetry = box.querySelector('.ifacebox-body > span:first-child');
-        if (head && telemetry && !head.querySelector('.sl-radio-band')) {
-          const text = telemetry.textContent || '';
+        const telemetryText = telemetry ? telemetry.textContent || '' : '';
+
+        const isWireless = (strong && /radio\d+|phy\d+|mt\d+|wireless/i.test(strong.textContent)) ||
+                           /channel\s*:\s*\d+/i.test(telemetryText) ||
+                           /bitrate\s*:/i.test(telemetryText) ||
+                           /mode\s*:\s*master/i.test(box.textContent || '');
+
+        if (!isWireless) {
+          const strayBand = head.querySelector('.sl-radio-band');
+          if (strayBand) strayBand.remove();
+          return;
+        }
+
+        // 1. Detect Frequency Band & inject Frequency pill in Header
+        if (!head.querySelector('.sl-radio-band')) {
           let bandLabel = null;
-          if (/\b2\.\d+\s*GHz\b/i.test(text) || text.includes('(2.') || text.includes('2.4')) {
+          if (/\(\s*2\.\d+\s*GHz\s*\)|\b2\.4\s*GHz\b/i.test(telemetryText)) {
             bandLabel = '2.4 GHz';
-          } else if (/\b5\.\d+\s*GHz\b/i.test(text) || text.includes('(5.') || text.includes('5 GHz') || text.includes('5.2') || text.includes('5.8')) {
+          } else if (/\(\s*5\.\d+\s*GHz\s*\)|\b5\s*GHz\b/i.test(telemetryText)) {
             bandLabel = '5 GHz';
-          } else if (/\b6\.\d+\s*GHz\b/i.test(text) || text.includes('(6.') || text.includes('6 GHz')) {
+          } else if (/\(\s*6\.\d+\s*GHz\s*\)|\b6\s*GHz\b/i.test(telemetryText)) {
             bandLabel = '6 GHz';
           }
 
@@ -292,7 +317,6 @@ return baseclass.extend({
             const bandPill = document.createElement('span');
             bandPill.className = 'sl-radio-band';
             bandPill.textContent = bandLabel;
-            const strong = head.querySelector('strong');
             if (strong) {
               strong.insertAdjacentElement('afterend', bandPill);
             } else {

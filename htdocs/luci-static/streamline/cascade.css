@@ -703,13 +703,62 @@ td > input[type="radio"] {
   margin: 0;
 }
 
-.table + h3, table + h3, .network-status-table + h3 { margin-top: 36px; padding-top: 8px; }
-.table + h4, table + h4 { margin-top: 32px; padding-top: 6px; }
-h3 + .table, h3 + table { margin-top: 14px; }
-h4 + .table, h4 + table { margin-top: 14px; }
-.table + .table, table + table { margin-top: 26px; }
-.cbi-section:not([data-tab]):not([data-tab-title]) + .cbi-section:not([data-tab]):not([data-tab-title]) { margin-top: 24px; }
-.network-status-table + h3 + .table { margin-top: 14px; }
+.table-wrapper,
+.cbi-section-node:has(> table),
+.cbi-section-node:has(> .table) {
+  margin-top: 0 !important;
+  margin-bottom: 24px !important;
+  width: 100% !important;
+}
+
+.table-wrapper > table,
+.table-wrapper > .table,
+.table-wrapper > table#status_leases,
+.table-wrapper > table#status_leases6,
+.table-wrapper > table#wifi_assoclist_table,
+.table-wrapper > table.leases,
+.table-wrapper > table.leases6,
+.table-wrapper > table.assoclist {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.table-wrapper + h3,
+table + h3,
+.table + h3,
+.network-status-table + h3 {
+  margin-top: 32px !important;
+  padding-top: 4px !important;
+}
+.table-wrapper + h4,
+table + h4,
+.table + h4,
+.network-status-table + h4 {
+  margin-top: 26px !important;
+  padding-top: 2px !important;
+}
+h3 + .table-wrapper,
+h3 + table,
+h3 + .table {
+  margin-top: 14px !important;
+}
+h4 + .table-wrapper,
+h4 + table,
+h4 + .table {
+  margin-top: 12px !important;
+}
+.table-wrapper + .table-wrapper,
+table + table,
+.table + .table {
+  margin-top: 20px !important;
+}
+.cbi-section:not([data-tab]):not([data-tab-title]) + .cbi-section:not([data-tab]):not([data-tab-title]) {
+  margin-top: 24px !important;
+}
+.network-status-table + h3 + .table,
+.network-status-table + h3 + .table-wrapper {
+  margin-top: 14px !important;
+}
 .cbi-section > .table, .cbi-section > .cbi-section-node > .table, .cbi-section-node > .table, .cbi-section-table { border: 0; background: transparent; box-shadow: none; }
 .cbi-section > .table + .cbi-button, .cbi-section-node > .table + .cbi-button,
 .cbi-section > table + .cbi-button, .cbi-section-node > table + .cbi-button { margin-top: 12px; }
@@ -748,6 +797,7 @@ h4 + .table, h4 + table { margin-top: 14px; }
   flex-direction: column !important;
   width: 100% !important;
   min-width: 0 !important;
+  height: 100% !important;
   margin: 0 !important;
   border: 1px solid var(--sl-border) !important;
   border-radius: var(--sl-radius) !important;
@@ -796,6 +846,10 @@ h4 + .table, h4 + table { margin-top: 14px; }
   -webkit-mask-size: contain;
   mask-size: contain;
   flex-shrink: 0;
+}
+
+.network-status-table .ifacebox-head.is-upstream strong::before {
+  display: none !important;
 }
 
 /* Radio Band Pill in Header */
@@ -851,7 +905,7 @@ h4 + .table, h4 + table { margin-top: 14px; }
   display: flex !important;
   flex: 1 1 auto !important;
   flex-direction: column !important;
-  gap: 16px !important;
+  gap: 14px !important;
   padding: 16px 18px !important;
   text-align: left !important;
   line-height: 1.6 !important;
@@ -865,11 +919,13 @@ h4 + .table, h4 + table { margin-top: 14px; }
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
+  align-content: flex-start !important;
   gap: 8px !important;
-  padding: 10px 14px !important;
+  padding: 12px 14px !important;
   background: rgba(0, 0, 0, 0.24) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: 10px !important;
+  flex: 1 1 auto !important;
 }
 
 .network-status-table .ifacebox-body > span:first-child > br {
@@ -897,28 +953,37 @@ h4 + .table, h4 + table { margin-top: 14px; }
   margin-right: 2px !important;
 }
 
-/* SSID Networks Container */
+/* SSID Networks Container / Device Container */
 .network-status-table .ifacebox-body > div {
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
-  margin-top: 0 !important;
+  margin-top: auto !important;
   padding-top: 0 !important;
   border-top: none !important;
+  width: 100% !important;
 }
 
-/* Individual SSID Card */
+/* Individual SSID Card / Device Badge */
 .network-status-table .ifacebadge {
   display: flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   width: 100% !important;
   min-width: 0 !important;
+  min-height: 64px !important;
   margin: 0 !important;
   padding: 13px 16px !important;
   gap: 14px !important;
   border: 1px solid var(--sl-border) !important;
   border-radius: 11px !important;
   background: var(--sl-surface-3) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.5 !important;
+  color: var(--sl-text) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease !important;
+  position: relative !important;
+}
   font-size: 0.82rem !important;
   line-height: 1.5 !important;
   color: var(--sl-text) !important;
@@ -1095,7 +1160,7 @@ h4 + .table, h4 + table { margin-top: 14px; }
 .sl-metric.is-loading .sl-gauge { animation: sl-health-pulse 1.35s ease-in-out infinite; }
 .sl-metric.is-loading .sl-gauge-value { color: var(--sl-muted); }
 .streamline-overview > .cbi-section { border-top-color: rgba(var(--sl-accent-rgb),.38); }
-.streamline-overview .network-status-table + h3 { margin-top: 36px; margin-bottom: 14px; }
+.streamline-overview .network-status-table + h3 { margin-top: 32px !important; margin-bottom: 14px !important; }
 
 @keyframes sl-health-pulse { 0%, 100% { opacity: .58; } 50% { opacity: 1; } }
 
@@ -3358,6 +3423,67 @@ table.table strong[style*="#fa0"] {
   padding-bottom: 2px !important;
   font-weight: 600 !important;
   letter-spacing: 0.02em !important;
+}
+
+/* ==========================================================================
+   Channel Analysis Graph & Table (Status -> Channel Analysis)
+   ========================================================================== */
+#channel_graph,
+[data-page*="channel_analysis"] #channel_graph,
+div[id="channel_graph"] {
+  display: block !important;
+  width: 100% !important;
+  height: 400px !important;
+  background: var(--sl-surface-2, #141821) !important;
+  border: 1px solid var(--sl-border, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: var(--sl-radius, 12px) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important;
+  margin-top: 8px !important;
+  margin-bottom: 24px !important;
+}
+
+#channel_graph svg,
+[data-page*="channel_analysis"] #channel_graph svg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+}
+
+/* Grid lines (horizontal dBm markers and vertical channel division lines) */
+#channel_graph svg line,
+[data-page*="channel_analysis"] #channel_graph svg line {
+  stroke: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* dBm labels and channel number text */
+#channel_graph svg text,
+[data-page*="channel_analysis"] #channel_graph svg text {
+  fill: var(--sl-muted, #94a3b8) !important;
+  font-family: var(--sl-font-family, system-ui, sans-serif) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Channel width gradient overlay */
+#channel_graph svg stop.stopblack,
+[data-page*="channel_analysis"] #channel_graph svg stop.stopblack {
+  stop-color: rgba(255, 255, 255, 0.08) !important;
+  stop-opacity: 0.25 !important;
+}
+
+/* Channel Analysis Results Table */
+[data-page*="channel_analysis"] table.table {
+  background: var(--sl-surface-2) !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: var(--sl-radius) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  margin-bottom: 24px !important;
 }
 
 /* ==========================================================================

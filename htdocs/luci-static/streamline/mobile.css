@@ -322,15 +322,66 @@
     margin-top: 8px;
   }
   .cbi-section { padding: 14px; border-radius: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .network-status-table { grid-template-columns: 1fr !important; gap: 14px !important; }
+  .network-status-table { grid-template-columns: 1fr !important; gap: 14px !important; margin-top: 0 !important; margin-bottom: 18px !important; }
   .network-status-table .ifacebox-head { padding: 10px 14px !important; font-size: 0.84rem !important; }
   .network-status-table .ifacebox-body { padding: 12px 14px !important; gap: 12px !important; }
-  .network-status-table .ifacebadge { padding: 10px 12px !important; gap: 10px !important; }
+  .network-status-table .ifacebadge { padding: 10px 12px !important; gap: 10px !important; min-height: 56px !important; }
   .network-status-table .ifacebadge img { width: 22px !important; height: 22px !important; max-width: 22px !important; max-height: 22px !important; padding: 4px !important; }
   .network-status-table .ifacebadge > span > .nowrap:first-child { font-size: 0.88rem !important; }
   .cbi-value { display: block; padding: 10px 0; }
   .cbi-value-title { display: block; width: 100%; padding: 0 0 7px; }
   .cbi-value-field { width: 100%; }
+
+  /* Mobile Heading & Table Spacing Harmonization */
+  h3, .cbi-section > h3, [data-page] h3 {
+    margin-top: 22px !important;
+    margin-bottom: 12px !important;
+  }
+  h4, .cbi-section > h4, [data-page] h4 {
+    margin-top: 18px !important;
+    margin-bottom: 10px !important;
+  }
+  #view > h3:first-child,
+  .cbi-section > h3:first-child,
+  .cbi-map > h3:first-child {
+    margin-top: 4px !important;
+  }
+  .table-wrapper + h3,
+  table + h3,
+  .table + h3,
+  .network-status-table + h3 {
+    margin-top: 26px !important;
+    padding-top: 2px !important;
+  }
+  .table-wrapper {
+    margin-top: 0 !important;
+    margin-bottom: 18px !important;
+  }
+  .table-wrapper > table,
+  .table-wrapper > .table,
+  .table-wrapper > table#status_leases,
+  .table-wrapper > table#status_leases6,
+  .table-wrapper > table#wifi_assoclist_table,
+  .table-wrapper > table.leases,
+  .table-wrapper > table.leases6,
+  .table-wrapper > table.assoclist {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  .table-wrapper + .table-wrapper,
+  table + table,
+  .table + .table {
+    margin-top: 16px !important;
+  }
+
+  /* Channel Analysis Mobile Graph */
+  #channel_graph,
+  [data-page*="channel_analysis"] #channel_graph,
+  div[id="channel_graph"] {
+    height: 280px !important;
+    margin-top: 6px !important;
+    margin-bottom: 18px !important;
+  }
 
   /* Responsive Horizontal Scrolling Table Containers */
   .cbi-section,

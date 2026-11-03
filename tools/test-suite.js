@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=2'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 2');
-assert(control.includes('Version: 1.0.57-2'), 'packaging/control Version is 1.0.57-2');
-assert(buildIpk.includes('1.0.57-2'), 'build-ipk.sh default target is 1.0.57-2');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-2'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-2');
-assert(swJs.includes('streamline-static-v57-2'), 'streamline-sw.js CACHE_NAME matches v57-2');
-assert(headerHtm.includes('?v=1.0.57.2'), 'header.htm asset query param matches v1.0.57.2');
-assert(headerUt.includes('?v=1.0.57.2'), 'header.ut asset query param matches v1.0.57.2');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=3'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 3');
+assert(control.includes('Version: 1.0.57-3'), 'packaging/control Version is 1.0.57-3');
+assert(buildIpk.includes('1.0.57-3'), 'build-ipk.sh default target is 1.0.57-3');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-3'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-3');
+assert(swJs.includes('streamline-static-v57-3'), 'streamline-sw.js CACHE_NAME matches v57-3');
+assert(headerHtm.includes('?v=1.0.57.3'), 'header.htm asset query param matches v1.0.57.3');
+assert(headerUt.includes('?v=1.0.57.3'), 'header.ut asset query param matches v1.0.57.3');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -205,6 +205,23 @@ assert(menuJs.includes('touchstart') && menuJs.includes('touchmove') && menuJs.i
   'menu-streamline-v21.js implements touch drag scrolling for mobile devices');
 assert(menuJs.includes('table#wifi_assoclist_table'),
   'menu-streamline-v21.js table drag scroll includes Associated Stations table');
+
+// Test 14: Verify Upstream alignment, Channel Analysis dark theme, and Table spacing harmonization
+console.log('\n14. Verifying Upstream alignment, Channel Analysis dark theme, and Table spacing...');
+assert(menuJs.includes('/upstream/i.test(headText)') && menuJs.includes('strayBand.remove()'),
+  'menu-streamline-v21.js strictly excludes upstream cards from Wi-Fi frequency detection');
+assert(cascadeCss.includes('.network-status-table .ifacebox-head.is-upstream strong::before'),
+  'cascade.css hides Wi-Fi icons on upstream network cards');
+assert(cascadeCss.includes('.network-status-table .ifacebox-body > div') && cascadeCss.includes('margin-top: auto !important;'),
+  'cascade.css pins bottom device badges to baseline across all upstream cards');
+assert(cascadeCss.includes('#channel_graph') && cascadeCss.includes('background: var(--sl-surface-2'),
+  'cascade.css provides dark theme for Channel Analysis graph');
+assert(mobileCss.includes('#channel_graph') && mobileCss.includes('height: 280px !important;'),
+  'mobile.css optimizes Channel Analysis graph height for mobile');
+assert(cascadeCss.includes('.table-wrapper + h3') && cascadeCss.includes('h3 + .table-wrapper'),
+  'cascade.css standardizes spacing between table wrappers and headings');
+assert(mobileCss.includes('.table-wrapper + h3') && mobileCss.includes('.table-wrapper + .table-wrapper'),
+  'mobile.css standardizes spacing between table wrappers and headings on mobile');
 
 // Summary
 console.log(`\n========================================`);
