@@ -321,26 +321,158 @@
     float: none;
     margin-top: 8px;
   }
-  .cbi-section { padding: 14px; border-radius: 12px; overflow-x: auto; }
+  .cbi-section { padding: 14px; border-radius: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .network-status-table { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 12px; }
   .cbi-value { display: block; padding: 10px 0; }
   .cbi-value-title { display: block; width: 100%; padding: 0 0 7px; }
   .cbi-value-field { width: 100%; }
-  table, .table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  th, td, .th, .td { min-width: 110px; padding: 10px 12px; text-align: left; }
+
+  /* Responsive Horizontal Scrolling Table Containers */
+  .cbi-section-node,
+  .table-wrapper,
+  div[data-chain],
+  #view table.table,
+  .cbi-section table.table,
+  [data-page*="realtime"] table.table,
+  table[style*="table-layout:fixed"] {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Table Width & Sizing: Prevent Squishing, Unlock Horizontal Drag */
+  .cbi-section-node > table,
+  .cbi-section-node > .table,
+  .cbi-section-node > .cbi-section-table,
+  .table-wrapper > table,
+  .table-wrapper > .table,
+  div[data-chain] > table,
+  div[data-chain] > .table {
+    display: table !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  /* Standalone Tables without wrapper */
+  table, .table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  table > thead,
+  table > tbody,
+  table > tfoot {
+    display: table !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  /* Table cells spacing and wrapping control */
+  th, td, .th, .td { min-width: 90px; padding: 10px 12px; text-align: left; }
+  th, .th, .cbi-section-table-titles .cbi-section-table-cell { white-space: nowrap !important; }
   th:first-child, td:first-child, .th:first-child, .td:first-child { padding-left: 14px; }
   th:last-child, td:last-child, .th:last-child, .td:last-child { padding-right: 14px; }
+
+  /* Wireless Overview: Unlock hidden overflow, protect action buttons */
+  [data-page="admin-network-wireless"] .cbi-section-node {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  [data-page="admin-network-wireless"] .cbi-section-table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    min-width: 640px !important;
+    width: max-content !important;
+  }
+  [data-page="admin-network-wireless"] .cbi-section-table-row > td:last-child,
+  [data-page="admin-network-wireless"] .cbi-section-table-row > .td:last-child {
+    white-space: nowrap !important;
+    min-width: 160px !important;
+  }
+
+  /* Firewall Chain Tables: Ensure columns do not collapse */
+  div[data-chain] th,
+  div[data-chain] td,
+  div[data-chain] .th,
+  div[data-chain] .td {
+    white-space: nowrap !important;
+    padding: 10px 12px !important;
+  }
+
+  /* Network Interfaces */
   #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacebox"] { width: 220px; min-width: 200px; max-width: 240px; padding: 12px; vertical-align: middle; }
   #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"] { width: 280px; min-width: 260px; padding: 12px 14px; vertical-align: middle; }
   #cbi-network-interface .cbi-section-table-row > .td[data-name="_ifacestat"] strong { display: inline-block; min-width: 75px; color: var(--sl-muted); font-size: .78rem; text-transform: uppercase; }
+  #cbi-network-interface .ifacebox { width: 100%; max-width: 190px; }
+
+  /* Action Buttons Column: Keep on single line, never wrap awkwardly */
   .cbi-section-table-row > .cbi-section-actions,
   .cbi-section-table-row > td.cbi-section-actions,
-  .cbi-section-table-row > .td.cbi-section-actions { width: auto; min-width: 170px; padding: 12px; vertical-align: middle; }
-  #cbi-network-interface .ifacebox { width: 100%; max-width: 190px; }
-  .cbi-section-actions > div { justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+  .cbi-section-table-row > .td.cbi-section-actions,
+  .cbi-section-actions {
+    width: auto !important;
+    min-width: 150px !important;
+    padding: 12px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+  }
+  .cbi-section-actions > div,
+  .cbi-section-actions .button-row {
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Key Identifiers: Prevent line breaking on addresses and badges */
+  .sl-copyable-address,
+  .ifacebadge,
+  .zone-forwards {
+    white-space: nowrap !important;
+  }
+  .zone-forwards { min-width: 230px; }
   .cbi-tooltip { position: fixed; left: 14px !important; right: 14px; top: auto; bottom: 18px; width: auto; max-width: none; transform: translateY(8px); }
   .cbi-tooltip-container:hover > .cbi-tooltip:not(:empty), .cbi-tooltip-container:focus-within > .cbi-tooltip:not(:empty) { transform: translateY(0); }
-  .zone-forwards { min-width: 230px; }
+
+  /* Subtle Custom Scrollbar for Drag-Scrollable Table Containers */
+  .cbi-section-node::-webkit-scrollbar,
+  div[data-chain]::-webkit-scrollbar,
+  .table-wrapper::-webkit-scrollbar,
+  [data-page="admin-network-wireless"] .cbi-section-table::-webkit-scrollbar,
+  table::-webkit-scrollbar,
+  .table::-webkit-scrollbar {
+    height: 4px;
+  }
+  .cbi-section-node::-webkit-scrollbar-track,
+  div[data-chain]::-webkit-scrollbar-track,
+  .table-wrapper::-webkit-scrollbar-track,
+  [data-page="admin-network-wireless"] .cbi-section-table::-webkit-scrollbar-track,
+  table::-webkit-scrollbar-track,
+  .table::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 99px;
+  }
+  .cbi-section-node::-webkit-scrollbar-thumb,
+  div[data-chain]::-webkit-scrollbar-thumb,
+  .table-wrapper::-webkit-scrollbar-thumb,
+  [data-page="admin-network-wireless"] .cbi-section-table::-webkit-scrollbar-thumb,
+  table::-webkit-scrollbar-thumb,
+  .table::-webkit-scrollbar-thumb {
+    background: rgba(var(--sl-accent-rgb), 0.45);
+    border-radius: 99px;
+  }
+  .cbi-section-node,
+  div[data-chain],
+  .table-wrapper,
+  [data-page="admin-network-wireless"] .cbi-section-table,
+  table,
+  .table {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--sl-accent-rgb), 0.45) rgba(255, 255, 255, 0.04);
+  }
   .cbi-page-actions { position: sticky; bottom: 0; z-index: 20; margin: 0 -14px -52px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(9,11,17,.92); border-top: 1px solid var(--sl-border); backdrop-filter: blur(10px); }
   #content_syslog, #content_dmesg, #content_systemlog, #content_kernellog, #diag-rc-output, #command-rc-output, .command-output { padding: 8px; }
   #syslog, #dmesg, #content_syslog textarea, #content_dmesg textarea, #content_systemlog textarea, #content_kernellog textarea { min-height: 55vh; padding: 11px; font-size: .76rem !important; }
@@ -383,17 +515,29 @@
 
   /* Realtime graphs & metrics table on mobile */
   [data-page*="realtime"] .cbi-section table.table,
-  .cbi-section:has(polyline) table.table {
+  .cbi-section:has(polyline) table.table,
+  table[style*="table-layout:fixed"] {
     display: block !important;
     width: 100% !important;
+    max-width: 100% !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    table-layout: auto !important;
     white-space: nowrap !important;
   }
+  [data-page*="realtime"] .cbi-section table.table > tbody,
+  .cbi-section:has(polyline) table.table > tbody,
+  table[style*="table-layout:fixed"] > tbody {
+    display: table !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
   [data-page*="realtime"] .cbi-section table.table td.td,
-  .cbi-section:has(polyline) table.table td.td {
+  .cbi-section:has(polyline) table.table td.td,
+  table[style*="table-layout:fixed"] td.td {
     padding: 10px 12px !important;
     font-size: 0.82rem !important;
+    white-space: nowrap !important;
   }
 }
 

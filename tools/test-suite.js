@@ -147,6 +147,26 @@ assert(menuJs.includes('showToast(value, type)'), 'menu-streamline-v21.js implem
 assert(cascadeCss.includes('.sl-copyable-address'), 'cascade.css contains .sl-copyable-address styling');
 assert(cascadeCss.includes('.sl-toast-container') && cascadeCss.includes('.sl-toast'), 'cascade.css contains toast notification styles');
 
+// Test 10: Verify mobile table layout and horizontal scrolling architecture
+console.log('\n10. Verifying mobile layout table responsiveness and horizontal drag/scroll...');
+const mobileCss = fs.readFileSync(path.join(rootDir, 'htdocs/luci-static/streamline/mobile.css'), 'utf8');
+assert(mobileCss.includes('.cbi-section-node') && mobileCss.includes('overflow-x: auto !important'),
+  'mobile.css enables horizontal scrolling on .cbi-section-node');
+assert(mobileCss.includes('[data-page="admin-network-wireless"] .cbi-section-table') &&
+       mobileCss.includes('overflow-x: auto !important'),
+  'mobile.css unlocks horizontal scrolling on wireless overview tables');
+assert(mobileCss.includes('div[data-chain]') && mobileCss.includes('white-space: nowrap !important'),
+  'mobile.css preserves firewall chain columns with non-collapsing nowrap styling');
+assert(mobileCss.includes('.cbi-section-actions') && mobileCss.includes('white-space: nowrap !important'),
+  'mobile.css keeps action buttons inline and prevents awkward button stacking');
+assert(mobileCss.includes('table[style*="table-layout:fixed"]') && mobileCss.includes('table-layout: auto !important'),
+  'mobile.css unlocks fixed realtime tables to allow natural column widths');
+assert(!cascadeCss.includes('overflow: hidden !important;\n  border-radius: 12px !important;\n  border: 1px solid var(--sl-border) !important;\n  background: var(--sl-surface) !important;'),
+  'cascade.css does not lock wireless tables with overflow: hidden !important');
+assert(menuJs.includes('setupResponsiveTables()'), 'menu-streamline-v21.js defines setupResponsiveTables()');
+assert(menuJs.includes('this.setupResponsiveTables()'), 'menu-streamline-v21.js initializes setupResponsiveTables in __init__');
+assert(menuJs.includes('setupTableDragScroll()'), 'menu-streamline-v21.js enables mouse/touch table drag scrolling');
+
 // Summary
 console.log(`\n========================================`);
 if (failures === 0) {
@@ -156,3 +176,4 @@ if (failures === 0) {
   console.error(`💥 ${failures} TEST(S) FAILED. Fix issues before releasing.\n`);
   process.exit(1);
 }
+

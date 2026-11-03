@@ -28,6 +28,7 @@ return baseclass.extend({
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
     this.setupClickToCopy();
+    this.setupResponsiveTables();
     ui.menu.load()
       .then((tree) => this.render(tree))
       .catch(() => {
@@ -1423,5 +1424,92 @@ return baseclass.extend({
         }
       }, 300);
     }, 2400);
+  },
+
+  setupResponsiveTables() {
+    const wrapTables = () => {
+      const tables = document.querySelectorAll('table.table, .cbi-section-table');
+      tables.forEach((tbl) => {
+        const parent = tbl.parentElement;
+        if (!parent) return;
+        if (
+          parent.classList.contains('cbi-section-node') ||
+          parent.classList.contains('table-wrapper') ||
+          parent.hasAttribute('data-chain') ||
+          parent.classList.contains('modal') ||
+          parent.classList.contains('modal-body')
+        ) {
+          return;
+        }
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        parent.insertBefore(wrapper, tbl);
+        wrapper.appendChild(tbl);
+      });
+    };
+
+    wrapTables();
+
+    const main = document.querySelector('#maincontent') || document.body;
+    if (main && window.MutationObserver) {
+      let timeout = null;
+      const observer = new MutationObserver(() => {
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(wrapTables, 100);
+      });
+      observer.observe(main, { childList: true, subtree: true });
+    }
+
+    this.setupTableDragScroll();
+  },
+
+  setupTableDragScroll() {
+    let activeContainer = null;
+    let startX = 0;
+    let scrollLeft = 0;
+    let isDragging = false;
+
+    document.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      const target = e.target;
+      if (!target) return;
+      if (target.closest('button, a, input, select, textarea, .cbi-button, .sl-copyable-address, [role="button"], label')) {
+        return;
+      }
+
+      const container = target.closest('.cbi-section-node, div[data-chain], .table-wrapper, [data-page="admin-network-wireless"] .cbi-section-table, table.table');
+      if (!container) return;
+      if (container.scrollWidth <= container.clientWidth) return;
+
+      activeContainer = container;
+      startX = e.pageX - container.getBoundingClientRect().left;
+      scrollLeft = container.scrollLeft;
+      isDragging = false;
+    }, { passive: true });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!activeContainer) return;
+      const x = e.pageX - activeContainer.getBoundingClientRect().left;
+      const walk = x - startX;
+      if (!isDragging && Math.abs(walk) > 6) {
+        isDragging = true;
+      }
+      if (isDragging) {
+        activeContainer.scrollLeft = scrollLeft - walk;
+        try {
+          const sel = window.getSelection();
+          if (sel && sel.empty) sel.empty();
+          else if (sel && sel.removeAllRanges) sel.removeAllRanges();
+        } catch (err) {}
+      }
+    }, { passive: true });
+
+    const endDrag = () => {
+      activeContainer = null;
+      isDragging = false;
+    };
+
+    document.addEventListener('mouseup', endDrag, { passive: true });
+    document.addEventListener('mouseleave', endDrag, { passive: true });
   }
 });

@@ -56,8 +56,16 @@ function extractGzipStreams(buf) {
     if (buf[pos] !== 0x1f || buf[pos + 1] !== 0x8b) {
       throw new Error(`Expected gzip stream magic at byte ${pos}`);
     }
+    const candidates = [];
+    for (let i = pos + 18; i < buf.length - 1; i++) {
+      if (buf[i] === 0x1f && buf[i + 1] === 0x8b) {
+        candidates.push(i);
+      }
+    }
+    candidates.push(buf.length);
+
     let found = false;
-    for (let end = pos + 18; end <= buf.length; end++) {
+    for (const end of candidates) {
       try {
         const decompressed = zlib.gunzipSync(buf.subarray(pos, end));
         streams.push({
@@ -70,7 +78,7 @@ function extractGzipStreams(buf) {
         found = true;
         break;
       } catch (err) {
-        // Try next slice boundary
+        // Try next candidate boundary
       }
     }
     if (!found) {

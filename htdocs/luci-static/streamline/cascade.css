@@ -2070,7 +2070,11 @@ code { color: #d9e2f2; font-family: ui-monospace, SFMono-Regular, Consolas, "Lib
   th:first-child, td:first-child, .th:first-child, .td:first-child { padding-left: 12px; }
   th:last-child, td:last-child, .th:last-child, .td:last-child { padding-right: 12px; }
   .sl-metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  table, .table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table, .table, .cbi-section-node, .table-wrapper, div[data-chain] {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @media (min-width: 1101px) and (min-height: 551px) {
@@ -2290,7 +2294,7 @@ div[data-chain] {
   border: 1px solid var(--sl-border) !important;
   border-radius: var(--sl-radius, 14px) !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
-  overflow: hidden !important;
+  overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
@@ -2432,6 +2436,26 @@ span.jump:hover, .target.jump:hover {
     margin-top: 20px !important;
     margin-bottom: 20px !important;
     border-radius: 12px !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  [data-page="admin-status-iptables"] div[data-chain] > table,
+  [data-page="admin-status-nftables"] div[data-chain] > table,
+  div[data-tab="iptables"] div[data-chain] > table,
+  div[data-tab="ip6tables"] div[data-chain] > table,
+  div[data-chain] > table,
+  div[data-chain] > .table {
+    display: table !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+  div[data-chain] th,
+  div[data-chain] td,
+  div[data-chain] .th,
+  div[data-chain] .td {
+    white-space: nowrap !important;
+    padding: 10px 12px !important;
   }
   [data-page="admin-status-iptables"] div[data-chain] > h4,
   [data-page="admin-status-nftables"] div[data-chain] > h4,
@@ -2462,7 +2486,7 @@ span.jump:hover, .target.jump:hover {
 [data-page="admin-network-wireless"] .cbi-section-table {
   border-collapse: separate !important;
   border-spacing: 0 !important;
-  overflow: hidden !important;
+  overflow: hidden;
   border-radius: 12px !important;
   border: 1px solid var(--sl-border) !important;
   background: var(--sl-surface) !important;
@@ -2934,7 +2958,7 @@ table[style*="table-layout:fixed"] {
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
-  overflow: hidden !important;
+  overflow: hidden;
   margin-top: 4px !important;
   margin-bottom: 24px !important;
 }
