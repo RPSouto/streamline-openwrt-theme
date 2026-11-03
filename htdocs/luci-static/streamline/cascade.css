@@ -713,104 +713,344 @@ h4 + .table, h4 + table { margin-top: 14px; }
 .ifacebadge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; margin: 2px; border: 1px solid var(--sl-border); border-radius: 7px; background: #0d1118; }
 .ifacebadge img { filter: brightness(1.4); }
 
+/* ==========================================================================
+   Wireless Overview Cards (Status -> Overview)
+   ========================================================================== */
 .network-status-table {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: 16px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  margin: 0 0 20px 0;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)) !important;
+  gap: 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin: 0 0 24px 0 !important;
+  width: 100% !important;
 }
+
 .network-status-table .ifacebox {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-width: 0;
-  margin: 0;
-  border: 1px solid var(--sl-border);
-  border-radius: var(--sl-radius);
-  background: var(--sl-surface-2);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: var(--sl-radius) !important;
+  background: var(--sl-surface-2) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease !important;
 }
+
 .network-status-table .ifacebox:hover {
-  border-color: rgba(var(--sl-accent-rgb), 0.35);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-  transform: translateY(-2px);
+  border-color: rgba(var(--sl-accent-rgb), 0.35) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+  transform: translateY(-2px) !important;
 }
+
+/* Radio Card Header */
 .network-status-table .ifacebox-head {
-  display: flex;
-  align-items: center;
-  padding: 13px 18px;
-  text-align: left;
-  border-bottom: 1px solid var(--sl-border);
-  background: var(--sl-surface-3);
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--sl-text);
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 18px !important;
+  border-bottom: 1px solid var(--sl-border) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), var(--sl-surface-3) !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  color: var(--sl-text) !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
 }
-.network-status-table .ifacebox-body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px 18px;
-  text-align: left;
-  line-height: 1.75;
-  overflow-wrap: anywhere;
-  font-size: 0.84rem;
-  color: var(--sl-muted);
+
+.network-status-table .ifacebox-head strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #ffffff !important;
 }
-.network-status-table .ifacebox-body > span {
-  flex: 1 1 auto;
-}
-.network-status-table .ifacebox-body strong {
-  color: var(--sl-text);
-  font-weight: 600;
-  margin-right: 4px;
-}
-.network-status-table .ifacebox-body > div {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-.network-status-table .ifacebadge {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-  margin: 0;
-  padding: 8px 12px;
-  gap: 10px;
-  border: 1px solid var(--sl-border);
-  border-radius: 8px;
-  background: var(--sl-surface-3);
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: var(--sl-text);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-.network-status-table .ifacebadge > span {
-  min-width: 0;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  font-variant-numeric: tabular-nums;
-}
-.network-status-table .ifacebadge img {
+
+.network-status-table .ifacebox-head strong::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: var(--sl-accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.55a11 11 0 0 1 14.08 0'/%3E%3Cpath d='M1.42 9a16 16 0 0 1 21.16 0'/%3E%3Cpath d='M8.53 16.11a6 6 0 0 1 6.95 0'/%3E%3Cline x1='12' y1='20' x2='12.01' y2='20'/%3E%3C/svg%3E") no-repeat center;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.55a11 11 0 0 1 14.08 0'/%3E%3Cpath d='M1.42 9a16 16 0 0 1 21.16 0'/%3E%3Cpath d='M8.53 16.11a6 6 0 0 1 6.95 0'/%3E%3Cline x1='12' y1='20' x2='12.01' y2='20'/%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
   flex-shrink: 0;
-  max-width: 16px;
-  max-height: 16px;
-  filter: brightness(1.3);
 }
+
+/* Radio Band Pill in Header */
+.network-status-table .sl-radio-band {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(var(--sl-accent-rgb), 0.15);
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.32);
+  color: var(--sl-accent);
+}
+
+/* Radio Status Pill (Active / Offline) */
+.network-status-table .ifacebox-head.active::after {
+  content: "Active";
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.network-status-table .ifacebox-head:not(.active)::after {
+  content: "Offline";
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sl-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--sl-border);
+}
+
+/* Radio Card Body */
+.network-status-table .ifacebox-body {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  padding: 16px 18px !important;
+  text-align: left !important;
+  line-height: 1.6 !important;
+  overflow-wrap: anywhere !important;
+  font-size: 0.84rem !important;
+  color: var(--sl-muted) !important;
+}
+
+/* Radio Telemetry Chips (Type, Channel, Bitrate, etc.) */
+.network-status-table .ifacebox-body > span:first-child {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  background: rgba(0, 0, 0, 0.24) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 10px !important;
+}
+
+.network-status-table .ifacebox-body > span:first-child > br {
+  display: none !important;
+}
+
+.network-status-table .ifacebox-body > span:first-child > .nowrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 7px !important;
+  font-size: 0.8rem !important;
+  color: var(--sl-text) !important;
+}
+
+.network-status-table .ifacebox-body > span:first-child > .nowrap strong {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  color: var(--sl-muted) !important;
+  margin-right: 2px !important;
+}
+
+/* SSID Networks Container */
+.network-status-table .ifacebox-body > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+}
+
+/* Individual SSID Card */
+.network-status-table .ifacebadge {
+  display: flex !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 13px 16px !important;
+  gap: 14px !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: 11px !important;
+  background: var(--sl-surface-3) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.5 !important;
+  color: var(--sl-text) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease !important;
+  position: relative !important;
+}
+
+.network-status-table .ifacebadge:hover {
+  border-color: rgba(var(--sl-accent-rgb), 0.35) !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Wi-Fi Signal / State Icon */
+.network-status-table .ifacebadge img {
+  flex-shrink: 0 !important;
+  width: 26px !important;
+  height: 26px !important;
+  max-width: 26px !important;
+  max-height: 26px !important;
+  padding: 5px !important;
+  border-radius: 8px !important;
+  background: rgba(var(--sl-accent-rgb), 0.1) !important;
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.22) !important;
+  filter: brightness(1.2) !important;
+  margin-top: 2px !important;
+}
+
+/* SSID Content Block */
+.network-status-table .ifacebadge > span {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px 12px !important;
+}
+
+.network-status-table .ifacebadge > span > br {
+  display: none !important;
+}
+
+/* SSID Name (Header of the card) */
+.network-status-table .ifacebadge > span > .nowrap:first-child {
+  display: block !important;
+  width: 100% !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.01em !important;
+  margin-bottom: 2px !important;
+  padding-bottom: 5px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.network-status-table .ifacebadge > span > .nowrap:first-child strong {
+  display: none !important;
+}
+
+/* SSID Metadata Details (Mode, BSSID, Encryption, Associations) */
+.network-status-table .ifacebadge > span > .nowrap:not(:first-child) {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 0.77rem !important;
+  color: var(--sl-text) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.network-status-table .ifacebadge > span > .nowrap:not(:first-child) strong {
+  font-size: 0.71rem !important;
+  font-weight: 600 !important;
+  color: var(--sl-muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+}
+
+/* Active Client Count Highlight */
+.network-status-table .ifacebadge > span > .nowrap.has-associations {
+  color: #34d399 !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  font-weight: 700 !important;
+}
+
+.network-status-table .ifacebadge > span > .nowrap.has-associations strong {
+  color: #6ee7b7 !important;
+}
+
+/* Disabled State */
+.network-status-table .ifacebadge em {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 3px 9px !important;
+  border-radius: 6px !important;
+  font-style: normal !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  background: rgba(244, 63, 94, 0.12) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(244, 63, 94, 0.25) !important;
+}
+
+.network-status-table .ifacebadge em::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: #f87171 !important;
+}
+
+.network-status-table .ifacebadge:has(em),
+.network-status-table .ifacebadge.sl-wifi-disabled {
+  background: rgba(13, 17, 24, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-style: dashed !important;
+  opacity: 0.78 !important;
+}
+
+.network-status-table .ifacebadge:has(em):hover,
+.network-status-table .ifacebadge.sl-wifi-disabled:hover {
+  opacity: 1 !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+
+.network-status-table .ifacebadge:has(em) img,
+.network-status-table .ifacebadge.sl-wifi-disabled img,
+.network-status-table .ifacebadge img[src*="none"] {
+  background: rgba(244, 63, 94, 0.1) !important;
+  border-color: rgba(244, 63, 94, 0.22) !important;
+}
+
+.network-status-table .ifacebadge .cbi-button {
+  margin-left: auto !important;
+  padding: 3px 10px !important;
+  min-height: 26px !important;
+  font-size: 0.74rem !important;
+}
+
 .network-status-table + .cbi-value {
   margin-top: 18px;
   padding-top: 18px;

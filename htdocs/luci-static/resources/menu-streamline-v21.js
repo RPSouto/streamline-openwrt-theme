@@ -27,6 +27,7 @@ return baseclass.extend({
     this.setupSidebar();
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
+    this.normalizeWirelessOverview();
     this.setupClickToCopy();
     this.setupResponsiveTables();
     ui.menu.load()
@@ -263,6 +264,80 @@ return baseclass.extend({
     const targetNode = document.body;
     if (targetNode && typeof MutationObserver !== 'undefined') {
       const observer = new MutationObserver(() => scheduleApply());
+      observer.observe(targetNode, { childList: true, subtree: true });
+    }
+  },
+
+  normalizeWirelessOverview() {
+    const enhance = () => {
+      const boxes = document.querySelectorAll('.network-status-table .ifacebox');
+      if (!boxes || !boxes.length) return;
+
+      boxes.forEach((box) => {
+        // 1. Detect Frequency Band & inject Frequency pill in Header
+        const head = box.querySelector('.ifacebox-head');
+        const telemetry = box.querySelector('.ifacebox-body > span:first-child');
+        if (head && telemetry && !head.querySelector('.sl-radio-band')) {
+          const text = telemetry.textContent || '';
+          let bandLabel = null;
+          if (/\b2\.\d+\s*GHz\b/i.test(text) || text.includes('(2.') || text.includes('2.4')) {
+            bandLabel = '2.4 GHz';
+          } else if (/\b5\.\d+\s*GHz\b/i.test(text) || text.includes('(5.') || text.includes('5 GHz') || text.includes('5.2') || text.includes('5.8')) {
+            bandLabel = '5 GHz';
+          } else if (/\b6\.\d+\s*GHz\b/i.test(text) || text.includes('(6.') || text.includes('6 GHz')) {
+            bandLabel = '6 GHz';
+          }
+
+          if (bandLabel) {
+            const bandPill = document.createElement('span');
+            bandPill.className = 'sl-radio-band';
+            bandPill.textContent = bandLabel;
+            const strong = head.querySelector('strong');
+            if (strong) {
+              strong.insertAdjacentElement('afterend', bandPill);
+            } else {
+              head.appendChild(bandPill);
+            }
+          }
+        }
+
+        // 2. Enhance SSID Cards
+        const badges = box.querySelectorAll('.ifacebadge');
+        badges.forEach((badge) => {
+          if (badge.querySelector('em') && !badge.classList.contains('sl-wifi-disabled')) {
+            badge.classList.add('sl-wifi-disabled');
+          }
+
+          const nowraps = badge.querySelectorAll('.nowrap');
+          nowraps.forEach((nw) => {
+            const str = nw.textContent || '';
+            const match = str.match(/Associations:\s*(\d+)/i);
+            if (match && parseInt(match[1], 10) > 0) {
+              nw.classList.add('has-associations');
+            }
+          });
+        });
+      });
+    };
+
+    let rafId = null;
+    const scheduleEnhance = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        enhance();
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', scheduleEnhance);
+    } else {
+      scheduleEnhance();
+    }
+
+    const targetNode = document.querySelector('#view') || document.querySelector('#maincontent') || document.body;
+    if (targetNode && typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(() => scheduleEnhance());
       observer.observe(targetNode, { childList: true, subtree: true });
     }
   },

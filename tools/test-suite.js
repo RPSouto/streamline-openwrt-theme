@@ -180,6 +180,19 @@ assert(mobileCss.includes('.cbi-section > div,') && mobileCss.includes('overflow
 assert(menuJs.includes('table#status_leases') && menuJs.includes('.cbi-section > div'),
   'menu-streamline-v21.js table drag scroll includes DHCP leases table and status containers');
 
+// Test 12: Verify Wireless Overview enhancements
+console.log('\n12. Verifying Wireless Overview enhancements and layout...');
+assert(cascadeCss.includes('repeat(auto-fit, minmax(min(100%, 380px), 1fr))'),
+  'cascade.css uses auto-fit grid to fill width symmetrically across all radio chips');
+assert(cascadeCss.includes('.network-status-table .ifacebox-head') && cascadeCss.includes('.sl-radio-band'),
+  'cascade.css includes modern radio hardware header and frequency pill styling');
+assert(cascadeCss.includes('.network-status-table .ifacebadge') && cascadeCss.includes('.has-associations'),
+  'cascade.css styles SSID cards with prominent titles, chip metadata and client highlights');
+assert(mobileCss.includes('.network-status-table { grid-template-columns: 1fr !important'),
+  'mobile.css stacks wireless radio cards to full width on mobile screens');
+assert(menuJs.includes('normalizeWirelessOverview()') && menuJs.includes('this.normalizeWirelessOverview()'),
+  'menu-streamline-v21.js defines and initializes normalizeWirelessOverview');
+
 // Summary
 console.log(`\n========================================`);
 if (failures === 0) {
