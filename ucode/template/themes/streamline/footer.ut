@@ -1,7 +1,11 @@
-    {% if (!blank_page): %}
+    {% if (!blank_page):
+      let dist = version.distversion ?? '';
+      if (version.distname && !match(dist, version.distname))
+        dist = `${version.distname} ${dist}`;
+    %}
     </div>
     <footer>
-      <span>Streamline · <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }} {{ version.luciversion }}</a> / {{ version.distname }} {{ version.distversion }}</span>
+      <span>Streamline · {{ entityencode(dist) }}</span>
       <ul class="breadcrumb pull-right" id="modemenu" style="display:none"></ul>
     </footer>
     <script>L.require('menu-streamline-v21')</script>

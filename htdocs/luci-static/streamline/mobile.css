@@ -319,7 +319,15 @@
     padding: 18px 14px 52px;
   }
   footer {
-    padding: 14px;
+    display: flex !important;
+    justify-content: flex-end !important;
+    text-align: right !important;
+    padding: 14px 18px 24px;
+    font-size: .74rem;
+  }
+  footer span {
+    margin-left: auto;
+    text-align: right;
   }
   footer .breadcrumb {
     float: none;

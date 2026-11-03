@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-8';
+const THEME_VERSION = '1.0.57-9';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -26,6 +26,7 @@ return baseclass.extend({
     this.initSession();
     this.setupSidebar();
     this.setupBrandVersion();
+    this.setupFooter();
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
     this.normalizeWirelessOverview();
@@ -1093,6 +1094,25 @@ return baseclass.extend({
           } catch (_) {}
         }).catch(() => {});
       }).catch(() => {});
+    }
+  },
+
+  setupFooter() {
+    const cleanFooter = () => {
+      const footerSpan = document.querySelector('footer > span');
+      if (!footerSpan) return;
+      const text = footerSpan.textContent || '';
+      if (/Powered by LuCI/i.test(text)) {
+        const match = text.match(/Streamline\s*·\s*Powered by LuCI[^\/]*\/\s*(.*)/i);
+        if (match && match[1]) {
+          footerSpan.textContent = 'Streamline · ' + match[1].trim();
+        }
+      }
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', cleanFooter);
+    } else {
+      cleanFooter();
     }
   },
 

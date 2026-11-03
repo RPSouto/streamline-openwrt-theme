@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=8'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 8');
-assert(control.includes('Version: 1.0.57-8'), 'packaging/control Version is 1.0.57-8');
-assert(buildIpk.includes('1.0.57-8'), 'build-ipk.sh default target is 1.0.57-8');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-8'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-8');
-assert(swJs.includes('streamline-static-v57-8'), 'streamline-sw.js CACHE_NAME matches v57-8');
-assert(headerHtm.includes('?v=1.0.57.8'), 'header.htm asset query param matches v1.0.57.8');
-assert(headerUt.includes('?v=1.0.57.8'), 'header.ut asset query param matches v1.0.57.8');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=9'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 9');
+assert(control.includes('Version: 1.0.57-9'), 'packaging/control Version is 1.0.57-9');
+assert(buildIpk.includes('1.0.57-9'), 'build-ipk.sh default target is 1.0.57-9');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-9'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-9');
+assert(swJs.includes('streamline-static-v57-9'), 'streamline-sw.js CACHE_NAME matches v57-9');
+assert(headerHtm.includes('?v=1.0.57.9'), 'header.htm asset query param matches v1.0.57.9');
+assert(headerUt.includes('?v=1.0.57.9'), 'header.ut asset query param matches v1.0.57.9');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -341,6 +341,21 @@ assert(cascadeCss.includes('.network-status-table .ifacebadge:hover') && !cascad
   'cascade.css avoids harsh glowing full contour on ifacebadge hover');
 assert(menuJs.includes('cleanDeviceBadges(box)') && menuJs.includes('formatDeviceBadgeElement'),
   'menu-streamline-v21.js implements cleanDeviceBadges and formatDeviceBadgeElement');
+
+// Test 20: Verify page footer right-alignment and simplified information
+console.log('\n20. Verifying page footer right-alignment and simplified content...');
+assert(cascadeCss.includes('footer {') && cascadeCss.includes('justify-content: flex-end !important;') && cascadeCss.includes('text-align: right !important;'),
+  'cascade.css aligns footer and contents to the right');
+assert(mobileCss.includes('footer {') && mobileCss.includes('justify-content: flex-end !important;'),
+  'mobile.css right-aligns footer on mobile devices');
+const footerHtm = fs.readFileSync(path.join(rootDir, 'luasrc/view/themes/streamline/footer.htm'), 'utf8');
+assert(!footerHtm.includes('Powered by') && footerHtm.includes('<span>Streamline · <%=pcdata(dist)%></span>'),
+  'footer.htm simplifies footer to only theme name and OpenWrt version');
+const footerUt = fs.readFileSync(path.join(rootDir, 'ucode/template/themes/streamline/footer.ut'), 'utf8');
+assert(!footerUt.includes('Powered by') && footerUt.includes('<span>Streamline · {{ entityencode(dist) }}</span>'),
+  'footer.ut simplifies footer to only theme name and OpenWrt version');
+assert(menuJs.includes('setupFooter()') && menuJs.includes('this.setupFooter()'),
+  'menu-streamline-v21.js defines and initializes setupFooter()');
 
 // Summary
 console.log(`\n========================================`);

@@ -398,8 +398,26 @@ header {
 .container::before { content: "ROUTER CONTROL"; display: block; color: var(--sl-accent-label); font-weight: 750; letter-spacing: .22em; font-size: .62rem; margin-bottom: 7px; }
 .container > h2:first-of-type, .container > .cbi-map > h2:first-child { margin-bottom: 22px; }
 
-footer { max-width: 1720px; margin-left: 232px; margin-right: auto; min-height: 54px; border-top: 1px solid var(--sl-border); padding: 16px 34px; color: var(--sl-faint); font-size: .78rem; transition: margin-left .3s cubic-bezier(.22,1,.36,1); }
-footer span { display: inline-block; }
+footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  text-align: right !important;
+  max-width: 1720px;
+  margin-left: 232px;
+  margin-right: auto;
+  min-height: 54px;
+  border-top: 1px solid var(--sl-border);
+  padding: 16px 34px;
+  color: var(--sl-faint);
+  font-size: .78rem;
+  transition: margin-left .3s cubic-bezier(.22,1,.36,1);
+}
+footer span {
+  display: inline-block;
+  margin-left: auto;
+  text-align: right;
+}
 .pull-right { float: right; }
 .breadcrumb { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
 .breadcrumb li a { color: var(--sl-muted); }

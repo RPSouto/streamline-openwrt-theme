@@ -1,8 +1,14 @@
 <%# SPDX-License-Identifier: Apache-2.0 -%>
-    <% if not blank_page then local ver = require "luci.version" %>
+    <% if not blank_page then
+      local ver = require "luci.version"
+      local dist = ver.distversion or ""
+      if ver.distname and not dist:find(ver.distname, 1, true) then
+        dist = ver.distname .. " " .. dist
+      end
+    %>
     </div>
     <footer>
-      <span>Streamline · <a href="https://github.com/openwrt/luci">Powered by <%=ver.luciname%> (<%=ver.luciversion%>)</a> / <%=ver.distversion%></span>
+      <span>Streamline · <%=pcdata(dist)%></span>
       <ul class="breadcrumb pull-right" id="modemenu" style="display:none"></ul>
     </footer>
     <script>L.require('menu-streamline-v21')</script>
