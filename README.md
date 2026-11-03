@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.57-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.57--10-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -10,15 +10,20 @@
 
 ## ✨ Highlights
 
+* **Dynamic OpenWrt Distribution & Version Badge**: Prominently displays the detected OpenWrt release (e.g. `OPENWRT 21`, `OPENWRT 23`, `IMMORTALWRT 23`) directly below the brand title in both the desktop sidebar and mobile navigation drawer.
+* **Minimalist Right-Aligned Footer**: Clean footer displaying strictly `Streamline · <Distro> <Version>` (e.g., `Streamline · OpenWrt 21.02`), stripping verbose snapshot tags and git commit hashes.
+* **Enhanced Mobile Table Scrolling & Touch Swipe**: Smooth horizontal touch swipe and drag scrolling across overview tables, DHCP leases, firewall rules, and associated stations tables without cell clipping.
 * **Click-to-Copy for IP & MAC Addresses**: Click directly on any IPv4, IPv6, or MAC address across overview tables, status dashboards, wireless clients, DHCP leases, and routing tables to instantly copy it to your clipboard. Features a subtle hover affordance and sleek frosted glass toast notifications (smartly excludes forms, input fields, buttons, and modal dialogs, with HTTP fallback support).
 * **Quick Search / Command Palette (`Ctrl + K` / `Cmd + K`)**: Instantly jump to any LuCI menu, page, or service with keyboard navigation and fuzzy search.
 * **Harmonized Firewall Zone Badges (`Network → Firewall`)**: Dynamic color normalization and dark glassmorphic styling for all firewall zone badges (`lan`, `wan`, and user-defined zones). Eliminates harsh pastel blocks and black text with sleek dark-tinted surfaces, neon glowing borders, and crisp high-contrast white typography.
 * **Normalized Realtime Graphs (`Status → Realtime Graphs`)**: Full dark-theme integration for Bandwidth, CPU Load, Wireless, and Connections SVG charts. Replaces legacy white boxes and harsh primary colors with theme-calibrated neon traces (cyan, purple, emerald, rose), technical dashed gridlines, and card-styled metrics tables.
-* **Smart Collapsible Wireless Overview (`Network → Wireless`)**:
+* **Revamped Wireless Overview (`Network → Wireless`)**:
   * **Collapsible Radio Groups**: Expand and collapse physical radios and virtual SSIDs with smooth animated chevron toggles. Radios are closed by default for a clean overview.
   * **Interactive Network Counter**: Circular numeric pill badge showing the exact number of active virtual interfaces per radio.
+  * **Auto-Fit Grid & Styled Chips**: Symmetrical auto-fit radio cards, styled SSID pills, and standardized Wi-Fi mode formatting (e.g., `802.11 b/g/n/ax`).
   * **Flicker-Free Polling**: Background statistics polling (`iwinfo` / assoclist every 5s) reconciles synchronously in microtasks, eliminating UI flashing and jitter.
   * **Parent-Child Visual Hierarchy**: Virtual interfaces are indented with a tree branch indicator (`↳`) under their parent physical controller.
+* **Status Card Modernization & Dark Channel Analysis**: Sleek device badges, baseline card alignment across upstream interfaces, and dark theme styling for Channel Analysis charts.
 * **Persistent Router Health Card**: Live CPU load, memory utilization, and flash storage meters rendered as unified full-width cards matching the system overview table.
 * **Clean Modern Frosted Login Screen**: Distraction-free dark canvas with subtle glowing ambient aura matching the active palette, router hostname display, and floating frosted glass credential card.
 * **Collapsible Sidebar & Navigation**: Auto-saving collapsible sidebar on desktop, closed accordion panels by default upon login, and a clean sliding drawer for mobile and tablet screens.
@@ -46,8 +51,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.57-1_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.57-1_all.ipk'
+scp releases/luci-theme-streamline_1.0.57-10_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.57-10_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -55,8 +60,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.57-r1_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.57-r1_all.apk'
+scp releases/luci-theme-streamline_1.0.57-r10_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.57-r10_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
@@ -141,8 +146,8 @@ Open **Appearance** at the bottom of the desktop sidebar or within the mobile dr
 Ensure you have a POSIX shell with GNU `tar` and `gzip`:
 
 ```sh
-./build-ipk.sh releases/luci-theme-streamline_1.0.57-1_all.ipk
-node tools/verify-ipk.js releases/luci-theme-streamline_1.0.57-1_all.ipk
+./build-ipk.sh releases/luci-theme-streamline_1.0.57-10_all.ipk
+node tools/verify-ipk.js releases/luci-theme-streamline_1.0.57-10_all.ipk
 ```
 
 ### Building via OpenWrt SDK / Buildroot
