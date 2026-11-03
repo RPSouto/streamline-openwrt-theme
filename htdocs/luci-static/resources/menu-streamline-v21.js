@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.57-7';
+const THEME_VERSION = '1.0.57-8';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -304,12 +304,82 @@ return baseclass.extend({
     }
   },
 
+  cleanDeviceBadges(box) {
+    const badges = box.querySelectorAll('.ifacebadge');
+    if (!badges || !badges.length) return;
+
+    badges.forEach((badge) => {
+      const text = badge.textContent || '';
+      if (/SSID:|Mode:\s*(Master|Client|Ad-Hoc)|BSSID:|Encryption:|Associations:/i.test(text)) {
+        return;
+      }
+
+      badge.classList.add('sl-device-badge');
+
+      const nowraps = badge.querySelectorAll('.nowrap');
+      if (nowraps.length > 0) {
+        nowraps.forEach((nw) => {
+          this.formatDeviceBadgeElement(nw);
+        });
+      } else {
+        this.formatDeviceBadgeElement(badge);
+      }
+    });
+  },
+
+  formatDeviceBadgeElement(el) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    const textNodes = [];
+    while ((node = walker.nextNode())) {
+      textNodes.push(node);
+    }
+
+    textNodes.forEach((tNode) => {
+      const val = tNode.nodeValue || '';
+      const m = val.match(/^(.*?)(Ethernet Adapter|Wireless Adapter|Bridge|VLAN|Software VLAN|MAC-VLAN|Tunnel|Device|Network Device):\s*"?([^"\r\n]+?)"?\s*$/i);
+      if (m) {
+        const prefix = m[1];
+        const type = m[2];
+        const devName = m[3];
+        const span = document.createElement('span');
+        span.className = 'sl-device-content';
+        if (prefix && prefix.trim()) {
+          span.appendChild(document.createTextNode(prefix));
+        }
+        const typeSpan = document.createElement('span');
+        typeSpan.className = 'sl-device-type';
+        typeSpan.textContent = type;
+        span.appendChild(typeSpan);
+
+        const sepSpan = document.createElement('span');
+        sepSpan.className = 'sl-device-sep';
+        sepSpan.textContent = '•';
+        span.appendChild(sepSpan);
+
+        const nameSpan = document.createElement('strong');
+        nameSpan.className = 'sl-device-name';
+        nameSpan.textContent = devName;
+        span.appendChild(nameSpan);
+
+        if (tNode.parentNode) {
+          tNode.parentNode.replaceChild(span, tNode);
+        }
+      } else if (/"([^"\r\n]+?)"/.test(val)) {
+        tNode.nodeValue = val.replace(/"([^"\r\n]+?)"/g, '$1');
+      }
+    });
+  },
+
   normalizeWirelessOverview() {
     const enhance = () => {
       const boxes = document.querySelectorAll('.network-status-table .ifacebox');
       if (!boxes || !boxes.length) return;
 
       boxes.forEach((box) => {
+        // Clean and modernize device footer badges (e.g. Ethernet Adapter: "wgclient1")
+        this.cleanDeviceBadges(box);
+
         const head = box.querySelector('.ifacebox-head');
         if (!head) return;
 

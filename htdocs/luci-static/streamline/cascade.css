@@ -800,12 +800,12 @@ table + table,
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)) !important;
   gap: 18px !important;
-  padding: 0 !important;
+  padding: 2px 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  margin: 0 0 24px 0 !important;
+  margin: -2px 0 24px 0 !important;
   width: 100% !important;
   contain: layout;
   box-sizing: border-box !important;
@@ -828,10 +828,10 @@ table + table,
 }
 
 .network-status-table .ifacebox:hover {
-  border-color: rgba(var(--sl-accent-rgb), 0.35) !important;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
-  transform: translateY(-2px) !important;
-  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+  border-color: rgba(var(--sl-accent-rgb), 0.45) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  transform: none !important;
+  transition: border-color .18s ease, box-shadow .18s ease !important;
 }
 
 /* Radio Card Header */
@@ -844,6 +844,7 @@ table + table,
   padding: 12px 18px !important;
   border-bottom: 1px solid var(--sl-border) !important;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), var(--sl-surface-3) !important;
+  background-clip: padding-box !important;
   font-size: 0.88rem !important;
   font-weight: 700 !important;
   color: var(--sl-text) !important;
@@ -1009,11 +1010,11 @@ table + table,
 }
 
 .network-status-table .ifacebadge:hover {
-  border-color: rgba(var(--sl-accent-rgb), 0.35) !important;
-  background: rgba(255, 255, 255, 0.035) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important;
-  transform: translateY(-1px) !important;
-  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: var(--sl-surface-3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  transform: none !important;
+  transition: border-color .15s ease, background .15s ease !important;
 }
 
 /* Wi-Fi Signal / State Icon */
@@ -1045,8 +1046,8 @@ table + table,
   display: none !important;
 }
 
-/* SSID Name (Header of the card) */
-.network-status-table .ifacebadge > span > .nowrap:first-child {
+/* SSID Name (Header of the card) - only underline if there are details below it */
+.network-status-table .ifacebadge > span > .nowrap:first-child:not(:only-child) {
   display: block !important;
   width: 100% !important;
   font-size: 0.95rem !important;
@@ -1058,8 +1059,86 @@ table + table,
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
+.network-status-table .ifacebadge > span > .nowrap:only-child {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: auto !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  color: var(--sl-text) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
 .network-status-table .ifacebadge > span > .nowrap:first-child strong {
   display: none !important;
+}
+
+/* Clean Device Footer Badge in Status Cards */
+.network-status-table .ifacebadge.sl-device-badge {
+  min-height: 44px !important;
+  padding: 8px 14px !important;
+  gap: 12px !important;
+  background: rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+
+.network-status-table .ifacebadge.sl-device-badge:hover {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(0, 0, 0, 0.26) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.network-status-table .ifacebadge.sl-device-badge img {
+  width: 22px !important;
+  height: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  padding: 3px !important;
+  border-radius: 6px !important;
+  background: rgba(var(--sl-accent-rgb), 0.08) !important;
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.18) !important;
+  margin-top: 0 !important;
+}
+
+.network-status-table .ifacebadge .sl-device-content {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  font-size: 0.84rem !important;
+  line-height: 1.4 !important;
+}
+
+.network-status-table .ifacebadge .sl-device-type {
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  color: var(--sl-muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+.network-status-table .ifacebadge .sl-device-sep {
+  color: var(--sl-faint) !important;
+  font-size: 0.72rem !important;
+}
+
+.network-status-table .ifacebadge .sl-device-name {
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.02em !important;
+  background: rgba(var(--sl-accent-rgb), 0.12) !important;
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.28) !important;
+  padding: 2px 8px !important;
+  border-radius: 6px !important;
+  font-family: var(--sl-font-family);
 }
 
 /* SSID Metadata Details (Mode, BSSID, Encryption, Associations) */

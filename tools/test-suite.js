@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=7'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 7');
-assert(control.includes('Version: 1.0.57-7'), 'packaging/control Version is 1.0.57-7');
-assert(buildIpk.includes('1.0.57-7'), 'build-ipk.sh default target is 1.0.57-7');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-7'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-7');
-assert(swJs.includes('streamline-static-v57-7'), 'streamline-sw.js CACHE_NAME matches v57-7');
-assert(headerHtm.includes('?v=1.0.57.7'), 'header.htm asset query param matches v1.0.57.7');
-assert(headerUt.includes('?v=1.0.57.7'), 'header.ut asset query param matches v1.0.57.7');
+assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=8'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 8');
+assert(control.includes('Version: 1.0.57-8'), 'packaging/control Version is 1.0.57-8');
+assert(buildIpk.includes('1.0.57-8'), 'build-ipk.sh default target is 1.0.57-8');
+assert(menuJs.includes("THEME_VERSION = '1.0.57-8'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-8');
+assert(swJs.includes('streamline-static-v57-8'), 'streamline-sw.js CACHE_NAME matches v57-8');
+assert(headerHtm.includes('?v=1.0.57.8'), 'header.htm asset query param matches v1.0.57.8');
+assert(headerUt.includes('?v=1.0.57.8'), 'header.ut asset query param matches v1.0.57.8');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -324,6 +324,23 @@ assert(cascadeCss.includes('overflow-wrap: break-word !important;'),
   'cascade.css enforces word breaking on modal card text');
 assert(menuJs.includes("E('div', { 'class': 'sl-palette-text' }"),
   'menu-streamline-v21.js wraps palette card text in dedicated sl-palette-text div');
+
+// Test 19: Verify device footer badge modernization, clean formatting, and hover contour stability
+console.log('\n19. Verifying device footer badge modernization and contour stability...');
+assert(cascadeCss.includes('.network-status-table .ifacebox:hover') && cascadeCss.includes('transform: none !important;'),
+  'cascade.css disables translateY on ifacebox hover to prevent top border overflow clipping');
+assert(cascadeCss.includes('.network-status-table .ifacebadge > span > .nowrap:first-child:not(:only-child)'),
+  'cascade.css restricts bottom underline to multi-line SSID badges');
+assert(cascadeCss.includes('.network-status-table .ifacebadge > span > .nowrap:only-child') && cascadeCss.includes('border-bottom: none !important;'),
+  'cascade.css removes bottom line on single device badges');
+assert(cascadeCss.includes('.network-status-table .ifacebadge.sl-device-badge') && cascadeCss.includes('min-height: 44px !important;'),
+  'cascade.css defines compact modern .sl-device-badge container');
+assert(cascadeCss.includes('.sl-device-name') && cascadeCss.includes('.sl-device-type'),
+  'cascade.css defines typography for device name pill and type label');
+assert(cascadeCss.includes('.network-status-table .ifacebadge:hover') && !cascadeCss.includes('.network-status-table .ifacebadge:hover {\n  border-color: rgba(var(--sl-accent-rgb)'),
+  'cascade.css avoids harsh glowing full contour on ifacebadge hover');
+assert(menuJs.includes('cleanDeviceBadges(box)') && menuJs.includes('formatDeviceBadgeElement'),
+  'menu-streamline-v21.js implements cleanDeviceBadges and formatDeviceBadgeElement');
 
 // Summary
 console.log(`\n========================================`);
