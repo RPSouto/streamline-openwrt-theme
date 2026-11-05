@@ -289,6 +289,87 @@
     return b + ' B';
   }
 
+  function parsePortSpeed(raw) {
+    if (typeof raw === 'number') return raw > 0 ? raw : 0;
+    if (!raw) return 0;
+    var m = String(raw).match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
+  function extractPortStatus(st) {
+    if (!st || typeof st !== 'object') {
+      return { isUp: false, speedNum: 0, speedText: tr('No Link', 'No Link'), duplex: '', rx: '0 B', tx: '0 B' };
+    }
+
+    var linkObj = (typeof st.link === 'object' && st.link !== null) ? st.link : null;
+
+    // Carrier / Link detection
+    var hasCarrier = false;
+    if (linkObj && typeof linkObj.carrier === 'boolean') {
+      hasCarrier = linkObj.carrier;
+    } else if (typeof st.carrier === 'boolean') {
+      hasCarrier = st.carrier;
+    } else if (typeof st.link === 'boolean') {
+      hasCarrier = st.link;
+    } else if (st.link === 1 || st.carrier === 1) {
+      hasCarrier = true;
+    }
+
+    // Speed extraction
+    var speedNum = 0;
+    if (linkObj && typeof linkObj.speed === 'number' && linkObj.speed > 0) {
+      speedNum = linkObj.speed;
+    } else if (linkObj && linkObj.speed) {
+      speedNum = parsePortSpeed(linkObj.speed);
+    } else if (st.speed) {
+      speedNum = parsePortSpeed(st.speed);
+    }
+
+    // Duplex extraction
+    var duplexRaw = (linkObj && linkObj.duplex) ? linkObj.duplex : (st.duplex || '');
+    if (!duplexRaw && typeof st.speed === 'string') {
+      if (/F/i.test(st.speed) || /full/i.test(st.speed)) duplexRaw = 'full';
+      else if (/H/i.test(st.speed) || /half/i.test(st.speed)) duplexRaw = 'half';
+    }
+    var duplexText = '';
+    if (/^full$/i.test(duplexRaw)) duplexText = 'Full Duplex';
+    else if (/^half$/i.test(duplexRaw)) duplexText = 'Half Duplex';
+    else if (duplexRaw && duplexRaw !== 'unknown') duplexText = String(duplexRaw);
+
+    // Is the port up?
+    var isUp = Boolean(hasCarrier || (speedNum > 0) || (st.up && (hasCarrier || speedNum > 0)));
+
+    // Speed text
+    var speedText = tr('No Link', 'No Link');
+    if (isUp) {
+      if (speedNum >= 2500) {
+        speedText = '2.5 Gbps';
+      } else if (speedNum === 1000) {
+        speedText = '1 Gbps';
+      } else if (speedNum === 100) {
+        speedText = '100 Mbps';
+      } else if (speedNum > 0) {
+        speedText = speedNum + ' Mbps';
+      } else {
+        speedText = tr('Connected', 'Connected');
+      }
+    }
+
+    // Stats
+    var stats = st.stats || st.statistics || (linkObj && (linkObj.stats || linkObj.statistics)) || {};
+    var rx = formatBytes(stats.rx_bytes);
+    var tx = formatBytes(stats.tx_bytes);
+
+    return {
+      isUp: isUp,
+      speedNum: speedNum,
+      speedText: speedText,
+      duplex: duplexText,
+      rx: rx,
+      tx: tx
+    };
+  }
+
   function buildPortsSection(summary) {
     if (!summary || !summary.parentNode)
       return null;
@@ -519,16 +600,17 @@
       });
 
       return callNetworkDevices().catch(function () { return {}; }).then(function (allDevs) {
-        if (allDevs && Object.keys(allDevs).length > 0) {
-          return portsList.map(function (p) {
-            return { device: p.device, status: allDevs[p.device] || {} };
-          });
-        }
+        allDevs = (allDevs && typeof allDevs === 'object') ? allDevs : {};
         var promises = portsList.map(function (p) {
+          var devData = allDevs[p.device];
+          var info = extractPortStatus(devData);
+          if (devData && (info.isUp || (devData.link && typeof devData.link === 'object'))) {
+            return Promise.resolve({ device: p.device, status: devData });
+          }
           return callDeviceStatus(p.device).then(function (st) {
-            return { device: p.device, status: st || {} };
+            return { device: p.device, status: Object.assign({}, devData || {}, st || {}) };
           }).catch(function () {
-            return { device: p.device, status: {} };
+            return { device: p.device, status: devData || {} };
           });
         });
         return Promise.all(promises);
@@ -542,49 +624,26 @@
         var card = sec.querySelector('.sl-port-card[data-device="' + r.device + '"]');
         if (!card) return;
 
-        var st = r.status || {};
-        var hasCarrier = (st.carrier === true || st.carrier === 1);
-        var hasLink = (st.link === true || st.link === 1);
-        var isUp = Boolean(hasCarrier || hasLink || (st.up && (st.speed > 0 || (typeof st.speed === 'string' && st.speed.indexOf('base') !== -1))));
-
-        var speedNum = 0;
-        if (st.speed) {
-          if (typeof st.speed === 'number') {
-            speedNum = st.speed;
-          } else {
-            var m = String(st.speed).match(/(\d+)/);
-            if (m) speedNum = parseInt(m[1], 10);
-          }
-        }
-        var duplex = st.duplex ? (st.duplex === 'full' ? 'Full Duplex' : 'Half Duplex') : '';
-        var stats = st.stats || st.statistics || {};
-        var rx = formatBytes(stats.rx_bytes);
-        var tx = formatBytes(stats.tx_bytes);
+        var info = extractPortStatus(r.status);
 
         card.classList.remove('is-loading', 'is-up', 'is-down', 'speed-2500', 'speed-1000', 'speed-100', 'speed-10');
 
-        var speedText;
-        if (isUp) {
+        if (info.isUp) {
           card.classList.add('is-up');
-          if (speedNum >= 2500) {
+          if (info.speedNum >= 2500) {
             card.classList.add('speed-2500');
-            speedText = '2.5 Gbps';
-          } else if (speedNum === 1000) {
+          } else if (info.speedNum === 1000) {
             card.classList.add('speed-1000');
-            speedText = '1 Gbps';
-          } else if (speedNum === 100) {
+          } else if (info.speedNum === 100) {
             card.classList.add('speed-100');
-            speedText = '100 Mbps';
-          } else if (speedNum > 0) {
-            speedText = speedNum + ' Mbps';
-          } else {
-            speedText = tr('Connected', 'Connected');
+          } else if (info.speedNum > 0) {
+            card.classList.add('speed-10');
           }
-          card.querySelector('.sl-port-speed').textContent = speedText;
-          card.querySelector('.sl-port-duplex').textContent = duplex || tr('Connected', 'Connected');
-          card.querySelector('.sl-port-rx').textContent = '↓ ' + rx;
-          card.querySelector('.sl-port-tx').textContent = '↑ ' + tx;
-          card.querySelector('.sl-port-led').setAttribute('title', tr('Connected', 'Connected') + ': ' + speedText + (duplex ? (' ' + duplex) : ''));
+          card.querySelector('.sl-port-speed').textContent = info.speedText;
+          card.querySelector('.sl-port-duplex').textContent = info.duplex || tr('Connected', 'Connected');
+          card.querySelector('.sl-port-rx').textContent = '↓ ' + info.rx;
+          card.querySelector('.sl-port-tx').textContent = '↑ ' + info.tx;
+          card.querySelector('.sl-port-led').setAttribute('title', tr('Connected', 'Connected') + ': ' + info.speedText + (info.duplex ? (' ' + info.duplex) : ''));
         } else {
           card.classList.add('is-down');
           card.querySelector('.sl-port-speed').textContent = tr('No Link', 'No Link');
@@ -600,15 +659,6 @@
         live.classList.remove('is-loading');
         live.setAttribute('aria-label', tr('Live', 'Live'));
         live.setAttribute('title', tr('Live', 'Live'));
-      }
-
-      // Hide native duplicate LuCI port section if present inside #view
-      var nativePorts = document.querySelector('#view .cbi-section .ifacebox');
-      if (nativePorts) {
-        var parentSec = nativePorts.closest('.cbi-section');
-        if (parentSec && parentSec.style.display !== 'none') {
-          parentSec.style.display = 'none';
-        }
       }
     }).catch(function () {
       portsUpdating = false;

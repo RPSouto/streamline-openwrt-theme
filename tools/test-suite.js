@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=2'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 2');
-assert(control.includes('Version: 1.0.58-2'), 'packaging/control Version is 1.0.58-2');
-assert(buildIpk.includes('1.0.58-2'), 'build-ipk.sh default target is 1.0.58-2');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-2'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-2');
-assert(swJs.includes('streamline-static-v58-2'), 'streamline-sw.js CACHE_NAME matches v58-2');
-assert(headerHtm.includes('?v=1.0.58.2'), 'header.htm asset query param matches v1.0.58.2');
-assert(headerUt.includes('?v=1.0.58.2'), 'header.ut asset query param matches v1.0.58.2');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=3'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 3');
+assert(control.includes('Version: 1.0.58-3'), 'packaging/control Version is 1.0.58-3');
+assert(buildIpk.includes('1.0.58-3'), 'build-ipk.sh default target is 1.0.58-3');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-3'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-3');
+assert(swJs.includes('streamline-static-v58-3'), 'streamline-sw.js CACHE_NAME matches v58-3');
+assert(headerHtm.includes('?v=1.0.58.3'), 'header.htm asset query param matches v1.0.58.3');
+assert(headerUt.includes('?v=1.0.58.3'), 'header.ut asset query param matches v1.0.58.3');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -424,6 +424,53 @@ const formatBytesTest = (bytes) => {
 assert(formatBytesTest(1610612736) === '1.5 GB', 'formatBytes formats gigabytes correctly');
 assert(formatBytesTest(20971520) === '20.0 MB', 'formatBytes formats megabytes correctly');
 assert(formatBytesTest(0) === '0 B', 'formatBytes formats zero safely');
+
+// Test extractPortStatus with luci-rpc getNetworkDevices response format (link object)
+const extractPortStatusTest = (st) => {
+  if (!st || typeof st !== 'object') return { isUp: false, speedNum: 0, speedText: 'No Link' };
+  const linkObj = (typeof st.link === 'object' && st.link !== null) ? st.link : null;
+  let hasCarrier = false;
+  if (linkObj && typeof linkObj.carrier === 'boolean') hasCarrier = linkObj.carrier;
+  else if (typeof st.carrier === 'boolean') hasCarrier = st.carrier;
+  else if (typeof st.link === 'boolean') hasCarrier = st.link;
+  else if (st.link === 1 || st.carrier === 1) hasCarrier = true;
+
+  let speedNum = 0;
+  if (linkObj && typeof linkObj.speed === 'number' && linkObj.speed > 0) speedNum = linkObj.speed;
+  else if (linkObj && linkObj.speed) speedNum = parsePortSpeed(linkObj.speed);
+  else if (st.speed) speedNum = parsePortSpeed(st.speed);
+
+  const isUp = Boolean(hasCarrier || (speedNum > 0) || (st.up && (hasCarrier || speedNum > 0)));
+  let speedText = 'No Link';
+  if (isUp) {
+    if (speedNum >= 2500) speedText = '2.5 Gbps';
+    else if (speedNum === 1000) speedText = '1 Gbps';
+    else if (speedNum === 100) speedText = '100 Mbps';
+    else if (speedNum > 0) speedText = speedNum + ' Mbps';
+    else speedText = 'Connected';
+  }
+  return { isUp, speedNum, speedText };
+};
+
+const dsaPortUp = { link: { carrier: true, speed: 2500, duplex: 'full' }, stats: { rx_bytes: 1000, tx_bytes: 2000 } };
+const dsaPortResult = extractPortStatusTest(dsaPortUp);
+assert(dsaPortResult.isUp === true && dsaPortResult.speedNum === 2500 && dsaPortResult.speedText === '2.5 Gbps',
+  'extractPortStatus recognizes link object with 2.5 Gbps carrier');
+
+const gbePortUp = { link: { carrier: true, speed: 1000, duplex: 'full' } };
+const gbePortResult = extractPortStatusTest(gbePortUp);
+assert(gbePortResult.isUp === true && gbePortResult.speedNum === 1000 && gbePortResult.speedText === '1 Gbps',
+  'extractPortStatus recognizes link object with 1 Gbps carrier');
+
+const netifdPortUp = { link: true, speed: '1000F', duplex: 'full' };
+const netifdResult = extractPortStatusTest(netifdPortUp);
+assert(netifdResult.isUp === true && netifdResult.speedNum === 1000 && netifdResult.speedText === '1 Gbps',
+  'extractPortStatus recognizes netifd fallback format with speed 1000F');
+
+const portDown = { link: { carrier: false, speed: -1, duplex: null } };
+const downResult = extractPortStatusTest(portDown);
+assert(downResult.isUp === false && downResult.speedText === 'No Link',
+  'extractPortStatus recognizes disconnected port with carrier: false');
 
 // Summary
 console.log(`\n========================================`);
