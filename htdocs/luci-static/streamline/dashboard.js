@@ -265,6 +265,313 @@
     return summary;
   }
 
+  var portsList = null;
+  var portsDiscoveryPending = false;
+  var portsUpdating = false;
+
+  var RJ45_SVG = '<svg class="sl-port-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M5 8C5 6.89543 5.89543 6 7 6H25C26.1046 6 27 6.89543 27 8V24C27 25.1046 26.1046 26 25 26H7C5.89543 26 5 25.1046 5 24V8Z" stroke="currentColor" stroke-width="2"/>' +
+    '<path d="M9 10H23V18H20V22H12V18H9V10Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.5"/>' +
+    '<line x1="11" y1="10" x2="11" y2="15" stroke="currentColor" stroke-width="1.2"/>' +
+    '<line x1="13" y1="10" x2="13" y2="15" stroke="currentColor" stroke-width="1.2"/>' +
+    '<line x1="15" y1="10" x2="15" y2="15" stroke="currentColor" stroke-width="1.2"/>' +
+    '<line x1="17" y1="10" x2="17" y2="15" stroke="currentColor" stroke-width="1.2"/>' +
+    '<line x1="19" y1="10" x2="19" y2="15" stroke="currentColor" stroke-width="1.2"/>' +
+    '<line x1="21" y1="10" x2="21" y2="15" stroke="currentColor" stroke-width="1.2"/>' +
+    '</svg>';
+
+  function formatBytes(bytes) {
+    var b = Number(bytes);
+    if (!isFinite(b) || b <= 0) return '0 B';
+    if (b >= 1073741824) return (b / 1073741824).toFixed(1) + ' GB';
+    if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MB';
+    if (b >= 1024) return (b / 1024).toFixed(0) + ' KB';
+    return b + ' B';
+  }
+
+  function buildPortsSection(summary) {
+    if (!summary || !summary.parentNode)
+      return null;
+
+    var existing = document.getElementById('streamline-ports-summary');
+    if (existing)
+      return existing;
+
+    var sec = document.createElement('section');
+    sec.id = 'streamline-ports-summary';
+    sec.className = 'sl-ports-summary';
+    sec.innerHTML = '<div class="sl-dashboard-heading"><div><span>' +
+      tr('ETHERNET PORTS', 'ETHERNET PORTS') + '</span><h3>' +
+      tr('Port status map', 'Port status map') + '</h3></div>' +
+      '<div class="sl-live-status is-loading" role="status" aria-label="' +
+      tr('Loading…', 'Loading…') + '" title="' + tr('Loading…', 'Loading…') + '"><i></i></div></div>' +
+      '<div class="sl-port-grid"></div>';
+
+    summary.parentNode.insertBefore(sec, summary.nextSibling);
+    return sec;
+  }
+
+  function renderPortCards() {
+    var sec = document.getElementById('streamline-ports-summary');
+    if (!sec || !portsList || portsList.length === 0)
+      return;
+
+    var grid = sec.querySelector('.sl-port-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    portsList.forEach(function (p) {
+      var card = document.createElement('article');
+      card.className = 'sl-port-card is-loading role-' + p.role;
+      card.setAttribute('data-device', p.device);
+      card.innerHTML =
+        '<div class="sl-port-header">' +
+          '<span class="sl-port-badge role-' + p.role + '">' + p.label + '</span>' +
+          '<span class="sl-port-led" title="' + tr('Loading…', 'Loading…') + '"></span>' +
+        '</div>' +
+        '<div class="sl-port-visual">' + RJ45_SVG + '</div>' +
+        '<div class="sl-port-info">' +
+          '<span class="sl-port-name">' + p.device + '</span>' +
+          '<span class="sl-port-speed">--</span>' +
+          '<span class="sl-port-duplex">' + tr('Loading…', 'Loading…') + '</span>' +
+        '</div>' +
+        '<div class="sl-port-traffic">' +
+          '<span class="sl-port-rx" title="' + tr('Downloaded', 'Downloaded') + '">--</span>' +
+          '<span class="sl-port-tx" title="' + tr('Uploaded', 'Uploaded') + '">--</span>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  function discoverPorts() {
+    if (portsDiscoveryPending || !window.L || typeof L.require !== 'function')
+      return;
+
+    portsDiscoveryPending = true;
+
+    Promise.resolve(L.require('rpc')).then(function (rpc) {
+      var callFileRead = rpc.declare({
+        object: 'file',
+        method: 'read',
+        params: ['path'],
+        expect: { data: '' }
+      });
+
+      var callBuiltin = rpc.declare({
+        object: 'luci',
+        method: 'getBuiltinEthernetPorts',
+        expect: { result: [] }
+      });
+
+      var callUciGet = rpc.declare({
+        object: 'uci',
+        method: 'get',
+        params: ['config'],
+        expect: { values: {} }
+      });
+
+      return Promise.all([
+        callBuiltin().catch(function () { return []; }),
+        callFileRead({ path: '/etc/board.json' }).catch(function () { return { data: '' }; }),
+        callUciGet({ config: 'network' }).catch(function () { return { values: {} }; })
+      ]);
+    }).then(function (results) {
+      var builtin = results[0] || [];
+      var boardData = (results[1] && results[1].data) ? results[1].data : '';
+      var uciValues = (results[2] && results[2].values) ? results[2].values : {};
+
+      var discovered = [];
+      var seen = {};
+
+      function add(dev, role, label) {
+        if (!dev || typeof dev !== 'string') return;
+        var cleanDev = dev.trim();
+        if (!cleanDev || seen[cleanDev]) return;
+        seen[cleanDev] = true;
+        discovered.push({
+          device: cleanDev,
+          role: role || (cleanDev.indexOf('wan') !== -1 ? 'wan' : 'lan'),
+          label: label || cleanDev.toUpperCase()
+        });
+      }
+
+      // 1. From builtin ethernet ports (LuCI 23.05+)
+      if (Array.isArray(builtin) && builtin.length > 0) {
+        builtin.forEach(function (p) {
+          if (p && p.device) {
+            var role = p.role || (p.device.indexOf('wan') !== -1 ? 'wan' : 'lan');
+            add(p.device, role, p.label || (role === 'wan' ? 'WAN' : p.device.toUpperCase()));
+          }
+        });
+      }
+
+      // 2. From /etc/board.json (GL.iNet & standard OpenWrt DSA)
+      if (discovered.length === 0 && boardData) {
+        try {
+          var board = JSON.parse(boardData);
+          if (board && board.network) {
+            // Check WAN
+            if (board.network.wan) {
+              if (board.network.wan.device)
+                add(board.network.wan.device, 'wan', 'WAN');
+              else if (Array.isArray(board.network.wan.ports))
+                board.network.wan.ports.forEach(function (p) { add(p, 'wan', 'WAN'); });
+            }
+            // Check LAN
+            if (board.network.lan) {
+              var lanPorts = board.network.lan.ports || (board.network.lan.device ? [board.network.lan.device] : []);
+              if (Array.isArray(lanPorts)) {
+                lanPorts.forEach(function (p, idx) {
+                  var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
+                  add(p, 'lan', lbl);
+                });
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. From UCI network if still empty
+      if (discovered.length === 0 && uciValues) {
+        Object.keys(uciValues).forEach(function (key) {
+          var s = uciValues[key];
+          if (s && s['.type'] === 'device' && s.type === 'bridge' && Array.isArray(s.ports)) {
+            s.ports.forEach(function (p, idx) {
+              var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
+              add(p, 'lan', lbl);
+            });
+          }
+          if (s && s['.type'] === 'interface' && (s['.name'] === 'wan' || s['.name'] === 'wan6')) {
+            if (s.device) add(s.device, 'wan', 'WAN');
+            else if (s.ifname) add(s.ifname, 'wan', 'WAN');
+          }
+        });
+      }
+
+      // 4. Default fallback probe for GL-MT6000 and standard DSA
+      if (discovered.length === 0) {
+        ['eth1', 'wan'].forEach(function (w) { add(w, 'wan', 'WAN'); });
+        ['lan1', 'lan2', 'lan3', 'lan4', 'lan5'].forEach(function (l, i) {
+          add(l, 'lan', 'LAN ' + (i + 1));
+        });
+      }
+
+      // Sort: WAN first, then LAN1, LAN2, LAN3...
+      discovered.sort(function (a, b) {
+        if (a.role === 'wan' && b.role !== 'wan') return -1;
+        if (a.role !== 'wan' && b.role === 'wan') return 1;
+        return a.device.localeCompare(b.device, undefined, { numeric: true });
+      });
+
+      portsList = discovered;
+      renderPortCards();
+      updatePortStatus();
+    }).catch(function () {
+      portsDiscoveryPending = false;
+    });
+  }
+
+  function updatePortStatus() {
+    if (!portsList || portsList.length === 0 || portsUpdating || !window.L || typeof L.require !== 'function')
+      return;
+
+    var sec = document.getElementById('streamline-ports-summary');
+    if (!sec) return;
+
+    portsUpdating = true;
+
+    Promise.resolve(L.require('rpc')).then(function (rpc) {
+      var callDeviceStatus = rpc.declare({
+        object: 'network.device',
+        method: 'status',
+        params: ['name'],
+        expect: { '': {} }
+      });
+
+      var promises = portsList.map(function (p) {
+        return callDeviceStatus({ name: p.device }).then(function (st) {
+          return { device: p.device, status: st || {} };
+        }).catch(function () {
+          return { device: p.device, status: {} };
+        });
+      });
+
+      return Promise.all(promises);
+    }).then(function (results) {
+      portsUpdating = false;
+      var sec = document.getElementById('streamline-ports-summary');
+      if (!sec) return;
+
+      results.forEach(function (r) {
+        var card = sec.querySelector('.sl-port-card[data-device="' + r.device + '"]');
+        if (!card) return;
+
+        var st = r.status || {};
+        var isUp = Boolean(st.link || st.carrier || (st.up && st.speed));
+        var speedNum = 0;
+        if (st.speed) {
+          var m = String(st.speed).match(/(\d+)/);
+          if (m) speedNum = parseInt(m[1], 10);
+        }
+        var duplex = st.duplex ? (st.duplex === 'full' ? 'Full Duplex' : 'Half Duplex') : '';
+        var stats = st.statistics || {};
+        var rx = formatBytes(stats.rx_bytes);
+        var tx = formatBytes(stats.tx_bytes);
+
+        card.classList.remove('is-loading', 'is-up', 'is-down', 'speed-2500', 'speed-1000', 'speed-100', 'speed-10');
+
+        var speedText;
+        if (isUp) {
+          card.classList.add('is-up');
+          if (speedNum >= 2500) {
+            card.classList.add('speed-2500');
+            speedText = '2.5 Gbps';
+          } else if (speedNum === 1000) {
+            card.classList.add('speed-1000');
+            speedText = '1 Gbps';
+          } else if (speedNum === 100) {
+            card.classList.add('speed-100');
+            speedText = '100 Mbps';
+          } else if (speedNum > 0) {
+            speedText = speedNum + ' Mbps';
+          } else {
+            speedText = tr('Connected', 'Connected');
+          }
+          card.querySelector('.sl-port-speed').textContent = speedText;
+          card.querySelector('.sl-port-duplex').textContent = duplex || tr('Connected', 'Connected');
+          card.querySelector('.sl-port-rx').textContent = '↓ ' + rx;
+          card.querySelector('.sl-port-tx').textContent = '↑ ' + tx;
+          card.querySelector('.sl-port-led').setAttribute('title', tr('Connected', 'Connected') + ': ' + speedText + (duplex ? (' ' + duplex) : ''));
+        } else {
+          card.classList.add('is-down');
+          card.querySelector('.sl-port-speed').textContent = tr('No Link', 'No Link');
+          card.querySelector('.sl-port-duplex').textContent = '--';
+          card.querySelector('.sl-port-rx').textContent = '--';
+          card.querySelector('.sl-port-tx').textContent = '';
+          card.querySelector('.sl-port-led').setAttribute('title', tr('No Link', 'No Link'));
+        }
+      });
+
+      var live = sec.querySelector('.sl-live-status');
+      if (live) {
+        live.classList.remove('is-loading');
+        live.setAttribute('aria-label', tr('Live', 'Live'));
+        live.setAttribute('title', tr('Live', 'Live'));
+      }
+
+      // Hide native duplicate LuCI port section if present inside #view
+      var nativePorts = document.querySelector('#view .cbi-section .ifacebox');
+      if (nativePorts) {
+        var parentSec = nativePorts.closest('.cbi-section');
+        if (parentSec && parentSec.style.display !== 'none') {
+          parentSec.style.display = 'none';
+        }
+      }
+    }).catch(function () {
+      portsUpdating = false;
+    });
+  }
+
   function setMetric(summary, selector, value, percent, detail) {
     var card = summary.querySelector(selector);
     var available = value && value !== '--';
@@ -290,6 +597,14 @@
       if (attempts > 24)
         window.clearInterval(timer);
       return;
+    }
+
+    // Build and manage Ethernet Ports section
+    buildPortsSection(summary);
+    if (!portsList && !portsDiscoveryPending) {
+      discoverPorts();
+    } else if (portsList) {
+      updatePortStatus();
     }
 
     loadText = firstNumericToken(rowValue(LOAD_PATTERN));

@@ -280,8 +280,10 @@ html[data-palette]:not([data-palette="streamline"]) .network-status-table,
 html[data-palette]:not([data-palette="streamline"]) .ifacebox,
 html[data-palette]:not([data-palette="streamline"]) .table,
 html[data-palette]:not([data-palette="streamline"]) .cbi-tabcontainer,
-html[data-palette]:not([data-palette="streamline"]) .sl-dashboard-summary { background: var(--sl-panel); }
-html[data-palette]:not([data-palette="streamline"]) .sl-metric { background: var(--sl-metric); }
+html[data-palette]:not([data-palette="streamline"]) .sl-dashboard-summary,
+html[data-palette]:not([data-palette="streamline"]) .sl-ports-summary { background: var(--sl-panel); }
+html[data-palette]:not([data-palette="streamline"]) .sl-metric,
+html[data-palette]:not([data-palette="streamline"]) .sl-port-card { background: var(--sl-metric); }
 html[data-palette]:not([data-palette="streamline"]) input,
 html[data-palette]:not([data-palette="streamline"]) select,
 html[data-palette]:not([data-palette="streamline"]) textarea,
@@ -1277,6 +1279,162 @@ table + table,
 .streamline-overview .network-status-table + h3 { margin-top: 32px !important; margin-bottom: 14px !important; }
 
 @keyframes sl-health-pulse { 0%, 100% { opacity: .58; } 50% { opacity: 1; } }
+
+/* Overview dashboard: physical Ethernet port status map */
+.sl-ports-summary {
+  width: 100%; max-width: 100%; margin: 0 0 22px;
+  overflow: hidden;
+  border: 1px solid var(--sl-border);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(20,24,33,.98), rgba(13,16,23,.98));
+  box-shadow: var(--sl-shadow);
+}
+.sl-port-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1px;
+  background: var(--sl-border);
+  padding: 0;
+  margin: 0;
+}
+.sl-port-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 12px 14px;
+  background: rgba(15,19,27,.98);
+  position: relative;
+  transition: background .2s ease, transform .15s ease;
+  min-width: 0;
+}
+.sl-port-card:hover {
+  background: rgba(255,255,255,.03);
+}
+.sl-port-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sl-port-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+.sl-port-badge.role-wan {
+  background: rgba(var(--sl-accent-rgb), .16);
+  color: var(--sl-accent-label, var(--sl-accent));
+  border: 1px solid rgba(var(--sl-accent-rgb), .3);
+}
+.sl-port-badge.role-lan {
+  background: rgba(57,216,170,.12);
+  color: var(--sl-green);
+  border: 1px solid rgba(57,216,170,.25);
+}
+.sl-port-led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #475569;
+  box-shadow: 0 0 0 2px rgba(71,85,105,.2);
+  transition: all .25s ease;
+}
+.sl-port-card.is-up .sl-port-led {
+  background: var(--sl-green);
+  box-shadow: 0 0 8px var(--sl-green), 0 0 0 3px rgba(57,216,170,.2);
+}
+.sl-port-card.is-up.speed-2500 .sl-port-led {
+  background: #06b6d4;
+  box-shadow: 0 0 10px #06b6d4, 0 0 0 3px rgba(6,182,212,.25);
+}
+.sl-port-card.is-up.speed-100 .sl-port-led {
+  background: var(--sl-amber);
+  box-shadow: 0 0 8px var(--sl-amber), 0 0 0 3px rgba(245,185,66,.2);
+}
+.sl-port-visual {
+  margin: 4px 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--sl-border);
+  color: var(--sl-muted);
+  transition: all .2s ease;
+}
+.sl-port-card.is-up .sl-port-visual {
+  border-color: rgba(var(--sl-accent-rgb),.4);
+  background: rgba(var(--sl-accent-rgb),.06);
+  color: var(--sl-text);
+}
+.sl-port-card.is-up.speed-2500 .sl-port-visual {
+  border-color: rgba(6,182,212,.4);
+  background: rgba(6,182,212,.08);
+  color: #e0f2fe;
+}
+.sl-port-icon {
+  width: 26px;
+  height: 26px;
+}
+.sl-port-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+.sl-port-name {
+  font-size: .72rem;
+  color: var(--sl-muted);
+  font-weight: 600;
+  font-family: var(--sl-font-family);
+}
+.sl-port-speed {
+  font-size: .88rem;
+  font-weight: 750;
+  color: var(--sl-text);
+  margin: 2px 0 1px;
+  font-variant-numeric: tabular-nums;
+}
+.sl-port-card.is-down .sl-port-speed {
+  color: var(--sl-faint, #64748b);
+  font-weight: 600;
+  font-size: .80rem;
+}
+.sl-port-duplex {
+  font-size: .68rem;
+  color: var(--sl-muted);
+}
+.sl-port-traffic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255,255,255,.06);
+  width: 100%;
+  font-size: .66rem;
+  color: var(--sl-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sl-port-traffic span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+/* Prevent duplicate native LuCI port status when Streamline port map is present */
+.streamline-overview #view .cbi-section:has(.ifacebox) {
+  display: none !important;
+}
 
 .alert-message { padding: 14px 16px; margin: 0 0 18px; border: 1px solid rgba(78,161,255,.35); border-radius: 11px; background: rgba(78,161,255,.09); color: #cfe5ff; }
 .alert-message.warning { border-color: rgba(245,185,66,.35); background: rgba(245,185,66,.09); color: #ffe3a6; }

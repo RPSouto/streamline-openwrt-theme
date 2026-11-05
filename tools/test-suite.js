@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.57') && makefile.includes('PKG_RELEASE:=10'), 'Makefile PKG_VERSION is 1.0.57 and PKG_RELEASE is 10');
-assert(control.includes('Version: 1.0.57-10'), 'packaging/control Version is 1.0.57-10');
-assert(buildIpk.includes('1.0.57-10'), 'build-ipk.sh default target is 1.0.57-10');
-assert(menuJs.includes("THEME_VERSION = '1.0.57-10'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.57-10');
-assert(swJs.includes('streamline-static-v57-10'), 'streamline-sw.js CACHE_NAME matches v57-10');
-assert(headerHtm.includes('?v=1.0.57.10'), 'header.htm asset query param matches v1.0.57.10');
-assert(headerUt.includes('?v=1.0.57.10'), 'header.ut asset query param matches v1.0.57.10');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=1'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 1');
+assert(control.includes('Version: 1.0.58-1'), 'packaging/control Version is 1.0.58-1');
+assert(buildIpk.includes('1.0.58-1'), 'build-ipk.sh default target is 1.0.58-1');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-1'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-1');
+assert(swJs.includes('streamline-static-v58-1'), 'streamline-sw.js CACHE_NAME matches v58-1');
+assert(headerHtm.includes('?v=1.0.58.1'), 'header.htm asset query param matches v1.0.58.1');
+assert(headerUt.includes('?v=1.0.58.1'), 'header.ut asset query param matches v1.0.58.1');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -377,6 +377,53 @@ assert(cleanFooterVer('OpenWrt', '23.05.3 r23809-234f1a2efa') === 'OpenWrt 23.05
   'cleanFooterVer converts 23.05.3 to OpenWrt 23.05.3');
 assert(cleanFooterVer('ImmortalWrt', '23.05-SNAPSHOT r1234') === 'ImmortalWrt 23.05',
   'cleanFooterVer preserves ImmortalWrt distname with clean version');
+
+// Test 21: Verify Ethernet Port Status Map implementation
+console.log('\n21. Verifying Ethernet Port Status Map implementation and layout...');
+const dashboardJs = fs.readFileSync(path.join(rootDir, 'htdocs/luci-static/streamline/dashboard.js'), 'utf8');
+assert(dashboardJs.includes('buildPortsSection') && dashboardJs.includes('sl-ports-summary'),
+  'dashboard.js defines buildPortsSection and creates .sl-ports-summary');
+assert(dashboardJs.includes('discoverPorts') && dashboardJs.includes('/etc/board.json'),
+  'dashboard.js discovers ethernet ports via /etc/board.json and LuCI builtin ports');
+assert(dashboardJs.includes('updatePortStatus') && dashboardJs.includes('network.device'),
+  'dashboard.js polls port link and speed via network.device status');
+assert(dashboardJs.includes('sl-port-card') && dashboardJs.includes('sl-port-led'),
+  'dashboard.js creates port cards with LED indicators and RJ45 icons');
+assert(cascadeCss.includes('.sl-ports-summary') && cascadeCss.includes('.sl-port-grid'),
+  'cascade.css contains .sl-ports-summary and .sl-port-grid container styling');
+assert(cascadeCss.includes('.sl-port-card') && cascadeCss.includes('.sl-port-led'),
+  'cascade.css styles .sl-port-card and active/inactive LED dots');
+assert(cascadeCss.includes('.sl-port-card.is-up.speed-2500 .sl-port-led'),
+  'cascade.css highlights 2.5 Gbps link with cyan neon LED styling');
+assert(cascadeCss.includes('.sl-ports-summary { background: var(--sl-panel); }'),
+  'cascade.css applies palette background override to .sl-ports-summary');
+assert(mobileCss.includes('.sl-ports-summary') && mobileCss.includes('.sl-port-grid'),
+  'mobile.css includes responsive rules for port map on mobile devices');
+
+// Unit tests of port parser logic
+const parsePortSpeed = (raw) => {
+  if (!raw) return 0;
+  if (typeof raw === 'number') return raw;
+  const m = String(raw).match(/(\d+)/);
+  return m ? parseInt(m[1], 10) : 0;
+};
+assert(parsePortSpeed('2500baseT/Full') === 2500, 'parsePortSpeed parses 2500baseT/Full to 2500');
+assert(parsePortSpeed('1000baseT/Full') === 1000, 'parsePortSpeed parses 1000baseT/Full to 1000');
+assert(parsePortSpeed('100baseT/Half') === 100, 'parsePortSpeed parses 100baseT/Half to 100');
+assert(parsePortSpeed(1000) === 1000, 'parsePortSpeed handles numeric speed 1000');
+assert(parsePortSpeed('') === 0, 'parsePortSpeed handles empty string safely');
+
+const formatBytesTest = (bytes) => {
+  const b = Number(bytes);
+  if (!isFinite(b) || b <= 0) return '0 B';
+  if (b >= 1073741824) return (b / 1073741824).toFixed(1) + ' GB';
+  if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MB';
+  if (b >= 1024) return (b / 1024).toFixed(0) + ' KB';
+  return b + ' B';
+};
+assert(formatBytesTest(1610612736) === '1.5 GB', 'formatBytes formats gigabytes correctly');
+assert(formatBytesTest(20971520) === '20.0 MB', 'formatBytes formats megabytes correctly');
+assert(formatBytesTest(0) === '0 B', 'formatBytes formats zero safely');
 
 // Summary
 console.log(`\n========================================`);
