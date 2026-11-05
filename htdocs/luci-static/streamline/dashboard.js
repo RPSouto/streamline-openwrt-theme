@@ -370,15 +370,23 @@
         expect: { values: {} }
       });
 
+      var callNetworkDevices = rpc.declare({
+        object: 'luci-rpc',
+        method: 'getNetworkDevices',
+        expect: { '': {} }
+      });
+
       return Promise.all([
         callBuiltin().catch(function () { return []; }),
-        callFileRead({ path: '/etc/board.json' }).catch(function () { return { data: '' }; }),
-        callUciGet({ config: 'network' }).catch(function () { return { values: {} }; })
+        callFileRead('/etc/board.json').catch(function () { return { data: '' }; }),
+        callUciGet('network').catch(function () { return { values: {} }; }),
+        callNetworkDevices().catch(function () { return {}; })
       ]);
     }).then(function (results) {
       var builtin = results[0] || [];
       var boardData = (results[1] && results[1].data) ? results[1].data : '';
       var uciValues = (results[2] && results[2].values) ? results[2].values : {};
+      var netDevs = results[3] || {};
 
       var discovered = [];
       var seen = {};
@@ -387,10 +395,12 @@
         if (!dev || typeof dev !== 'string') return;
         var cleanDev = dev.trim();
         if (!cleanDev || seen[cleanDev]) return;
+        if (/^(lo|br-.*|sit\d+|wlan\d+|phy\d+|dummy\d+|tun\d+|tap\d+|docker\d+|wg\d+|wg.*|gre\d+|gre.*|teql\d+)$/i.test(cleanDev))
+          return;
         seen[cleanDev] = true;
         discovered.push({
           device: cleanDev,
-          role: role || (cleanDev.indexOf('wan') !== -1 ? 'wan' : 'lan'),
+          role: role || (/wan/i.test(cleanDev) ? 'wan' : 'lan'),
           label: label || cleanDev.toUpperCase()
         });
       }
@@ -399,7 +409,7 @@
       if (Array.isArray(builtin) && builtin.length > 0) {
         builtin.forEach(function (p) {
           if (p && p.device) {
-            var role = p.role || (p.device.indexOf('wan') !== -1 ? 'wan' : 'lan');
+            var role = p.role || (/wan/i.test(p.device) ? 'wan' : 'lan');
             add(p.device, role, p.label || (role === 'wan' ? 'WAN' : p.device.toUpperCase()));
           }
         });
@@ -448,11 +458,25 @@
         });
       }
 
-      // 4. Default fallback probe for GL-MT6000 and standard DSA
-      if (discovered.length === 0) {
-        ['eth1', 'wan'].forEach(function (w) { add(w, 'wan', 'WAN'); });
-        ['lan1', 'lan2', 'lan3', 'lan4', 'lan5'].forEach(function (l, i) {
-          add(l, 'lan', 'LAN ' + (i + 1));
+      // 4. From netDevs if still empty (querying active devices)
+      if (discovered.length === 0 && Object.keys(netDevs).length > 0) {
+        Object.keys(netDevs).forEach(function (devName) {
+          if (/^lan\d+$/i.test(devName)) {
+            add(devName, 'lan', devName.toUpperCase().replace('LAN', 'LAN '));
+          } else if (/^wan/i.test(devName)) {
+            add(devName, 'wan', 'WAN');
+          } else if (/^eth1$/i.test(devName)) {
+            add(devName, 'wan', 'WAN');
+          } else if (/^eth\d+$/i.test(devName)) {
+            add(devName, 'lan', devName.toUpperCase());
+          }
+        });
+      }
+
+      // Filter: if netDevs has devices, only keep devices that actually exist in the kernel!
+      if (Object.keys(netDevs).length > 0) {
+        discovered = discovered.filter(function (p) {
+          return Boolean(netDevs[p.device]);
         });
       }
 
@@ -481,6 +505,12 @@
     portsUpdating = true;
 
     Promise.resolve(L.require('rpc')).then(function (rpc) {
+      var callNetworkDevices = rpc.declare({
+        object: 'luci-rpc',
+        method: 'getNetworkDevices',
+        expect: { '': {} }
+      });
+
       var callDeviceStatus = rpc.declare({
         object: 'network.device',
         method: 'status',
@@ -488,15 +518,21 @@
         expect: { '': {} }
       });
 
-      var promises = portsList.map(function (p) {
-        return callDeviceStatus({ name: p.device }).then(function (st) {
-          return { device: p.device, status: st || {} };
-        }).catch(function () {
-          return { device: p.device, status: {} };
+      return callNetworkDevices().catch(function () { return {}; }).then(function (allDevs) {
+        if (allDevs && Object.keys(allDevs).length > 0) {
+          return portsList.map(function (p) {
+            return { device: p.device, status: allDevs[p.device] || {} };
+          });
+        }
+        var promises = portsList.map(function (p) {
+          return callDeviceStatus(p.device).then(function (st) {
+            return { device: p.device, status: st || {} };
+          }).catch(function () {
+            return { device: p.device, status: {} };
+          });
         });
+        return Promise.all(promises);
       });
-
-      return Promise.all(promises);
     }).then(function (results) {
       portsUpdating = false;
       var sec = document.getElementById('streamline-ports-summary');
@@ -507,14 +543,21 @@
         if (!card) return;
 
         var st = r.status || {};
-        var isUp = Boolean(st.link || st.carrier || (st.up && st.speed));
+        var hasCarrier = (st.carrier === true || st.carrier === 1);
+        var hasLink = (st.link === true || st.link === 1);
+        var isUp = Boolean(hasCarrier || hasLink || (st.up && (st.speed > 0 || (typeof st.speed === 'string' && st.speed.indexOf('base') !== -1))));
+
         var speedNum = 0;
         if (st.speed) {
-          var m = String(st.speed).match(/(\d+)/);
-          if (m) speedNum = parseInt(m[1], 10);
+          if (typeof st.speed === 'number') {
+            speedNum = st.speed;
+          } else {
+            var m = String(st.speed).match(/(\d+)/);
+            if (m) speedNum = parseInt(m[1], 10);
+          }
         }
         var duplex = st.duplex ? (st.duplex === 'full' ? 'Full Duplex' : 'Half Duplex') : '';
-        var stats = st.statistics || {};
+        var stats = st.stats || st.statistics || {};
         var rx = formatBytes(stats.rx_bytes);
         var tx = formatBytes(stats.tx_bytes);
 
