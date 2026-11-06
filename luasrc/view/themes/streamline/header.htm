@@ -21,18 +21,18 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title><%=striptags((boardinfo.hostname or "?") .. ((node and node.title) and " | " .. translate(node.title) or ""))%></title>
-    <script>(function(){try{var d=document.documentElement,p=localStorage.getItem('streamline.palette'),f=localStorage.getItem('streamline.font'),c={glinet:'#111331',streamline:'#0b0e14',ocean:'#071521',forest:'#0a1511',sunset:'#17100f',rose:'#180f18',oled:'#000000',light:'#f8fafc'},fonts={system:1,arial:1,serif:1,mono:1};if(!Object.prototype.hasOwnProperty.call(c,p))p='glinet';if(!Object.prototype.hasOwnProperty.call(fonts,f))f='system';d.setAttribute('data-palette',p);d.setAttribute('data-font',f);document.querySelector('meta[name="theme-color"]').setAttribute('content',c[p])}catch(e){}window.Streamline=window.Streamline||{version:'1.0.58-10',addons:{},protocols:{},routerProfiles:{},classifiers:[],customWidgets:[],registerAddon:function(i,d){if(!i||typeof d!=='object')return;this.addons[i]=d;if(d.protocols)Object.assign(this.protocols,d.protocols);if(d.routerProfiles)Object.assign(this.routerProfiles,d.routerProfiles);if(Array.isArray(d.classifiers))this.classifiers.push.apply(this.classifiers,d.classifiers);if(Array.isArray(d.widgets))this.customWidgets.push.apply(this.customWidgets,d.widgets);if(typeof d.init==='function'){try{d.init(this)}catch(e){}}},registerRouterProfile:function(k,p){if(k&&p)this.routerProfiles[k]=p},registerProtocol:function(k,p){if(k&&p)this.protocols[k]=p},getProtocol:function(n){return this.protocols[n]||null},getRouterProfile:function(b,m){var k=String(b||'').toLowerCase(),o=String(m||'').toLowerCase();for(var p in this.routerProfiles){var t=p.toLowerCase();if((k&&k.indexOf(t)!==-1)||(o&&o.indexOf(t)!==-1))return this.routerProfiles[p]}return null}};})()</script>
-    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.58.10">
-    <link rel="stylesheet" href="<%=media%>/mobile.css?v=1.0.58.10" media="(max-width: 991px), (max-height: 550px) and (orientation: landscape)">
-    <link rel="icon" href="<%=media%>/logo-glinet.svg?v=1.0.58.10" sizes="any">
-    <script>if(document.documentElement.getAttribute('data-palette')!=='glinet')document.querySelector('link[rel~="icon"]').href='<%=media%>/logo.svg?v=1.0.58.10'</script>
-    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.58.10">
+    <script>(function(){try{var d=document.documentElement,p=localStorage.getItem('streamline.palette'),f=localStorage.getItem('streamline.font'),c={glinet:'#111331',streamline:'#0b0e14',ocean:'#071521',forest:'#0a1511',sunset:'#17100f',rose:'#180f18',oled:'#000000',light:'#f8fafc'},fonts={system:1,arial:1,serif:1,mono:1};if(!Object.prototype.hasOwnProperty.call(c,p))p='glinet';if(!Object.prototype.hasOwnProperty.call(fonts,f))f='system';d.setAttribute('data-palette',p);d.setAttribute('data-font',f);document.querySelector('meta[name="theme-color"]').setAttribute('content',c[p])}catch(e){}window.Streamline=window.Streamline||{version:'1.0.58-11',addons:{},protocols:{},routerProfiles:{},classifiers:[],customWidgets:[],registerAddon:function(i,d){if(!i||typeof d!=='object')return;this.addons[i]=d;if(d.protocols)Object.assign(this.protocols,d.protocols);if(d.routerProfiles)Object.assign(this.routerProfiles,d.routerProfiles);if(Array.isArray(d.classifiers))this.classifiers.push.apply(this.classifiers,d.classifiers);if(Array.isArray(d.widgets))this.customWidgets.push.apply(this.customWidgets,d.widgets);if(typeof d.init==='function'){try{d.init(this)}catch(e){}}},registerRouterProfile:function(k,p){if(k&&p)this.routerProfiles[k]=p},registerProtocol:function(k,p){if(k&&p)this.protocols[k]=p},getProtocol:function(n){return this.protocols[n]||null},getRouterProfile:function(b,m){var k=String(b||'').toLowerCase(),o=String(m||'').toLowerCase();for(var p in this.routerProfiles){var t=p.toLowerCase();if((k&&k.indexOf(t)!==-1)||(o&&o.indexOf(t)!==-1))return this.routerProfiles[p]}return null}};})()</script>
+    <link rel="stylesheet" href="<%=media%>/cascade.css?v=1.0.58.11">
+    <link rel="stylesheet" href="<%=media%>/mobile.css?v=1.0.58.11" media="(max-width: 991px), (max-height: 550px) and (orientation: landscape)">
+    <link rel="icon" href="<%=media%>/logo-glinet.svg?v=1.0.58.11" sizes="any">
+    <script>if(document.documentElement.getAttribute('data-palette')!=='glinet')document.querySelector('link[rel~="icon"]').href='<%=media%>/logo.svg?v=1.0.58.11'</script>
+    <link rel="manifest" href="<%=media%>/manifest.json?v=1.0.58.11">
     <% if node and node.css then %><link rel="stylesheet" href="<%=resource%>/<%=node.css%>"><% end %>
     <% if css then %><style><%=css%></style><% end %>
     <script src="<%=url('admin/translations', luci.i18n.context.lang)%>"></script>
     <script src="<%=resource%>/cbi.js"></script>
-    <script defer src="<%=media%>/pwa.js?v=1.0.58.10"></script>
-    <script defer src="<%=media%>/dashboard.js?v=1.0.58.10"></script>
+    <script defer src="<%=media%>/pwa.js?v=1.0.58.11"></script>
+    <script defer src="<%=media%>/dashboard.js?v=1.0.58.11"></script>
     <%
     local _fs = require "nixio.fs"
     local _itr = _fs.dir and _fs.dir("/www/luci-static/resources/streamline-addons")
@@ -40,7 +40,7 @@
       for _f in _itr do
         if _f:match("%.js$") then
     %>
-    <script defer src="<%=resource%>/streamline-addons/<%=pcdata(_f)%>?v=1.0.58.10"></script>
+    <script defer src="<%=resource%>/streamline-addons/<%=pcdata(_f)%>?v=1.0.58.11"></script>
     <%
         end
       end

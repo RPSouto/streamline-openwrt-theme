@@ -12,4 +12,5 @@ uci set luci.main.mediaurlbase='/luci-static/streamline'
 uci commit luci
 
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
+[ -x /etc/init.d/rpcd ] && /etc/init.d/rpcd reload >/dev/null 2>&1 || true
 exit 0

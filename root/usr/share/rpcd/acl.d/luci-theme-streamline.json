@@ -1,0 +1,23 @@
+{
+	"luci-theme-streamline": {
+		"description": "Grant access to procedures needed by Streamline theme",
+		"read": {
+			"ubus": {
+				"luci": [
+					"getBuiltinEthernetPorts"
+				],
+				"luci-rpc": [
+					"getNetworkDevices"
+				],
+				"file": [
+					"read"
+				]
+			},
+			"uci": [
+				"network",
+				"wireless",
+				"luci"
+			]
+		}
+	}
+}

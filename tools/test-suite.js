@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=10'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 10');
-assert(control.includes('Version: 1.0.58-10'), 'packaging/control Version is 1.0.58-10');
-assert(buildIpk.includes('1.0.58-10'), 'build-ipk.sh default target is 1.0.58-10');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-10'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-10');
-assert(swJs.includes('streamline-static-v58-10'), 'streamline-sw.js CACHE_NAME matches v58-10');
-assert(headerHtm.includes('?v=1.0.58.10'), 'header.htm asset query param matches v1.0.58.10');
-assert(headerUt.includes('?v=1.0.58.10'), 'header.ut asset query param matches v1.0.58.10');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=11'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 11');
+assert(control.includes('Version: 1.0.58-11'), 'packaging/control Version is 1.0.58-11');
+assert(buildIpk.includes('1.0.58-11'), 'build-ipk.sh default target is 1.0.58-11');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-11'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-11');
+assert(swJs.includes('streamline-static-v58-11'), 'streamline-sw.js CACHE_NAME matches v58-11');
+assert(headerHtm.includes('?v=1.0.58.11'), 'header.htm asset query param matches v1.0.58.11');
+assert(headerUt.includes('?v=1.0.58.11'), 'header.ut asset query param matches v1.0.58.11');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -641,6 +641,13 @@ assert(fs.existsSync(path.join(templateAddonDir, 'README.md')), 'luci-addon-temp
 
 assert(fs.existsSync(path.join(rootDir, 'build-addons.sh')), 'build-addons.sh exists in repository root');
 assert(fs.existsSync(path.join(rootDir, 'packages/README.md')), 'packages/README.md exists with documentation');
+
+const aclPath = path.join(rootDir, 'root/usr/share/rpcd/acl.d/luci-theme-streamline.json');
+assert(fs.existsSync(aclPath), 'root/usr/share/rpcd/acl.d/luci-theme-streamline.json exists');
+if (fs.existsSync(aclPath)) {
+  const aclContent = fs.readFileSync(aclPath, 'utf8');
+  assert(aclContent.includes('getBuiltinEthernetPorts'), 'rpcd ACL grants luci getBuiltinEthernetPorts');
+}
 
 // Summary
 console.log(`\n========================================`);
