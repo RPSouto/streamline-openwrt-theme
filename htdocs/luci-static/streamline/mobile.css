@@ -534,20 +534,6 @@
   th:first-child, td:first-child, .th:first-child, .td:first-child { padding-left: 14px; }
   th:last-child, td:last-child, .th:last-child, .td:last-child { padding-right: 14px; }
 
-  /* Mobile table filter bar */
-  .sl-table-filter-bar {
-    padding: 8px 10px !important;
-    gap: 8px !important;
-  }
-  .sl-filter-input-wrap {
-    max-width: 100% !important;
-    flex: 1 1 100% !important;
-  }
-  .sl-filter-meta {
-    width: 100% !important;
-    justify-content: flex-end !important;
-  }
-
   /* Mobile scrollbar indicators */
   .table-wrapper::-webkit-scrollbar,
   .cbi-section-node::-webkit-scrollbar,

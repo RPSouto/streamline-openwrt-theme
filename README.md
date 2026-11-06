@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.58--6-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.58--7-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -10,7 +10,6 @@
 
 ## ✨ Highlights
 
-* **Instant Table Search Filter (`DHCP, Wi-Fi Clients, Firewall, Routes`)**: Real-time interactive search filter bar dynamically attached above data tables. Allows instantaneous filtering by hostname, IP address, MAC address, firewall rule, port, or protocol as you type. Includes live match counter pills (`12 / 24`), quick clear buttons (`×`), escape key binding, and full reactivity to LuCI's live 5-second polling updates without losing active search queries or focus.
 * **Physical Ethernet Port Map (`Status → Overview`)**: Real-time visual RJ45 port status map directly on the homepage. Automatically discovers WAN and LAN switch ports via `/etc/board.json` and network topology. Displays active connection state, glowing multi-speed LED indicators (2.5 Gbps cyan neon, 1 Gbps emerald green, 100 Mbps amber), duplex modes, and live download/upload throughput counters with zero-shift background polling.
 * **Dynamic OpenWrt Distribution & Version Badge**: Prominently displays the detected OpenWrt release (e.g. `OPENWRT 21`, `OPENWRT 23`, `IMMORTALWRT 23`) directly below the brand title in both the desktop sidebar and mobile navigation drawer.
 * **Minimalist Right-Aligned Footer**: Clean footer displaying strictly `Streamline · <Distro> <Version>` (e.g., `Streamline · OpenWrt 21.02`), stripping verbose snapshot tags and git commit hashes.
@@ -53,8 +52,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.58-6_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.58-6_all.ipk'
+scp releases/luci-theme-streamline_1.0.58-7_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.58-7_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -62,8 +61,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.58-r6_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.58-r6_all.apk'
+scp releases/luci-theme-streamline_1.0.58-r7_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.58-r7_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
