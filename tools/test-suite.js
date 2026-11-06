@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=7'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 7');
-assert(control.includes('Version: 1.0.58-7'), 'packaging/control Version is 1.0.58-7');
-assert(buildIpk.includes('1.0.58-7'), 'build-ipk.sh default target is 1.0.58-7');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-7'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-7');
-assert(swJs.includes('streamline-static-v58-7'), 'streamline-sw.js CACHE_NAME matches v58-7');
-assert(headerHtm.includes('?v=1.0.58.7'), 'header.htm asset query param matches v1.0.58.7');
-assert(headerUt.includes('?v=1.0.58.7'), 'header.ut asset query param matches v1.0.58.7');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=8'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 8');
+assert(control.includes('Version: 1.0.58-8'), 'packaging/control Version is 1.0.58-8');
+assert(buildIpk.includes('1.0.58-8'), 'build-ipk.sh default target is 1.0.58-8');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-8'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-8');
+assert(swJs.includes('streamline-static-v58-8'), 'streamline-sw.js CACHE_NAME matches v58-8');
+assert(headerHtm.includes('?v=1.0.58.8'), 'header.htm asset query param matches v1.0.58.8');
+assert(headerUt.includes('?v=1.0.58.8'), 'header.ut asset query param matches v1.0.58.8');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
