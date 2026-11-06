@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-9';
+const THEME_VERSION = '1.0.58-10';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -886,40 +886,43 @@ return baseclass.extend({
     if (typeof L === 'undefined' || typeof L.require !== 'function')
       return;
     const glProtos = {
+      qmi: 'QMI Cellular',
+      wwan: 'Wireless WAN',
+      relay: 'Relay bridge',
       wgclient: 'WireGuard Client (GL.iNet)',
       wgserver: 'WireGuard Server (GL.iNet)',
       ovpnclient: 'OpenVPN Client (GL.iNet)',
       ovpnserver: 'OpenVPN Server (GL.iNet)',
       tethering: 'Tethering (GL.iNet)'
     };
-    Object.keys(glProtos).forEach((proto) => {
-      L.require('protocol.' + proto).catch(() => {
-        L.require('network').then((network) => {
-          if (network && typeof network.registerProtocol === 'function' && !network.getProtocol(proto)) {
-            network.registerProtocol(proto, {
-              getI18n: () => _(glProtos[proto]),
-              getIfname() { return this._ubus('l3_device') || this._ubus('device') || this.sid || proto; },
-              isFloating: () => true,
-              isVirtual: () => true,
-              getDevices: () => null,
-              containsDevice(ifname) { return (network.getIfnameOf(ifname) === this.getIfname()); },
-              renderFormOptions(s) {
-                L.require('form').then((form) => {
-                  if (form && s && typeof s.taboption === 'function') {
-                    const o = s.taboption('general', form.DummyValue, '_gl_managed', _('Managed by GL.iNet'));
-                    o.rawhtml = true;
-                    o.default = '<div class="alert-message notice" style="margin: 8px 0; padding: 12px 16px; border-radius: 8px;">' +
-                      '<strong>' + _(glProtos[proto]) + '</strong><br>' +
-                      _('This interface is managed by the GL.iNet VPN subsystem.') +
-                      '</div>';
-                  }
-                }).catch(() => {});
-              }
-            });
-          }
-        }).catch(() => {});
+    L.require('network').then((network) => {
+      if (!network || typeof network.registerProtocol !== 'function')
+        return;
+      Object.keys(glProtos).forEach((proto) => {
+        if (!network.getProtocol(proto)) {
+          network.registerProtocol(proto, {
+            getI18n: () => _(glProtos[proto]),
+            getIfname() { return this._ubus('l3_device') || this._ubus('device') || this.sid || proto; },
+            isFloating: () => true,
+            isVirtual: () => true,
+            getDevices: () => null,
+            containsDevice(ifname) { return (network.getIfnameOf(ifname) === this.getIfname()); },
+            renderFormOptions(s) {
+              L.require('form').then((form) => {
+                if (form && s && typeof s.taboption === 'function') {
+                  const o = s.taboption('general', form.DummyValue, '_gl_managed', _('Managed by System / GL.iNet'));
+                  o.rawhtml = true;
+                  o.default = '<div class="alert-message notice" style="margin: 8px 0; padding: 12px 16px; border-radius: 8px;">' +
+                    '<strong>' + _(glProtos[proto]) + '</strong><br>' +
+                    _('This interface protocol is managed by system services or external tools.') +
+                    '</div>';
+                }
+              }).catch(() => {});
+            }
+          });
+        }
       });
-    });
+    }).catch(() => {});
   },
 
   getDispatchPath() {

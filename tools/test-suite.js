@@ -30,7 +30,15 @@ const jsFiles = [
   'htdocs/luci-static/resources/menu-streamline-v21.js',
   'htdocs/luci-static/streamline/dashboard.js',
   'htdocs/luci-static/streamline/pwa.js',
-  'htdocs/streamline-sw.js'
+  'htdocs/streamline-sw.js',
+  'htdocs/luci-static/resources/protocol/qmi.js',
+  'htdocs/luci-static/resources/protocol/wwan.js',
+  'htdocs/luci-static/resources/protocol/relay.js',
+  'htdocs/luci-static/resources/protocol/wgclient.js',
+  'htdocs/luci-static/resources/protocol/wgserver.js',
+  'htdocs/luci-static/resources/protocol/ovpnclient.js',
+  'htdocs/luci-static/resources/protocol/ovpnserver.js',
+  'htdocs/luci-static/resources/protocol/tethering.js'
 ];
 
 for (const rel of jsFiles) {
@@ -120,13 +128,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=9'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 9');
-assert(control.includes('Version: 1.0.58-9'), 'packaging/control Version is 1.0.58-9');
-assert(buildIpk.includes('1.0.58-9'), 'build-ipk.sh default target is 1.0.58-9');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-9'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-9');
-assert(swJs.includes('streamline-static-v58-9'), 'streamline-sw.js CACHE_NAME matches v58-9');
-assert(headerHtm.includes('?v=1.0.58.9'), 'header.htm asset query param matches v1.0.58.9');
-assert(headerUt.includes('?v=1.0.58.9'), 'header.ut asset query param matches v1.0.58.9');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=10'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 10');
+assert(control.includes('Version: 1.0.58-10'), 'packaging/control Version is 1.0.58-10');
+assert(buildIpk.includes('1.0.58-10'), 'build-ipk.sh default target is 1.0.58-10');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-10'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-10');
+assert(swJs.includes('streamline-static-v58-10'), 'streamline-sw.js CACHE_NAME matches v58-10');
+assert(headerHtm.includes('?v=1.0.58.10'), 'header.htm asset query param matches v1.0.58.10');
+assert(headerUt.includes('?v=1.0.58.10'), 'header.ut asset query param matches v1.0.58.10');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -551,6 +559,27 @@ assert(testFormatEnc('none') === 'None', 'formatWifiEncryptionString formats non
 assert(testFormatEnc('') === 'None', 'formatWifiEncryptionString formats empty string');
 assert(testFormatEnc('wpa3-eap') === 'WPA3 EAP (CCMP)', 'formatWifiEncryptionString formats wpa3-eap');
 assert(testFormatEnc('wpa2-eap') === 'WPA2 EAP (CCMP)', 'formatWifiEncryptionString formats wpa2-eap');
+
+// Test 24: Verify bundled protocol handlers presence and registration
+console.log('\n24. Verifying bundled protocol handlers...');
+const protoFiles = [
+  'qmi.js',
+  'wwan.js',
+  'relay.js',
+  'wgclient.js',
+  'wgserver.js',
+  'ovpnclient.js',
+  'ovpnserver.js',
+  'tethering.js'
+];
+for (const p of protoFiles) {
+  const filePath = path.join(rootDir, 'htdocs/luci-static/resources/protocol', p);
+  assert(fs.existsSync(filePath), `Protocol handler exists: ${p}`);
+  if (fs.existsSync(filePath)) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    assert(content.includes('network.registerProtocol'), `Protocol handler ${p} registers protocol via network.registerProtocol`);
+  }
+}
 
 // Summary
 console.log(`\n========================================`);
