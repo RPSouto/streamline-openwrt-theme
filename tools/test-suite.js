@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=3'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 3');
-assert(control.includes('Version: 1.0.58-3'), 'packaging/control Version is 1.0.58-3');
-assert(buildIpk.includes('1.0.58-3'), 'build-ipk.sh default target is 1.0.58-3');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-3'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-3');
-assert(swJs.includes('streamline-static-v58-3'), 'streamline-sw.js CACHE_NAME matches v58-3');
-assert(headerHtm.includes('?v=1.0.58.3'), 'header.htm asset query param matches v1.0.58.3');
-assert(headerUt.includes('?v=1.0.58.3'), 'header.ut asset query param matches v1.0.58.3');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=4'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 4');
+assert(control.includes('Version: 1.0.58-4'), 'packaging/control Version is 1.0.58-4');
+assert(buildIpk.includes('1.0.58-4'), 'build-ipk.sh default target is 1.0.58-4');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-4'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-4');
+assert(swJs.includes('streamline-static-v58-4'), 'streamline-sw.js CACHE_NAME matches v58-4');
+assert(headerHtm.includes('?v=1.0.58.4'), 'header.htm asset query param matches v1.0.58.4');
+assert(headerUt.includes('?v=1.0.58.4'), 'header.ut asset query param matches v1.0.58.4');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -471,6 +471,56 @@ const portDown = { link: { carrier: false, speed: -1, duplex: null } };
 const downResult = extractPortStatusTest(portDown);
 assert(downResult.isUp === false && downResult.speedText === 'No Link',
   'extractPortStatus recognizes disconnected port with carrier: false');
+
+// Test 22: Verify Network adapter classification and empty-badge elimination
+console.log('\n22. Verifying Network adapter classification and empty-badge elimination...');
+assert(menuJs.includes('classifyDevice(devName, ifaceName, rawText)'), 'menu-streamline-v21.js implements classifyDevice()');
+assert(menuJs.includes('formatDeviceBadgeElement(badge, ifaceName)'), 'menu-streamline-v21.js implements formatDeviceBadgeElement()');
+assert(cascadeCss.includes('.ifacebadge.sl-device-badge.sl-type-wan'), 'cascade.css contains .sl-type-wan category styling');
+assert(cascadeCss.includes('.ifacebadge.sl-device-badge.sl-type-bridge'), 'cascade.css contains .sl-type-bridge category styling');
+assert(cascadeCss.includes('.ifacebadge.sl-device-badge.sl-type-virtual'), 'cascade.css contains .sl-type-virtual category styling');
+assert(cascadeCss.includes('.ifacebadge.sl-device-badge .sl-device-empty-label'), 'cascade.css contains .sl-device-empty-label styling');
+assert(cascadeCss.includes('.ifacebadge.sl-device-badge .sl-device-ports'), 'cascade.css contains .sl-device-ports styling');
+
+// Extract and test classifyDevice implementation directly
+const classifyDeviceMatch = menuJs.match(/classifyDevice\(devName,\s*ifaceName,\s*rawText\)\s*\{([\s\S]*?)\n\s*\},?\n\s*cleanDeviceBadges/);
+assert(Boolean(classifyDeviceMatch), 'Extracted classifyDevice implementation for unit testing');
+
+const testClassifyDevice = new Function('devName', 'ifaceName', 'rawText', classifyDeviceMatch[1]);
+
+// 1. Empty devName -> virtual
+const vRes = testClassifyDevice('', 'guest_lan', 'Ethernet Adapter: ""');
+assert(vRes.category === 'virtual' && vRes.isVirtual === true && vRes.typeLabel === 'Virtual Interface' && vRes.nameLabel === 'No physical device',
+  'classifyDevice correctly classifies empty device as Virtual Interface with "No physical device"');
+
+// 2. Empty devName on VPN interface -> VPN Interface
+const vpnRes = testClassifyDevice('', 'wgclient', 'Ethernet Adapter: ""');
+assert(vpnRes.category === 'virtual' && vpnRes.typeLabel === 'VPN Interface' && vpnRes.nameLabel === 'wgclient',
+  'classifyDevice classifies empty device on VPN interface as VPN Interface • wgclient');
+
+// 3. Physical 2.5G WAN (eth1)
+const wanRes = testClassifyDevice('eth1', 'wan', 'Ethernet Adapter: "eth1"');
+assert(wanRes.category === 'wan' && wanRes.typeLabel === '2.5G WAN Port' && wanRes.nameLabel === 'eth1',
+  'classifyDevice classifies eth1 as 2.5G WAN Port');
+
+// 4. Bridge interface (br-lan)
+const brRes = testClassifyDevice('br-lan', 'lan', 'Bridge: "br-lan" (lan1, lan2, lan3, lan4)');
+assert(brRes.category === 'bridge' && brRes.typeLabel === 'LAN Bridge' && brRes.nameLabel === 'br-lan',
+  'classifyDevice classifies br-lan as LAN Bridge');
+
+// 5. WireGuard VPN
+const wgRes = testClassifyDevice('wgclient', 'wgclient', 'Ethernet Adapter: "wgclient"');
+assert(wgRes.category === 'vpn' && wgRes.typeLabel === 'WireGuard VPN' && wgRes.nameLabel === 'wgclient',
+  'classifyDevice classifies wgclient as WireGuard VPN');
+
+// 6. LAN Switch Ports (lan1 is 2.5G, lan2 is standard)
+const lan1Res = testClassifyDevice('lan1', 'lan', 'Ethernet Adapter: "lan1"');
+assert(lan1Res.category === 'lan' && lan1Res.typeLabel === '2.5G LAN Port' && lan1Res.nameLabel === 'LAN1',
+  'classifyDevice classifies lan1 as 2.5G LAN Port');
+
+const lan2Res = testClassifyDevice('lan2', 'lan', 'Ethernet Adapter: "lan2"');
+assert(lan2Res.category === 'lan' && lan2Res.typeLabel === 'LAN Port' && lan2Res.nameLabel === 'LAN2',
+  'classifyDevice classifies lan2 as LAN Port');
 
 // Summary
 console.log(`\n========================================`);

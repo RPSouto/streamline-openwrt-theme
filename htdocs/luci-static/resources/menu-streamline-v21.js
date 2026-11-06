@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-3';
+const THEME_VERSION = '1.0.58-4';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -305,9 +305,153 @@ return baseclass.extend({
     }
   },
 
+  classifyDevice(devName, ifaceName, rawText) {
+    const dev = (devName || '').toLowerCase().trim();
+    const iface = (ifaceName || '').toLowerCase().trim();
+    const raw = (rawText || '').toLowerCase().trim();
+
+    // 1. Empty / Virtual / No Physical Device
+    if (!dev || dev === 'none' || dev === '""' || dev === '?' || /no interfaces attached|nenhuma interface/i.test(raw)) {
+      const isVpn = /wg|wireguard|ovpn|openvpn/i.test(iface);
+      return {
+        category: 'virtual',
+        className: 'sl-type-virtual',
+        typeLabel: isVpn ? 'VPN Interface' : 'Virtual Interface',
+        nameLabel: isVpn ? (ifaceName || 'Managed by Subsystem') : 'No physical device',
+        isVirtual: true,
+        icon: 'virtual'
+      };
+    }
+
+    // 2. WireGuard VPN
+    if (/^wg|wireguard/i.test(dev) || /^wg|wireguard/i.test(iface)) {
+      return {
+        category: 'vpn',
+        className: 'sl-type-vpn',
+        typeLabel: 'WireGuard VPN',
+        nameLabel: devName,
+        icon: 'vpn'
+      };
+    }
+
+    // 3. OpenVPN / Tunnels
+    if (/^(tun|tap|ovpn|gre|sit|ip6tnl)/i.test(dev) || /ovpn|openvpn/i.test(iface)) {
+      return {
+        category: 'vpn',
+        className: 'sl-type-vpn',
+        typeLabel: 'OpenVPN',
+        nameLabel: devName,
+        icon: 'vpn'
+      };
+    }
+
+    // 4. USB Tethering
+    if (/^(usb|rndis|cdc|ncm)\d*/i.test(dev) || /tether/i.test(iface)) {
+      return {
+        category: 'tether',
+        className: 'sl-type-tether',
+        typeLabel: 'USB Tethering',
+        nameLabel: devName,
+        icon: 'tether'
+      };
+    }
+
+    // 5. Cellular / 4G / 5G Modem
+    if (/^(wwan|qmi|mbim|modem)\d*/i.test(dev) || /wwan|modem|cellular|mobile/i.test(iface)) {
+      return {
+        category: 'cellular',
+        className: 'sl-type-cellular',
+        typeLabel: 'Cellular Modem',
+        nameLabel: devName,
+        icon: 'cellular'
+      };
+    }
+
+    // 6. WAN Physical Port (eth1 on GL-MT6000 is 2.5G WAN)
+    if (dev === 'eth1' || (/wan/i.test(iface) && /^(eth\d+|wan)/i.test(dev))) {
+      const is25G = (dev === 'eth1');
+      return {
+        category: 'wan',
+        className: 'sl-type-wan',
+        typeLabel: is25G ? '2.5G WAN Port' : 'WAN Port',
+        nameLabel: devName,
+        icon: 'wan'
+      };
+    }
+
+    // 7. Bridge Interface (e.g. br-lan)
+    if (/^br-|^bridge/i.test(dev) || /bridge|ponte|puente|pont/i.test(raw)) {
+      return {
+        category: 'bridge',
+        className: 'sl-type-bridge',
+        typeLabel: 'LAN Bridge',
+        nameLabel: devName,
+        icon: 'bridge'
+      };
+    }
+
+    // 8. Individual LAN Port (DSA switch port)
+    if (/^lan\d+$/i.test(dev)) {
+      const isLan25G = (dev === 'lan1');
+      return {
+        category: 'lan',
+        className: 'sl-type-lan',
+        typeLabel: isLan25G ? '2.5G LAN Port' : 'LAN Port',
+        nameLabel: devName.toUpperCase(),
+        icon: 'lan'
+      };
+    }
+
+    // 9. VLAN Interface
+    if (/\.\d+$|vlan/i.test(dev) || /vlan/i.test(raw)) {
+      return {
+        category: 'vlan',
+        className: 'sl-type-vlan',
+        typeLabel: 'VLAN',
+        nameLabel: devName,
+        icon: 'vlan'
+      };
+    }
+
+    // 10. Alias / Sub-interface (@wan, @lan)
+    if (/^@/.test(dev) || /alias/i.test(raw)) {
+      return {
+        category: 'alias',
+        className: 'sl-type-alias',
+        typeLabel: 'Alias Interface',
+        nameLabel: devName,
+        icon: 'virtual'
+      };
+    }
+
+    // 11. Wi-Fi Wireless Adapter
+    if (/^(wlan|ra|rax|ath|wl)\d+/i.test(dev) || /wireless|wifi/i.test(raw)) {
+      return {
+        category: 'wifi',
+        className: 'sl-type-wifi',
+        typeLabel: 'Wireless Network',
+        nameLabel: devName,
+        icon: 'wifi'
+      };
+    }
+
+    // 12. Default physical Ethernet
+    return {
+      category: 'ethernet',
+      className: 'sl-type-ethernet',
+      typeLabel: 'Ethernet Adapter',
+      nameLabel: devName || ifaceName,
+      icon: 'ethernet'
+    };
+  },
+
   cleanDeviceBadges(box) {
     const badges = box.querySelectorAll('.ifacebadge');
     if (!badges || !badges.length) return;
+
+    const head = box.querySelector('.ifacebox-head');
+    const strong = head ? head.querySelector('strong') : null;
+    const ifaceName = (strong ? strong.textContent : (head ? head.textContent : '')).trim();
 
     badges.forEach((badge) => {
       const text = badge.textContent || '';
@@ -315,70 +459,114 @@ return baseclass.extend({
         return;
       }
 
-      badge.classList.add('sl-device-badge');
-
-      const nowraps = badge.querySelectorAll('.nowrap');
-      if (nowraps.length > 0) {
-        nowraps.forEach((nw) => {
-          this.formatDeviceBadgeElement(nw);
-        });
-      } else {
-        this.formatDeviceBadgeElement(badge);
-      }
+      this.formatDeviceBadgeElement(badge, ifaceName);
     });
   },
 
-  formatDeviceBadgeElement(el) {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
-    let node;
-    const textNodes = [];
-    while ((node = walker.nextNode())) {
-      textNodes.push(node);
+  formatDeviceBadgeElement(badge, ifaceName) {
+    if (!badge) return;
+    if (badge.dataset && badge.dataset.slEnhanced) return;
+
+    const fullText = (badge.textContent || '').trim();
+
+    // 1. Extract device name if present
+    let devName = '';
+    const quoteMatch = fullText.match(/"([^"\r\n]+?)"/);
+    if (quoteMatch) {
+      devName = quoteMatch[1].trim();
+    } else {
+      const colonMatch = fullText.match(/:\s*"?([^\s()"'\r\n]+)/);
+      if (colonMatch) {
+        devName = colonMatch[1].trim();
+      }
     }
 
-    textNodes.forEach((tNode) => {
-      const val = tNode.nodeValue || '';
-      const m = val.match(/^(.*?)(Ethernet Adapter|Wireless Adapter|Bridge|VLAN|Software VLAN|MAC-VLAN|Tunnel|Device|Network Device):\s*"?([^"\r\n]+?)"?\s*$/i);
-      if (m) {
-        const prefix = m[1];
-        const type = m[2];
-        const devName = m[3];
-        const span = document.createElement('span');
-        span.className = 'sl-device-content';
-        if (prefix && prefix.trim()) {
-          span.appendChild(document.createTextNode(prefix));
-        }
-        const typeSpan = document.createElement('span');
-        typeSpan.className = 'sl-device-type';
-        typeSpan.textContent = type;
-        span.appendChild(typeSpan);
+    if (!devName || devName === 'none' || devName === '""' || devName === '?') {
+      devName = '';
+    }
 
-        const sepSpan = document.createElement('span');
-        sepSpan.className = 'sl-device-sep';
-        sepSpan.textContent = '•';
-        span.appendChild(sepSpan);
+    // 2. Extract ports if bridge
+    let portsStr = '';
+    const portsMatch = fullText.match(/\(([^)]+)\)/);
+    if (portsMatch && !/no interfaces attached|nenhuma interface/i.test(portsMatch[1])) {
+      portsStr = portsMatch[1].trim();
+    }
 
-        const nameSpan = document.createElement('strong');
-        nameSpan.className = 'sl-device-name';
-        nameSpan.textContent = devName;
-        span.appendChild(nameSpan);
+    // 3. Classify device
+    const info = this.classifyDevice(devName, ifaceName || '', fullText);
 
-        if (tNode.parentNode) {
-          tNode.parentNode.replaceChild(span, tNode);
-        }
-      } else if (/"([^"\r\n]+?)"/.test(val)) {
-        tNode.nodeValue = val.replace(/"([^"\r\n]+?)"/g, '$1');
+    badge.className = 'ifacebadge sl-device-badge ' + info.className;
+    if (badge.dataset) badge.dataset.slEnhanced = '1';
+
+    // SVG icon mapping
+    const svgMap = {
+      wan: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+      lan: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 8h8v6h-2v3h-4v-3H8V8z"/></svg>',
+      bridge: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="7" height="6" rx="2"/><rect x="14" y="14" width="7" height="6" rx="2"/><path d="M6.5 10v4M17.5 10v4"/></svg>',
+      vpn: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="2"/></svg>',
+      tether: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="19" r="2"/><circle cx="6" cy="9" r="1.5"/><circle cx="18" cy="9" r="1.5"/><path d="M12 17V8M6 10.5v2a3.5 3.5 0 0 0 3.5 3.5h5a3.5 3.5 0 0 0 3.5-3.5v-2"/></svg>',
+      cellular: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h2M7 16v4M12 12v8M17 8v12M22 4v16"/></svg>',
+      vlan: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+      virtual: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg>',
+      ethernet: '<svg class="sl-dev-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 8h8v6h-2v3h-4v-3H8V8z"/></svg>'
+    };
+
+    badge.innerHTML = '';
+
+    // Icon wrapper
+    const iconWrap = document.createElement('span');
+    iconWrap.className = 'sl-device-icon-wrap ' + (info.isVirtual ? 'is-virtual' : '');
+    iconWrap.innerHTML = svgMap[info.icon] || svgMap.ethernet;
+    badge.appendChild(iconWrap);
+
+    // Content container
+    const content = document.createElement('span');
+    content.className = 'sl-device-content';
+
+    // Type label
+    const typeSpan = document.createElement('span');
+    typeSpan.className = 'sl-device-type';
+    typeSpan.textContent = info.typeLabel;
+    content.appendChild(typeSpan);
+
+    // Separator dot
+    const sepSpan = document.createElement('span');
+    sepSpan.className = 'sl-device-sep';
+    sepSpan.textContent = '•';
+    content.appendChild(sepSpan);
+
+    // Name or Empty label
+    if (info.isVirtual) {
+      const emptySpan = document.createElement('span');
+      emptySpan.className = 'sl-device-empty-label';
+      emptySpan.textContent = info.nameLabel;
+      content.appendChild(emptySpan);
+    } else {
+      const nameSpan = document.createElement('strong');
+      nameSpan.className = 'sl-device-name';
+      nameSpan.textContent = info.nameLabel;
+      content.appendChild(nameSpan);
+
+      // If bridge has member ports, append ports pill
+      if (portsStr) {
+        const portsSpan = document.createElement('span');
+        portsSpan.className = 'sl-device-ports';
+        portsSpan.textContent = portsStr;
+        portsSpan.setAttribute('title', 'Bridge member ports: ' + portsStr);
+        content.appendChild(portsSpan);
       }
-    });
+    }
+
+    badge.appendChild(content);
   },
 
   normalizeWirelessOverview() {
     const enhance = () => {
-      const boxes = document.querySelectorAll('.network-status-table .ifacebox');
+      const boxes = document.querySelectorAll('.network-status-table .ifacebox, #cbi-network-interface .ifacebox, .cbi-section .ifacebox');
       if (!boxes || !boxes.length) return;
 
       boxes.forEach((box) => {
-        // Clean and modernize device footer badges (e.g. Ethernet Adapter: "wgclient1")
+        // Clean and modernize device footer badges (e.g. 2.5G WAN Port • eth1)
         this.cleanDeviceBadges(box);
 
         const head = box.querySelector('.ifacebox-head');
@@ -386,11 +574,10 @@ return baseclass.extend({
 
         // Ensure upstream network cards NEVER get Wi-Fi frequency badges or icons
         const headText = head.textContent || '';
-        if (/upstream/i.test(headText)) {
+        if (/upstream/i.test(headText) || /wan/i.test(headText)) {
           head.classList.add('is-upstream');
           const strayBand = head.querySelector('.sl-radio-band');
           if (strayBand) strayBand.remove();
-          return;
         }
 
         // Check for wireless indicators: wireless controller in strong, or channel/freq/SSID in body
@@ -404,6 +591,7 @@ return baseclass.extend({
                            /mode\s*:\s*master/i.test(box.textContent || '');
 
         if (!isWireless) {
+          head.classList.add('is-non-wireless');
           const strayBand = head.querySelector('.sl-radio-band');
           if (strayBand) strayBand.remove();
           return;
