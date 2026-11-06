@@ -438,12 +438,6 @@
         expect: { data: '' }
       });
 
-      var callBuiltin = rpc.declare({
-        object: 'luci',
-        method: 'getBuiltinEthernetPorts',
-        expect: { result: [] }
-      });
-
       var callUciGet = rpc.declare({
         object: 'uci',
         method: 'get',
@@ -458,69 +452,56 @@
       });
 
       return Promise.all([
-        callBuiltin().catch(function () { return []; }),
         callFileRead('/etc/board.json').catch(function () { return { data: '' }; }),
         callUciGet('network').catch(function () { return { values: {} }; }),
         callNetworkDevices().catch(function () { return {}; })
-      ]);
-    }).then(function (results) {
-      var builtin = results[0] || [];
-      var boardData = (results[1] && results[1].data) ? results[1].data : '';
-      var uciValues = (results[2] && results[2].values) ? results[2].values : {};
-      var netDevs = results[3] || {};
+      ]).then(function (results) {
+        var boardData = (results[0] && results[0].data) ? results[0].data : '';
+        var uciValues = (results[1] && results[1].values) ? results[1].values : {};
+        var netDevs = results[2] || {};
 
-      var discovered = [];
-      var seen = {};
+        var discovered = [];
+        var seen = {};
 
-      function add(dev, role, label) {
-        if (!dev || typeof dev !== 'string') return;
-        var cleanDev = dev.trim();
-        if (!cleanDev || seen[cleanDev]) return;
-        if (/^(lo|br-.*|sit\d+|wlan\d+|phy\d+|dummy\d+|tun\d+|tap\d+|docker\d+|wg\d+|wg.*|gre\d+|gre.*|teql\d+)$/i.test(cleanDev))
-          return;
-        seen[cleanDev] = true;
-        discovered.push({
-          device: cleanDev,
-          role: role || (/wan/i.test(cleanDev) ? 'wan' : 'lan'),
-          label: label || cleanDev.toUpperCase()
-        });
-      }
+        function add(dev, role, label) {
+          if (!dev || typeof dev !== 'string') return;
+          var cleanDev = dev.trim();
+          if (!cleanDev || seen[cleanDev]) return;
+          if (/^(lo|br-.*|sit\d+|wlan\d+|phy\d+|dummy\d+|tun\d+|tap\d+|docker\d+|wg\d+|wg.*|gre\d+|gre.*|teql\d+)$/i.test(cleanDev))
+            return;
+          seen[cleanDev] = true;
+          discovered.push({
+            device: cleanDev,
+            role: role || (/wan/i.test(cleanDev) ? 'wan' : 'lan'),
+            label: label || cleanDev.toUpperCase()
+          });
+        }
 
-      // 1. From builtin ethernet ports (LuCI 23.05+)
-      if (Array.isArray(builtin) && builtin.length > 0) {
-        builtin.forEach(function (p) {
-          if (p && p.device) {
-            var role = p.role || (/wan/i.test(p.device) ? 'wan' : 'lan');
-            add(p.device, role, p.label || (role === 'wan' ? 'WAN' : p.device.toUpperCase()));
-          }
-        });
-      }
-
-      // 2. From /etc/board.json (GL.iNet & standard OpenWrt DSA)
-      if (discovered.length === 0 && boardData) {
-        try {
-          var board = JSON.parse(boardData);
-          if (board && board.network) {
-            // Check WAN
-            if (board.network.wan) {
-              if (board.network.wan.device)
-                add(board.network.wan.device, 'wan', 'WAN');
-              else if (Array.isArray(board.network.wan.ports))
-                board.network.wan.ports.forEach(function (p) { add(p, 'wan', 'WAN'); });
-            }
-            // Check LAN
-            if (board.network.lan) {
-              var lanPorts = board.network.lan.ports || (board.network.lan.device ? [board.network.lan.device] : []);
-              if (Array.isArray(lanPorts)) {
-                lanPorts.forEach(function (p, idx) {
-                  var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
-                  add(p, 'lan', lbl);
-                });
+        // 1. From /etc/board.json (GL.iNet & standard OpenWrt DSA)
+        if (boardData) {
+          try {
+            var board = JSON.parse(boardData);
+            if (board && board.network) {
+              // Check WAN
+              if (board.network.wan) {
+                if (board.network.wan.device)
+                  add(board.network.wan.device, 'wan', 'WAN');
+                else if (Array.isArray(board.network.wan.ports))
+                  board.network.wan.ports.forEach(function (p) { add(p, 'wan', 'WAN'); });
+              }
+              // Check LAN
+              if (board.network.lan) {
+                var lanPorts = board.network.lan.ports || (board.network.lan.device ? [board.network.lan.device] : []);
+                if (Array.isArray(lanPorts)) {
+                  lanPorts.forEach(function (p, idx) {
+                    var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
+                    add(p, 'lan', lbl);
+                  });
+                }
               }
             }
-          }
-        } catch (e) {}
-      }
+          } catch (e) {}
+        }
 
       // 3. From UCI network if still empty
       if (discovered.length === 0 && uciValues) {
@@ -553,24 +534,48 @@
           }
         });
       }
+        // 4. Fallback for non-DSA devices on LuCI 23.05+ (only if board.json, UCI & netDevs gave nothing)
+        var fallbackPromise = Promise.resolve();
+        if (discovered.length === 0) {
+          try {
+            var callBuiltin = rpc.declare({
+              object: 'luci',
+              method: 'getBuiltinEthernetPorts',
+              expect: { result: [] }
+            });
+            fallbackPromise = callBuiltin().then(function (builtin) {
+              if (Array.isArray(builtin) && builtin.length > 0) {
+                builtin.forEach(function (p) {
+                  if (p && p.device) {
+                    var role = p.role || (/wan/i.test(p.device) ? 'wan' : 'lan');
+                    add(p.device, role, p.label || (role === 'wan' ? 'WAN' : p.device.toUpperCase()));
+                  }
+                });
+              }
+            }).catch(function () {});
+          } catch (e) {}
+        }
 
-      // Filter: if netDevs has devices, only keep devices that actually exist in the kernel!
-      if (Object.keys(netDevs).length > 0) {
-        discovered = discovered.filter(function (p) {
-          return Boolean(netDevs[p.device]);
+        return fallbackPromise.then(function () {
+          // Filter: if netDevs has devices, only keep devices that actually exist in the kernel!
+          if (Object.keys(netDevs).length > 0) {
+            discovered = discovered.filter(function (p) {
+              return Boolean(netDevs[p.device]);
+            });
+          }
+
+          // Sort: WAN first, then LAN1, LAN2, LAN3...
+          discovered.sort(function (a, b) {
+            if (a.role === 'wan' && b.role !== 'wan') return -1;
+            if (a.role !== 'wan' && b.role === 'wan') return 1;
+            return a.device.localeCompare(b.device, undefined, { numeric: true });
+          });
+
+          portsList = discovered;
+          renderPortCards();
+          updatePortStatus();
         });
-      }
-
-      // Sort: WAN first, then LAN1, LAN2, LAN3...
-      discovered.sort(function (a, b) {
-        if (a.role === 'wan' && b.role !== 'wan') return -1;
-        if (a.role !== 'wan' && b.role === 'wan') return 1;
-        return a.device.localeCompare(b.device, undefined, { numeric: true });
       });
-
-      portsList = discovered;
-      renderPortCards();
-      updatePortStatus();
     }).catch(function () {
       portsDiscoveryPending = false;
     });

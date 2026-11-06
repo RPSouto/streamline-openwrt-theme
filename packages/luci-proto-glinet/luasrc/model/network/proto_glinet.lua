@@ -11,7 +11,13 @@ local protos = {
 	tethering = "Tethering (GL.iNet)",
 	qmi = "QMI Cellular",
 	wwan = "Wireless WAN",
-	relay = "Relay bridge"
+	relay = "Relay bridge",
+	["3g"] = "3G / UMTS / GPRS",
+	ncm = "NCM Cellular",
+	qcm = "QCM Cellular",
+	directip = "DirectIP (Sierra)",
+	callip = "Cellular IP",
+	amneziawg = "Amnezia WireGuard"
 }
 
 for proto_name, proto_title in pairs(protos) do

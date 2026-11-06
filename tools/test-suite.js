@@ -38,7 +38,13 @@ const jsFiles = [
   'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/wgserver.js',
   'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/ovpnclient.js',
   'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/ovpnserver.js',
-  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/tethering.js'
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/tethering.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/3g.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/ncm.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/qcm.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/directip.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/callip.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/amneziawg.js'
 ];
 
 for (const rel of jsFiles) {
@@ -573,7 +579,13 @@ const protoFiles = [
   'wgserver.js',
   'ovpnclient.js',
   'ovpnserver.js',
-  'tethering.js'
+  'tethering.js',
+  '3g.js',
+  'ncm.js',
+  'qcm.js',
+  'directip.js',
+  'callip.js',
+  'amneziawg.js'
 ];
 for (const p of protoFiles) {
   const filePath = path.join(rootDir, 'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol', p);
@@ -586,8 +598,8 @@ for (const p of protoFiles) {
 
 const glControl = fs.readFileSync(path.join(rootDir, 'packages/luci-proto-glinet/packaging/control'), 'utf8');
 const glMakefile = fs.readFileSync(path.join(rootDir, 'packages/luci-proto-glinet/Makefile'), 'utf8');
-assert(glControl.includes('Version: 1.0.0-2'), 'luci-proto-glinet control version is 1.0.0-2');
-assert(glMakefile.includes('PKG_RELEASE:=2'), 'luci-proto-glinet Makefile PKG_RELEASE is 2');
+assert(glControl.includes('Version: 1.0.0-3'), 'luci-proto-glinet control version is 1.0.0-3');
+assert(glMakefile.includes('PKG_RELEASE:=3'), 'luci-proto-glinet Makefile PKG_RELEASE is 3');
 
 // Summary
 console.log(`\n========================================`);

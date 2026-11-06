@@ -893,7 +893,13 @@ return baseclass.extend({
       wgserver: 'WireGuard Server (GL.iNet)',
       ovpnclient: 'OpenVPN Client (GL.iNet)',
       ovpnserver: 'OpenVPN Server (GL.iNet)',
-      tethering: 'Tethering (GL.iNet)'
+      tethering: 'Tethering (GL.iNet)',
+      '3g': '3G / UMTS / GPRS',
+      ncm: 'NCM Cellular',
+      qcm: 'QCM Cellular',
+      directip: 'DirectIP (Sierra)',
+      callip: 'Cellular IP',
+      amneziawg: 'Amnezia WireGuard'
     };
     L.require('network').then((network) => {
       if (!network || typeof network.registerProtocol !== 'function')

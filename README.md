@@ -67,11 +67,11 @@ ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.5
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
 
-If you run OpenWrt / LuCI on GL.iNet hardware and see **"Unsupported protocol type"** or 404 network errors on GL.iNet protocols (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`, `qmi`, `wwan`, `relay`):
+If you run OpenWrt / LuCI on GL.iNet hardware and see **"Unsupported protocol type"** or 404 network errors on GL.iNet protocols (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`, `qmi`, `wwan`, `relay`, `3g`, `ncm`, `qcm`, `directip`, `callip`, `amneziawg`):
 
 ```sh
-scp releases/luci-proto-glinet_1.0.0-2_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-proto-glinet_1.0.0-2_all.ipk'
+scp releases/luci-proto-glinet_1.0.0-3_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-proto-glinet_1.0.0-3_all.ipk'
 ```
 
 > **Note**: Perform a hard refresh (**`Ctrl + F5`** or **`Cmd + Shift + R`**) in your browser after installing to ensure cached static files are renewed.
