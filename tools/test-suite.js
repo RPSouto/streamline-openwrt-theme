@@ -601,6 +601,47 @@ const glMakefile = fs.readFileSync(path.join(rootDir, 'packages/luci-proto-gline
 assert(glControl.includes('Version: 1.0.0-3'), 'luci-proto-glinet control version is 1.0.0-3');
 assert(glMakefile.includes('PKG_RELEASE:=3'), 'luci-proto-glinet Makefile PKG_RELEASE is 3');
 
+// Test 25: Verify Streamline Addon & Router Extension Architecture
+console.log('\n25. Verifying Streamline Addon & Router Extension Architecture...');
+const headerHtmContent = fs.readFileSync(path.join(rootDir, 'luasrc/view/themes/streamline/header.htm'), 'utf8');
+const headerUtContent = fs.readFileSync(path.join(rootDir, 'ucode/template/themes/streamline/header.ut'), 'utf8');
+
+assert(headerHtmContent.includes('window.Streamline=window.Streamline||') && headerHtmContent.includes('registerAddon'),
+  'header.htm defines window.Streamline global registry with registerAddon');
+assert(headerHtmContent.includes('streamline-addons'),
+  'header.htm scans server-side directory /www/luci-static/resources/streamline-addons');
+
+assert(headerUtContent.includes('window.Streamline=window.Streamline||') && headerUtContent.includes('registerAddon'),
+  'header.ut defines window.Streamline global registry with registerAddon');
+assert(headerUtContent.includes('streamline-addons'),
+  'header.ut scans server-side glob for streamline-addons');
+
+assert(dashboardJs.includes('Streamline.getRouterProfile'),
+  'dashboard.js checks Streamline.getRouterProfile() in discoverPorts()');
+assert(menuJs.includes('window.Streamline.protocols'),
+  'menu-streamline-v21.js merges window.Streamline.protocols in preloadProtocols()');
+assert(menuJs.includes('window.Streamline.classifiers'),
+  'menu-streamline-v21.js checks window.Streamline.classifiers in classifyDevice()');
+
+const glAddonPath = path.join(rootDir, 'packages/luci-proto-glinet/htdocs/luci-static/resources/streamline-addons/glinet.js');
+assert(fs.existsSync(glAddonPath), 'glinet.js addon file exists in luci-proto-glinet package');
+if (fs.existsSync(glAddonPath)) {
+  const glAddonContent = fs.readFileSync(glAddonPath, 'utf8');
+  assert(glAddonContent.includes("registerAddon('glinet'"), 'glinet.js registers glinet addon');
+  assert(glAddonContent.includes('gl-mt6000') && glAddonContent.includes('gl-mt3000'), 'glinet.js defines GL.iNet router profiles');
+}
+
+const templateAddonDir = path.join(rootDir, 'packages/luci-addon-template');
+assert(fs.existsSync(path.join(templateAddonDir, 'packaging/control')), 'luci-addon-template includes packaging/control');
+assert(fs.existsSync(path.join(templateAddonDir, 'Makefile')), 'luci-addon-template includes Makefile');
+assert(fs.existsSync(path.join(templateAddonDir, 'build-ipk.sh')), 'luci-addon-template includes build-ipk.sh');
+assert(fs.existsSync(path.join(templateAddonDir, 'htdocs/luci-static/resources/streamline-addons/template.js')), 'luci-addon-template includes template.js');
+assert(fs.existsSync(path.join(templateAddonDir, 'htdocs/luci-static/resources/protocol/sampleproto.js')), 'luci-addon-template includes sampleproto.js');
+assert(fs.existsSync(path.join(templateAddonDir, 'README.md')), 'luci-addon-template includes README.md');
+
+assert(fs.existsSync(path.join(rootDir, 'build-addons.sh')), 'build-addons.sh exists in repository root');
+assert(fs.existsSync(path.join(rootDir, 'packages/README.md')), 'packages/README.md exists with documentation');
+
 // Summary
 console.log(`\n========================================`);
 if (failures === 0) {

@@ -163,6 +163,21 @@ make package/luci-theme-streamline/compile V=s
 
 ---
 
+## 🧩 Streamline Addon & Router Extension System
+
+Streamline includes a modular **Addon Architecture** (`window.Streamline`) that allows router-specific hardware profiles, port mapping, vendor network protocols, and custom classifiers to be packaged independently without polluting the core theme:
+
+* **Zero Collisions (`check_data_file_clashes`)**: Addons are distributed as separate packages (e.g. `luci-proto-glinet`, `luci-addon-template`), keeping the core theme package completely free of protocol files.
+* **Server-Side Script Discovery**: Streamline headers automatically scan `/www/luci-static/resources/streamline-addons/*.js`. If no addons are installed, zero scripts are loaded (zero 404s and zero client RPC calls).
+* **Compiling Addons**:
+  ```sh
+  ./build-addons.sh
+  ```
+  See [`packages/README.md`](packages/README.md) and [`packages/luci-addon-template`](packages/luci-addon-template) for documentation on creating addons for other router brands (Teltonika, Xiaomi, MikroTik, Asus, etc.).
+
+---
+
 ## 📄 License
 
 Licensed under the **Apache-2.0** License. See [LICENSE](LICENSE) for details.
+

@@ -508,6 +508,16 @@ return baseclass.extend({
     const iface = (ifaceName || '').toLowerCase().trim();
     const raw = (rawText || '').toLowerCase().trim();
 
+    // 0. Registered custom classifiers from Streamline addons
+    if (typeof window !== 'undefined' && window.Streamline && Array.isArray(window.Streamline.classifiers)) {
+      for (let i = 0; i < window.Streamline.classifiers.length; i++) {
+        try {
+          const res = window.Streamline.classifiers[i](dev, iface, raw, devName, ifaceName);
+          if (res && typeof res === 'object') return res;
+        } catch (e) {}
+      }
+    }
+
     // 1. Empty / Virtual / No Physical Device
     if (!dev || dev === 'none' || dev === '""' || dev === '?' || /no interfaces attached|nenhuma interface/i.test(raw)) {
       const isVpn = /wg|wireguard|ovpn|openvpn/i.test(iface);
@@ -885,7 +895,7 @@ return baseclass.extend({
   preloadProtocols() {
     if (typeof L === 'undefined' || typeof L.require !== 'function')
       return;
-    const glProtos = {
+    const baseProtos = {
       qmi: 'QMI Cellular',
       wwan: 'Wireless WAN',
       relay: 'Relay bridge',
@@ -901,13 +911,19 @@ return baseclass.extend({
       callip: 'Cellular IP',
       amneziawg: 'Amnezia WireGuard'
     };
+    const addonProtos = (typeof window !== 'undefined' && window.Streamline && typeof window.Streamline.protocols === 'object')
+      ? window.Streamline.protocols
+      : {};
+    const glProtos = Object.assign({}, baseProtos, addonProtos);
     L.require('network').then((network) => {
       if (!network || typeof network.registerProtocol !== 'function')
         return;
       Object.keys(glProtos).forEach((proto) => {
         if (!network.getProtocol(proto)) {
+          const protoDef = glProtos[proto];
+          const title = (protoDef && typeof protoDef === 'object' && protoDef.title) ? protoDef.title : String(protoDef);
           network.registerProtocol(proto, {
-            getI18n: () => _(glProtos[proto]),
+            getI18n: () => _(title),
             getIfname() { return this._ubus('l3_device') || this._ubus('device') || this.sid || proto; },
             isFloating: () => true,
             isVirtual: () => true,
@@ -916,10 +932,10 @@ return baseclass.extend({
             renderFormOptions(s) {
               L.require('form').then((form) => {
                 if (form && s && typeof s.taboption === 'function') {
-                  const o = s.taboption('general', form.DummyValue, '_gl_managed', _('Managed by System / GL.iNet'));
+                  const o = s.taboption('general', form.DummyValue, '_' + proto + '_managed', _('Managed by System / Service'));
                   o.rawhtml = true;
                   o.default = '<div class="alert-message notice" style="margin: 8px 0; padding: 12px 16px; border-radius: 8px;">' +
-                    '<strong>' + _(glProtos[proto]) + '</strong><br>' +
+                    '<strong>' + _(title) + '</strong><br>' +
                     _('This interface protocol is managed by system services or external tools.') +
                     '</div>';
                 }

@@ -1,0 +1,10 @@
+Package: luci-addon-template
+Version: 1.0.0-1
+Depends: libc, luci-base
+Source: luci-addon-template
+SourceName: luci-addon-template
+License: Apache-2.0
+Section: luci
+Architecture: all
+Installed-Size: 10000
+Description: Streamline Addon Template for custom router hardware profiles, port mapping, and vendor network protocols.

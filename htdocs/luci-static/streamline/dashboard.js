@@ -477,27 +477,41 @@
           });
         }
 
-        // 1. From /etc/board.json (GL.iNet & standard OpenWrt DSA)
+        var board = null;
         if (boardData) {
           try {
-            var board = JSON.parse(boardData);
-            if (board && board.network) {
-              // Check WAN
-              if (board.network.wan) {
-                if (board.network.wan.device)
-                  add(board.network.wan.device, 'wan', 'WAN');
-                else if (Array.isArray(board.network.wan.ports))
-                  board.network.wan.ports.forEach(function (p) { add(p, 'wan', 'WAN'); });
-              }
-              // Check LAN
-              if (board.network.lan) {
-                var lanPorts = board.network.lan.ports || (board.network.lan.device ? [board.network.lan.device] : []);
-                if (Array.isArray(lanPorts)) {
-                  lanPorts.forEach(function (p, idx) {
-                    var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
-                    add(p, 'lan', lbl);
-                  });
-                }
+            board = JSON.parse(boardData);
+          } catch (e) {}
+        }
+
+        // 0. From registered Streamline router profiles (Addon Extension System)
+        if (typeof window !== 'undefined' && window.Streamline && typeof window.Streamline.getRouterProfile === 'function') {
+          var boardId = (board && board.model && (board.model.id || board.model.name)) ? (board.model.id + ' ' + board.model.name) : '';
+          var customProfile = window.Streamline.getRouterProfile(boardId, board && board.model ? board.model.name : '');
+          if (customProfile && Array.isArray(customProfile.ports) && customProfile.ports.length > 0) {
+            customProfile.ports.forEach(function (p) {
+              add(p.device, p.role, p.label);
+            });
+          }
+        }
+
+        // 1. From /etc/board.json (GL.iNet & standard OpenWrt DSA) if profile didn't define ports
+        if (discovered.length === 0 && board && board.network) {
+          try {
+            if (board.network.wan) {
+              if (board.network.wan.device)
+                add(board.network.wan.device, 'wan', 'WAN');
+              else if (Array.isArray(board.network.wan.ports))
+                board.network.wan.ports.forEach(function (p) { add(p, 'wan', 'WAN'); });
+            }
+            // Check LAN
+            if (board.network.lan) {
+              var lanPorts = board.network.lan.ports || (board.network.lan.device ? [board.network.lan.device] : []);
+              if (Array.isArray(lanPorts)) {
+                lanPorts.forEach(function (p, idx) {
+                  var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
+                  add(p, 'lan', lbl);
+                });
               }
             }
           } catch (e) {}
