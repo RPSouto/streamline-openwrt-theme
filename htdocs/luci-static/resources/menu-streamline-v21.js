@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-4';
+const THEME_VERSION = '1.0.58-5';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -33,6 +33,7 @@ return baseclass.extend({
     this.setupWirelessLayout();
     this.setupClickToCopy();
     this.setupResponsiveTables();
+    this.setupTableFilter();
     ui.menu.load()
       .then((tree) => this.render(tree))
       .catch(() => {
@@ -2077,5 +2078,277 @@ return baseclass.extend({
 
     document.addEventListener('touchend', endTouch, { passive: true });
     document.addEventListener('touchcancel', endTouch, { passive: true });
+  },
+
+  isFilterTarget(table) {
+    if (!table || (table.dataset && table.dataset.slFiltered)) return false;
+    if (table.closest('.modal, .modal-dialog, .cbi-modal, .cbi-tooltip, .network-status-table, .sl-ports-summary, .sl-palette-grid')) return false;
+
+    // Do not filter radio accordion table on wireless overview
+    if (table.querySelector('.is-radio-row, .sl-radio-collapse-toggle')) return false;
+
+    // 1. DHCP Tables (Overview and Network -> DHCP)
+    if (table.matches('#status_leases, #status_leases6, #lease_status_table, #lease6_status_table, table.leases, table.leases6')) {
+      return { type: 'dhcp', placeholder: 'Filter leases (hostname, IP, MAC...)' };
+    }
+    const section = table.closest('.cbi-section, fieldset');
+    const sectionTitle = section ? ((section.querySelector('h3, legend') || {}).textContent || '') : '';
+    if (/lease/i.test(sectionTitle) || /dhcp/i.test(sectionTitle)) {
+      return { type: 'dhcp', placeholder: 'Filter leases (hostname, IP, MAC...)' };
+    }
+
+    // 2. Wi-Fi Clients / Associated Stations
+    if (table.matches('#wifi_assoc_table, #wifi_assoclist_table, table.assoclist, [id*="assoc"] table, table[id*="assoc"]')) {
+      return { type: 'wifi', placeholder: 'Filter clients (MAC, IP, signal, rate...)' };
+    }
+    if (/assoc|station/i.test(sectionTitle) || (/wireless|wi-fi|wifi/i.test(sectionTitle) && /client|cliente|dispositivo/i.test(sectionTitle))) {
+      return { type: 'wifi', placeholder: 'Filter clients (MAC, IP, signal, rate...)' };
+    }
+
+    // 3. Firewall Rules & Chains (Port Forwarding, Traffic Rules, NAT, Chains)
+    const page = (typeof document !== 'undefined' && document.body && document.body.getAttribute('data-page')) || '';
+    if (page.includes('firewall') || table.closest('#cbi-firewall-redirect, #cbi-firewall-rule, #cbi-firewall-zone, div[data-chain]')) {
+      if (table.matches('.cbi-section-table, table.table, div[data-chain] table')) {
+        return { type: 'firewall', placeholder: 'Filter firewall rules (name, port, zone, proto...)' };
+      }
+    }
+
+    // 4. Routing / ARP Tables
+    if (table.matches('#table_routing, #table_routes, table.routing, #table_arp, table.arp') || /routing|rotas|arp/i.test(sectionTitle)) {
+      return { type: 'routing', placeholder: 'Filter routes (destination, gateway, dev...)' };
+    }
+
+    // 5. General CBI data tables with >= 3 data rows
+    if (table.matches('.cbi-section-table, table.table') && section) {
+      const rows = table.querySelectorAll('tr:not(.cbi-section-table-titles):not(.table-titles)');
+      if (rows.length >= 3 && !table.querySelector('.cbi-progressbar')) {
+        return { type: 'general', placeholder: 'Quick filter entries...' };
+      }
+    }
+
+    return false;
+  },
+
+  bindTableFilter(table, info) {
+    if (!table || (table.dataset && table.dataset.slFiltered)) return;
+    if (table.dataset) table.dataset.slFiltered = '1';
+
+    const bar = document.createElement('div');
+    bar.className = 'sl-table-filter-bar';
+
+    const inputWrap = document.createElement('div');
+    inputWrap.className = 'sl-filter-input-wrap';
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'sl-filter-icon';
+    iconSpan.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+    inputWrap.appendChild(iconSpan);
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'sl-table-filter-input';
+    input.placeholder = info.placeholder || 'Quick filter...';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.setAttribute('aria-label', info.placeholder || 'Quick filter');
+    inputWrap.appendChild(input);
+
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'sl-filter-clear-btn';
+    clearBtn.title = 'Clear filter';
+    clearBtn.setAttribute('aria-label', 'Clear filter');
+    clearBtn.style.display = 'none';
+    clearBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    inputWrap.appendChild(clearBtn);
+
+    bar.appendChild(inputWrap);
+
+    const meta = document.createElement('div');
+    meta.className = 'sl-filter-meta';
+
+    const counter = document.createElement('span');
+    counter.className = 'sl-filter-counter';
+    meta.appendChild(counter);
+
+    bar.appendChild(meta);
+
+    // Insert bar above table (or table wrapper if already wrapped)
+    const container = table.closest('.table-wrapper') || table;
+    if (container.parentElement) {
+      container.parentElement.insertBefore(bar, container);
+    }
+
+    let isFiltering = false;
+
+    const getDataRows = () => {
+      const allRows = table.querySelectorAll('tr, .tr');
+      const rows = [];
+      for (let i = 0; i < allRows.length; i++) {
+        const r = allRows[i];
+        if (r.parentElement && r.parentElement.tagName === 'THEAD') continue;
+        if (r.classList.contains('table-titles') || r.classList.contains('cbi-section-table-titles')) continue;
+        if (r.classList.contains('sl-filter-no-matches')) continue;
+        if (r.classList.contains('cbi-section-table-descr')) continue;
+        if (r.classList.contains('is-radio-row')) continue;
+        if (r.querySelector('.cbi-button-add')) continue;
+        const hasTd = r.querySelector('td, .td');
+        const hasTh = r.querySelector('th, .th');
+        if (hasTh && !hasTd) continue;
+        if (!hasTd && !r.textContent.trim()) continue;
+        rows.push(r);
+      }
+      return rows;
+    };
+
+    const updateFilter = () => {
+      if (isFiltering) return;
+      isFiltering = true;
+
+      try {
+        const query = (input.value || '').trim().toLowerCase();
+        const words = query.split(/\s+/).filter(Boolean);
+        const rows = getDataRows();
+        const total = rows.length;
+
+        clearBtn.style.display = words.length > 0 ? 'flex' : 'none';
+
+        if (words.length === 0) {
+          rows.forEach((r) => { r.style.display = ''; });
+          const noMatches = table.querySelector('.sl-filter-no-matches');
+          if (noMatches && noMatches.parentElement) {
+            noMatches.parentElement.removeChild(noMatches);
+          }
+          counter.classList.remove('is-filtered');
+          counter.textContent = total === 1 ? '1 entry' : (total + ' entries');
+          return;
+        }
+
+        let matchCount = 0;
+        rows.forEach((r) => {
+          const text = (r.textContent || '').toLowerCase();
+          const matches = words.every((w) => text.includes(w));
+          if (matches) {
+            r.style.display = '';
+            matchCount++;
+          } else {
+            r.style.display = 'none';
+          }
+        });
+
+        counter.classList.add('is-filtered');
+        counter.textContent = matchCount + ' / ' + total;
+
+        let noMatches = table.querySelector('.sl-filter-no-matches');
+        if (matchCount === 0 && total > 0) {
+          const isRealTable = table.tagName === 'TABLE';
+          if (!noMatches) {
+            noMatches = document.createElement(isRealTable ? 'tr' : 'div');
+            noMatches.className = (isRealTable ? '' : 'tr ') + 'sl-filter-no-matches';
+            const td = document.createElement(isRealTable ? 'td' : 'div');
+            if (isRealTable) td.setAttribute('colspan', '100%');
+            else td.className = 'td';
+            noMatches.appendChild(td);
+            const tbody = table.querySelector('tbody') || table;
+            tbody.appendChild(noMatches);
+          }
+          const td = noMatches.querySelector('td, .td');
+          if (td) {
+            td.innerHTML = '';
+            const emptyWrap = document.createElement('div');
+            emptyWrap.className = 'sl-filter-empty-content';
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'sl-filter-empty-text';
+            textSpan.appendChild(document.createTextNode('No matching entries found for "'));
+            const mark = document.createElement('mark');
+            mark.textContent = query;
+            textSpan.appendChild(mark);
+            textSpan.appendChild(document.createTextNode('"'));
+
+            const resetBtn = document.createElement('button');
+            resetBtn.type = 'button';
+            resetBtn.className = 'sl-filter-reset-link';
+            resetBtn.textContent = 'Clear filter';
+            resetBtn.addEventListener('click', () => {
+              input.value = '';
+              updateFilter();
+              input.focus();
+            });
+
+            emptyWrap.appendChild(textSpan);
+            emptyWrap.appendChild(resetBtn);
+            td.appendChild(emptyWrap);
+          }
+        } else if (noMatches && noMatches.parentElement) {
+          noMatches.parentElement.removeChild(noMatches);
+        }
+      } finally {
+        setTimeout(() => { isFiltering = false; }, 10);
+      }
+    };
+
+    input.addEventListener('input', updateFilter);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        input.value = '';
+        updateFilter();
+        input.blur();
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      updateFilter();
+      input.focus();
+    });
+
+    updateFilter();
+
+    if (typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(() => {
+        if (isFiltering) return;
+        window.requestAnimationFrame(() => {
+          if (isFiltering) return;
+          updateFilter();
+        });
+      });
+      observer.observe(table, { childList: true, subtree: true });
+    }
+  },
+
+  setupTableFilter() {
+    const scanTables = () => {
+      const candidates = document.querySelectorAll('table.table, .cbi-section-table, table#status_leases, table#status_leases6, table.leases, table.leases6, table.assoclist, table#wifi_assoc_table, div[data-chain] table');
+      candidates.forEach((table) => {
+        const info = this.isFilterTarget(table);
+        if (info) {
+          this.bindTableFilter(table, info);
+        }
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', scanTables);
+    } else {
+      scanTables();
+    }
+
+    const targetNode = document.querySelector('#maincontent') || document.querySelector('#view') || document.body;
+    if (targetNode && typeof MutationObserver !== 'undefined') {
+      let isScanning = false;
+      const observer = new MutationObserver(() => {
+        if (isScanning) return;
+        isScanning = true;
+        setTimeout(() => {
+          try {
+            scanTables();
+          } finally {
+            isScanning = false;
+          }
+        }, 80);
+      });
+      observer.observe(targetNode, { childList: true, subtree: true });
+    }
   }
 });

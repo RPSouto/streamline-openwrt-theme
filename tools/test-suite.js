@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=4'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 4');
-assert(control.includes('Version: 1.0.58-4'), 'packaging/control Version is 1.0.58-4');
-assert(buildIpk.includes('1.0.58-4'), 'build-ipk.sh default target is 1.0.58-4');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-4'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-4');
-assert(swJs.includes('streamline-static-v58-4'), 'streamline-sw.js CACHE_NAME matches v58-4');
-assert(headerHtm.includes('?v=1.0.58.4'), 'header.htm asset query param matches v1.0.58.4');
-assert(headerUt.includes('?v=1.0.58.4'), 'header.ut asset query param matches v1.0.58.4');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=5'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 5');
+assert(control.includes('Version: 1.0.58-5'), 'packaging/control Version is 1.0.58-5');
+assert(buildIpk.includes('1.0.58-5'), 'build-ipk.sh default target is 1.0.58-5');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-5'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-5');
+assert(swJs.includes('streamline-static-v58-5'), 'streamline-sw.js CACHE_NAME matches v58-5');
+assert(headerHtm.includes('?v=1.0.58.5'), 'header.htm asset query param matches v1.0.58.5');
+assert(headerUt.includes('?v=1.0.58.5'), 'header.ut asset query param matches v1.0.58.5');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -521,6 +521,72 @@ assert(lan1Res.category === 'lan' && lan1Res.typeLabel === '2.5G LAN Port' && la
 const lan2Res = testClassifyDevice('lan2', 'lan', 'Ethernet Adapter: "lan2"');
 assert(lan2Res.category === 'lan' && lan2Res.typeLabel === 'LAN Port' && lan2Res.nameLabel === 'LAN2',
   'classifyDevice classifies lan2 as LAN Port');
+
+// Test 23: Verify Instant Table Search Filter implementation
+console.log('\n23. Verifying Instant Table Search Filter implementation and reactive polling...');
+assert(menuJs.includes('setupTableFilter()'), 'menu-streamline-v21.js defines setupTableFilter()');
+assert(menuJs.includes('this.setupTableFilter()'), 'menu-streamline-v21.js initializes setupTableFilter in __init__');
+assert(menuJs.includes('isFilterTarget(table)'), 'menu-streamline-v21.js implements isFilterTarget()');
+assert(menuJs.includes('bindTableFilter(table, info)'), 'menu-streamline-v21.js implements bindTableFilter()');
+assert(cascadeCss.includes('.sl-table-filter-bar'), 'cascade.css contains .sl-table-filter-bar container styling');
+assert(cascadeCss.includes('.sl-filter-input-wrap'), 'cascade.css contains .sl-filter-input-wrap styling');
+assert(cascadeCss.includes('.sl-table-filter-input'), 'cascade.css contains .sl-table-filter-input styling');
+assert(cascadeCss.includes('.sl-filter-clear-btn'), 'cascade.css contains .sl-filter-clear-btn styling');
+assert(cascadeCss.includes('.sl-filter-counter'), 'cascade.css contains .sl-filter-counter styling');
+assert(cascadeCss.includes('.sl-filter-no-matches'), 'cascade.css contains .sl-filter-no-matches styling');
+assert(mobileCss.includes('.sl-table-filter-bar') && mobileCss.includes('.sl-filter-input-wrap'),
+  'mobile.css includes responsive rules for table filter bar');
+
+// Unit test isFilterTarget table classification logic
+const mockTable = (selectorMatches, sectionTitle, rowCount = 4, isRadio = false) => {
+  return {
+    dataset: {},
+    closest: (sel) => {
+      if (sel.includes('modal') || sel.includes('cbi-tooltip') || sel.includes('network-status-table') || sel.includes('sl-ports-summary')) return null;
+      if (sel.includes('cbi-section') && sectionTitle) {
+        return { querySelector: () => ({ textContent: sectionTitle }) };
+      }
+      return null;
+    },
+    querySelector: (sel) => {
+      if (sel.includes('is-radio-row') || sel.includes('sl-radio-collapse-toggle')) return isRadio ? {} : null;
+      if (sel.includes('cbi-progressbar')) return null;
+      return null;
+    },
+    querySelectorAll: (sel) => {
+      return Array(rowCount).fill({});
+    },
+    matches: (sel) => {
+      return sel.split(',').some(part => selectorMatches.includes(part.trim()));
+    }
+  };
+};
+
+// Extract isFilterTarget from menuJs
+const isFilterMatch = menuJs.match(/isFilterTarget\(table\)\s*\{([\s\S]*?)\n\s*\},?\n\s*bindTableFilter/);
+assert(Boolean(isFilterMatch), 'Extracted isFilterTarget implementation for unit testing');
+
+const testIsFilterTarget = new Function('table', isFilterMatch[1]);
+
+// 1. DHCP table target
+const dhcpTable = mockTable('#lease_status_table', 'Active DHCP Leases');
+const dhcpInfo = testIsFilterTarget(dhcpTable);
+assert(dhcpInfo && dhcpInfo.type === 'dhcp', 'isFilterTarget recognizes DHCP leases table');
+
+// 2. Wi-Fi client table target
+const wifiTable = mockTable('#wifi_assoc_table', 'Associated Stations');
+const wifiInfo = testIsFilterTarget(wifiTable);
+assert(wifiInfo && wifiInfo.type === 'wifi', 'isFilterTarget recognizes Wi-Fi client table');
+
+// 3. Routing table target
+const routeTable = mockTable('#table_routing', 'Routing Table');
+const routeInfo = testIsFilterTarget(routeTable);
+assert(routeInfo && routeInfo.type === 'routing', 'isFilterTarget recognizes Routing table');
+
+// 4. Radio accordion exclusion
+const radioTable = mockTable('.cbi-section-table', 'Wireless Overview', 10, true);
+const radioInfo = testIsFilterTarget(radioTable);
+assert(radioInfo === false, 'isFilterTarget strictly excludes physical wireless radio accordion tables');
 
 // Summary
 console.log(`\n========================================`);

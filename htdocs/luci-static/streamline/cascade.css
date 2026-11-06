@@ -4100,6 +4100,183 @@ div[id="channel_graph"] {
   max-width: 260px;
 }
 
+/* ==========================================================================
+   INSTANT SEARCH FILTER FOR TABLES (DHCP, Wi-Fi Clients, Firewall)
+   ========================================================================== */
+.sl-table-filter-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin: 12px 0 14px 0 !important;
+  padding: 8px 12px !important;
+  background: var(--sl-surface-2) !important;
+  border: 1px solid var(--sl-border) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.sl-filter-input-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex: 1 1 240px !important;
+  max-width: 440px !important;
+  min-width: 180px !important;
+}
+
+.sl-filter-icon {
+  position: absolute !important;
+  left: 11px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--sl-muted) !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+}
+
+.sl-filter-icon svg {
+  width: 14px !important;
+  height: 14px !important;
+  display: block !important;
+}
+
+.sl-table-filter-input {
+  width: 100% !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 32px 0 34px !important;
+  background: rgba(0, 0, 0, 0.28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 7px !important;
+  color: var(--sl-text) !important;
+  font-family: var(--sl-font-family) !important;
+  font-size: 0.84rem !important;
+  line-height: 34px !important;
+  outline: none !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease !important;
+  box-sizing: border-box !important;
+}
+
+.sl-table-filter-input:focus {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: var(--sl-accent) !important;
+  box-shadow: 0 0 0 2px rgba(var(--sl-accent-rgb), 0.25) !important;
+}
+
+.sl-table-filter-input::placeholder {
+  color: var(--sl-faint) !important;
+  opacity: 0.8 !important;
+}
+
+.sl-filter-clear-btn {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--sl-muted) !important;
+  cursor: pointer !important;
+  transition: background-color .12s ease, color .12s ease !important;
+  z-index: 2 !important;
+}
+
+.sl-filter-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.sl-filter-meta {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+}
+
+.sl-filter-counter {
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  color: var(--sl-muted) !important;
+  padding: 3px 9px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+}
+
+.sl-filter-counter.is-filtered {
+  color: var(--sl-accent) !important;
+  background: rgba(var(--sl-accent-rgb), 0.1) !important;
+  border-color: rgba(var(--sl-accent-rgb), 0.25) !important;
+}
+
+/* Empty filter state in table body */
+tr.sl-filter-no-matches td,
+div.sl-filter-no-matches .td {
+  padding: 28px 16px !important;
+  text-align: center !important;
+  background: rgba(0, 0, 0, 0.15) !important;
+  color: var(--sl-muted) !important;
+  font-size: 0.85rem !important;
+}
+
+.sl-filter-empty-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.sl-filter-empty-text mark {
+  background: rgba(var(--sl-accent-rgb), 0.25) !important;
+  color: #ffffff !important;
+  padding: 1px 5px !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+}
+
+.sl-filter-reset-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-top: 4px !important;
+  padding: 4px 12px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: var(--sl-accent) !important;
+  background: rgba(var(--sl-accent-rgb), 0.12) !important;
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.3) !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all .15s ease !important;
+}
+
+.sl-filter-reset-link:hover {
+  background: rgba(var(--sl-accent-rgb), 0.22) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}
+
 @media (max-width: 767px) {
   .sl-toast-container {
     bottom: 16px;
