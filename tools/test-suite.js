@@ -31,14 +31,14 @@ const jsFiles = [
   'htdocs/luci-static/streamline/dashboard.js',
   'htdocs/luci-static/streamline/pwa.js',
   'htdocs/streamline-sw.js',
-  'htdocs/luci-static/resources/protocol/qmi.js',
-  'htdocs/luci-static/resources/protocol/wwan.js',
-  'htdocs/luci-static/resources/protocol/relay.js',
-  'htdocs/luci-static/resources/protocol/wgclient.js',
-  'htdocs/luci-static/resources/protocol/wgserver.js',
-  'htdocs/luci-static/resources/protocol/ovpnclient.js',
-  'htdocs/luci-static/resources/protocol/ovpnserver.js',
-  'htdocs/luci-static/resources/protocol/tethering.js'
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/qmi.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/wwan.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/relay.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/wgclient.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/wgserver.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/ovpnclient.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/ovpnserver.js',
+  'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol/tethering.js'
 ];
 
 for (const rel of jsFiles) {
@@ -560,8 +560,11 @@ assert(testFormatEnc('') === 'None', 'formatWifiEncryptionString formats empty s
 assert(testFormatEnc('wpa3-eap') === 'WPA3 EAP (CCMP)', 'formatWifiEncryptionString formats wpa3-eap');
 assert(testFormatEnc('wpa2-eap') === 'WPA2 EAP (CCMP)', 'formatWifiEncryptionString formats wpa2-eap');
 
-// Test 24: Verify bundled protocol handlers presence and registration
-console.log('\n24. Verifying bundled protocol handlers...');
+// Test 24: Verify luci-proto-glinet protocol handlers and absence of protocol files in theme
+console.log('\n24. Verifying luci-proto-glinet protocol handlers and clean theme separation...');
+assert(!fs.existsSync(path.join(rootDir, 'htdocs/luci-static/resources/protocol')),
+  'luci-theme-streamline does not bundle /protocol/ directory directly to avoid package clashing');
+
 const protoFiles = [
   'qmi.js',
   'wwan.js',
@@ -573,13 +576,18 @@ const protoFiles = [
   'tethering.js'
 ];
 for (const p of protoFiles) {
-  const filePath = path.join(rootDir, 'htdocs/luci-static/resources/protocol', p);
-  assert(fs.existsSync(filePath), `Protocol handler exists: ${p}`);
+  const filePath = path.join(rootDir, 'packages/luci-proto-glinet/htdocs/luci-static/resources/protocol', p);
+  assert(fs.existsSync(filePath), `luci-proto-glinet handler exists: ${p}`);
   if (fs.existsSync(filePath)) {
     const content = fs.readFileSync(filePath, 'utf8');
-    assert(content.includes('network.registerProtocol'), `Protocol handler ${p} registers protocol via network.registerProtocol`);
+    assert(content.includes('network.registerProtocol'), `luci-proto-glinet handler ${p} registers protocol via network.registerProtocol`);
   }
 }
+
+const glControl = fs.readFileSync(path.join(rootDir, 'packages/luci-proto-glinet/packaging/control'), 'utf8');
+const glMakefile = fs.readFileSync(path.join(rootDir, 'packages/luci-proto-glinet/Makefile'), 'utf8');
+assert(glControl.includes('Version: 1.0.0-2'), 'luci-proto-glinet control version is 1.0.0-2');
+assert(glMakefile.includes('PKG_RELEASE:=2'), 'luci-proto-glinet Makefile PKG_RELEASE is 2');
 
 // Summary
 console.log(`\n========================================`);

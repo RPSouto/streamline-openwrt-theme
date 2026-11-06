@@ -3,7 +3,7 @@ set -eu
 
 BASE_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 REPO_ROOT=$(CDPATH= cd -- "$BASE_DIR/../.." && pwd)
-OUTPUT=${1:-"$REPO_ROOT/luci-proto-glinet_1.0.0-1_all.ipk"}
+OUTPUT=${1:-"$REPO_ROOT/luci-proto-glinet_1.0.0-2_all.ipk"}
 BUILD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/glinet-proto-ipk.XXXXXX")
 trap 'rm -rf "$BUILD_DIR"' EXIT HUP INT TERM
 

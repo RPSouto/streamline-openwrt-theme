@@ -8,7 +8,10 @@ local protos = {
 	wgserver = "WireGuard Server (GL.iNet)",
 	ovpnclient = "OpenVPN Client (GL.iNet)",
 	ovpnserver = "OpenVPN Server (GL.iNet)",
-	tethering = "Tethering (GL.iNet)"
+	tethering = "Tethering (GL.iNet)",
+	qmi = "QMI Cellular",
+	wwan = "Wireless WAN",
+	relay = "Relay bridge"
 }
 
 for proto_name, proto_title in pairs(protos) do
