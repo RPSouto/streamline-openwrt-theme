@@ -3,5 +3,4 @@
 uci set luci.themes.Streamline='/luci-static/streamline'
 uci set luci.main.mediaurlbase='/luci-static/streamline'
 uci commit luci
-[ -x /etc/init.d/rpcd ] && /etc/init.d/rpcd reload >/dev/null 2>&1 || true
 exit 0

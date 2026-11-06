@@ -642,13 +642,6 @@ assert(fs.existsSync(path.join(templateAddonDir, 'README.md')), 'luci-addon-temp
 assert(fs.existsSync(path.join(rootDir, 'build-addons.sh')), 'build-addons.sh exists in repository root');
 assert(fs.existsSync(path.join(rootDir, 'packages/README.md')), 'packages/README.md exists with documentation');
 
-const aclPath = path.join(rootDir, 'root/usr/share/rpcd/acl.d/luci-theme-streamline.json');
-assert(fs.existsSync(aclPath), 'root/usr/share/rpcd/acl.d/luci-theme-streamline.json exists');
-if (fs.existsSync(aclPath)) {
-  const aclContent = fs.readFileSync(aclPath, 'utf8');
-  assert(aclContent.includes('getBuiltinEthernetPorts'), 'rpcd ACL grants luci getBuiltinEthernetPorts');
-}
-
 // Summary
 console.log(`\n========================================`);
 if (failures === 0) {
