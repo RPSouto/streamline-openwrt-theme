@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=8'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 8');
-assert(control.includes('Version: 1.0.58-8'), 'packaging/control Version is 1.0.58-8');
-assert(buildIpk.includes('1.0.58-8'), 'build-ipk.sh default target is 1.0.58-8');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-8'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-8');
-assert(swJs.includes('streamline-static-v58-8'), 'streamline-sw.js CACHE_NAME matches v58-8');
-assert(headerHtm.includes('?v=1.0.58.8'), 'header.htm asset query param matches v1.0.58.8');
-assert(headerUt.includes('?v=1.0.58.8'), 'header.ut asset query param matches v1.0.58.8');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=9'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 9');
+assert(control.includes('Version: 1.0.58-9'), 'packaging/control Version is 1.0.58-9');
+assert(buildIpk.includes('1.0.58-9'), 'build-ipk.sh default target is 1.0.58-9');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-9'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-9');
+assert(swJs.includes('streamline-static-v58-9'), 'streamline-sw.js CACHE_NAME matches v58-9');
+assert(headerHtm.includes('?v=1.0.58.9'), 'header.htm asset query param matches v1.0.58.9');
+assert(headerUt.includes('?v=1.0.58.9'), 'header.ut asset query param matches v1.0.58.9');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -521,6 +521,36 @@ assert(lan1Res.category === 'lan' && lan1Res.typeLabel === '2.5G LAN Port' && la
 const lan2Res = testClassifyDevice('lan2', 'lan', 'Ethernet Adapter: "lan2"');
 assert(lan2Res.category === 'lan' && lan2Res.typeLabel === 'LAN Port' && lan2Res.nameLabel === 'LAN2',
   'classifyDevice classifies lan2 as LAN Port');
+
+// Test 23: Verify Wireless encryption fallback and string formatting
+console.log('\n23. Verifying Wireless encryption fallback and string formatting...');
+assert(menuJs.includes('formatWifiEncryptionString(raw)'), 'menu-streamline-v21.js defines formatWifiEncryptionString()');
+assert(menuJs.includes('loadWirelessEncryptionMap()'), 'menu-streamline-v21.js defines loadWirelessEncryptionMap()');
+assert(menuJs.includes('resolveWifiEncryption(ssid, dev)'), 'menu-streamline-v21.js defines resolveWifiEncryption()');
+assert(menuJs.includes('fixWirelessEncryptionElement(container, radioDev)'), 'menu-streamline-v21.js defines fixWirelessEncryptionElement()');
+assert(menuJs.includes('isEncryptionLabel(label)'), 'menu-streamline-v21.js defines isEncryptionLabel()');
+assert(menuJs.includes('this.loadWirelessEncryptionMap()'), 'menu-streamline-v21.js calls loadWirelessEncryptionMap in __init__');
+
+// Extract and test formatWifiEncryptionString
+const encFormatMatch = menuJs.match(/formatWifiEncryptionString\(raw\)\s*\{([\s\S]*?)\n\s*\},?\n\s*isEncryptionLabel/);
+assert(Boolean(encFormatMatch), 'Extracted formatWifiEncryptionString implementation for unit testing');
+
+const testFormatEnc = new Function('raw', encFormatMatch[1]);
+
+assert(testFormatEnc('sae-mixed') === 'mixed WPA2/WPA3 PSK/SAE (CCMP)', 'formatWifiEncryptionString formats sae-mixed');
+assert(testFormatEnc('psk2/sae') === 'mixed WPA2/WPA3 PSK/SAE (CCMP)', 'formatWifiEncryptionString formats psk2/sae');
+assert(testFormatEnc('sae') === 'WPA3 SAE (CCMP)', 'formatWifiEncryptionString formats sae');
+assert(testFormatEnc('wpa3') === 'WPA3 SAE (CCMP)', 'formatWifiEncryptionString formats wpa3');
+assert(testFormatEnc('psk2') === 'WPA2 PSK (CCMP)', 'formatWifiEncryptionString formats psk2');
+assert(testFormatEnc('psk2+ccmp') === 'WPA2 PSK (CCMP)', 'formatWifiEncryptionString formats psk2+ccmp');
+assert(testFormatEnc('psk2+tkip') === 'WPA2 PSK (TKIP)', 'formatWifiEncryptionString formats psk2+tkip');
+assert(testFormatEnc('psk-mixed') === 'mixed WPA/WPA2 PSK (TKIP, CCMP)', 'formatWifiEncryptionString formats psk-mixed');
+assert(testFormatEnc('psk') === 'WPA PSK (TKIP)', 'formatWifiEncryptionString formats psk');
+assert(testFormatEnc('owe') === 'OWE', 'formatWifiEncryptionString formats owe');
+assert(testFormatEnc('none') === 'None', 'formatWifiEncryptionString formats none');
+assert(testFormatEnc('') === 'None', 'formatWifiEncryptionString formats empty string');
+assert(testFormatEnc('wpa3-eap') === 'WPA3 EAP (CCMP)', 'formatWifiEncryptionString formats wpa3-eap');
+assert(testFormatEnc('wpa2-eap') === 'WPA2 EAP (CCMP)', 'formatWifiEncryptionString formats wpa2-eap');
 
 // Summary
 console.log(`\n========================================`);

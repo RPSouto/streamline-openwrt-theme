@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-8';
+const THEME_VERSION = '1.0.58-9';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -31,6 +31,7 @@ return baseclass.extend({
     this.normalizeFirewallBadges();
     this.normalizeWirelessOverview();
     this.setupWirelessLayout();
+    this.loadWirelessEncryptionMap();
     this.setupClickToCopy();
     this.setupResponsiveTables();
     ui.menu.load()
@@ -305,6 +306,203 @@ return baseclass.extend({
     }
   },
 
+  formatWifiEncryptionString(raw) {
+    const noneStr = (typeof _ === 'function') ? _('None') : 'None';
+    if (!raw || typeof raw !== 'string') return noneStr;
+    const s = raw.toLowerCase().trim();
+    if (s === 'none' || s === 'open' || s === 'off' || s === '') {
+      return noneStr;
+    }
+    if (s === 'owe') {
+      return 'OWE';
+    }
+    if (s === 'sae-mixed' || s === 'psk2/sae' || s === 'sae-compat' || s === 'wpa3-mixed' || s === 'mixed-sae') {
+      return 'mixed WPA2/WPA3 PSK/SAE (CCMP)';
+    }
+    if (s === 'sae' || s === 'wpa3' || s === 'wpa3-sae' || s === 'sae-ext') {
+      return 'WPA3 SAE (CCMP)';
+    }
+    if (s === 'wpa3-eap-mixed') {
+      return 'mixed WPA2/WPA3 EAP (CCMP)';
+    }
+    if (s === 'wpa3-eap192') {
+      return 'WPA3 EAP 192-bit (GCMP-256)';
+    }
+    if (s === 'wpa3-eap') {
+      return 'WPA3 EAP (CCMP)';
+    }
+    if (s === 'psk-mixed' || s === 'wpa-mixed' || s === 'psk+psk2' || s === 'mixed-psk') {
+      return 'mixed WPA/WPA2 PSK (TKIP, CCMP)';
+    }
+    if (s === 'wpa-eap-mixed' || s === 'eap-mixed') {
+      return 'mixed WPA/WPA2 EAP (TKIP, CCMP)';
+    }
+    if (s === 'psk2+tkip+ccmp' || s === 'psk2+ccmp+tkip') {
+      return 'WPA2 PSK (TKIP, CCMP)';
+    }
+    if (s === 'psk2+tkip' || s === 'psk2-tkip') {
+      return 'WPA2 PSK (TKIP)';
+    }
+    if (s === 'psk2' || s === 'psk2+ccmp' || s === 'psk2+aes' || s === 'psk2-ccmp' || s === 'wpa2' || s === 'wpa2-psk') {
+      return 'WPA2 PSK (CCMP)';
+    }
+    if (s === 'wpa2-eap' || s === 'eap2' || s === 'wpa2/eap') {
+      return 'WPA2 EAP (CCMP)';
+    }
+    if (s === 'psk' || s === 'psk+tkip' || s === 'wpa' || s === 'wpa-psk') {
+      return 'WPA PSK (TKIP)';
+    }
+    if (s === 'wpa-eap' || s === 'eap') {
+      return 'WPA EAP (TKIP)';
+    }
+    if (s.startsWith('wep')) {
+      return 'WEP';
+    }
+    return raw.toUpperCase();
+  },
+
+  isEncryptionLabel(label) {
+    if (!label) return false;
+    const t = label.replace(/:$/, '').trim().toLowerCase();
+    if (typeof _ === 'function') {
+      try {
+        const localized = _('Encryption');
+        if (localized && t === localized.toLowerCase()) return true;
+      } catch (_) {}
+    }
+    return /encrypt|cript|cif|versch|chiff|szyfr|salaus|krypt|mã hóa|暗号|加密/i.test(t);
+  },
+
+  loadWirelessEncryptionMap() {
+    if (this._wirelessEncMap) {
+      return Promise.resolve(this._wirelessEncMap);
+    }
+    if (this._wirelessEncMapPromise) {
+      return this._wirelessEncMapPromise;
+    }
+    if (typeof L === 'undefined' || typeof L.require !== 'function') {
+      return Promise.resolve({});
+    }
+
+    const parseSections = (values) => {
+      const map = {};
+      if (!values || typeof values !== 'object') return map;
+      const secs = Array.isArray(values) ? values : Object.values(values);
+      secs.forEach((sec) => {
+        if (!sec || (sec['.type'] !== 'wifi-iface' && sec.type !== 'wifi-iface')) return;
+        const rawEnc = sec.encryption || 'none';
+        const ssid = (sec.ssid || '').trim();
+        const dev = (sec.device || '').trim();
+        const formatted = this.formatWifiEncryptionString(rawEnc);
+        if (ssid) {
+          map[ssid.toLowerCase()] = formatted;
+          if (dev) {
+            map[dev.toLowerCase() + ':' + ssid.toLowerCase()] = formatted;
+          }
+        }
+        if (sec.ifname) {
+          map[sec.ifname.toLowerCase()] = formatted;
+        }
+      });
+      return map;
+    };
+
+    this._wirelessEncMapPromise = new Promise((resolve) => {
+      L.require('rpc').then((rpc) => {
+        const callUciGet = rpc.declare({
+          object: 'uci',
+          method: 'get',
+          params: ['config'],
+          expect: { values: {} }
+        });
+        return callUciGet('wireless').then((res) => {
+          const map = parseSections(res);
+          this._wirelessEncMap = map;
+          if (typeof this._runWirelessEnhance === 'function') {
+            try { this._runWirelessEnhance(); } catch (_) {}
+          }
+          if (typeof this._syncWirelessLayout === 'function') {
+            try { this._syncWirelessLayout(); } catch (_) {}
+          }
+          resolve(map);
+        });
+      }).catch(() => {
+        L.require('uci').then((uci) => {
+          return uci.load('wireless').then(() => {
+            const ifaces = uci.sections('wireless', 'wifi-iface') || [];
+            const map = parseSections(ifaces);
+            this._wirelessEncMap = map;
+            if (typeof this._runWirelessEnhance === 'function') {
+              try { this._runWirelessEnhance(); } catch (_) {}
+            }
+            if (typeof this._syncWirelessLayout === 'function') {
+              try { this._syncWirelessLayout(); } catch (_) {}
+            }
+            resolve(map);
+          });
+        }).catch(() => resolve({}));
+      });
+    });
+
+    return this._wirelessEncMapPromise;
+  },
+
+  resolveWifiEncryption(ssid, dev) {
+    if (!this._wirelessEncMap) return null;
+    const s = (ssid || '').toLowerCase().trim();
+    const d = (dev || '').toLowerCase().trim();
+    if (d && s && this._wirelessEncMap[d + ':' + s]) {
+      return this._wirelessEncMap[d + ':' + s];
+    }
+    if (s && this._wirelessEncMap[s]) {
+      return this._wirelessEncMap[s];
+    }
+    return null;
+  },
+
+  fixWirelessEncryptionElement(container, radioDev) {
+    if (!container) return;
+    const nowraps = container.querySelectorAll('.nowrap');
+    if (!nowraps || !nowraps.length) return;
+
+    let ssidStr = '';
+    let encNowrap = null;
+    let encStrong = null;
+
+    for (let i = 0; i < nowraps.length; i++) {
+      const nw = nowraps[i];
+      const strong = nw.querySelector('strong');
+      if (!strong) continue;
+      const label = (strong.textContent || '').trim();
+
+      if (/ssid/i.test(label)) {
+        ssidStr = nw.textContent.replace(strong.textContent, '').trim().replace(/^["']|["']$/g, '');
+      } else if (this.isEncryptionLabel(label)) {
+        encNowrap = nw;
+        encStrong = strong;
+      }
+    }
+
+    if (!encNowrap || !encStrong) return;
+
+    const currentVal = encNowrap.textContent.replace(encStrong.textContent, '').trim();
+    if (currentVal !== '-' && currentVal !== '?' && currentVal !== '') {
+      return;
+    }
+
+    const resolved = this.resolveWifiEncryption(ssidStr, radioDev);
+    if (!resolved) {
+      this.loadWirelessEncryptionMap();
+      return;
+    }
+
+    while (encNowrap.lastChild && encNowrap.lastChild !== encStrong) {
+      encNowrap.removeChild(encNowrap.lastChild);
+    }
+    encNowrap.appendChild(document.createTextNode(' ' + resolved));
+    encNowrap.setAttribute('data-sl-enc-resolved', '1');
+  },
+
   classifyDevice(devName, ifaceName, rawText) {
     const dev = (devName || '').toLowerCase().trim();
     const iface = (ifaceName || '').toLowerCase().trim();
@@ -561,6 +759,8 @@ return baseclass.extend({
   },
 
   normalizeWirelessOverview() {
+    this.loadWirelessEncryptionMap();
+
     const enhance = () => {
       const boxes = document.querySelectorAll('.network-status-table .ifacebox');
       if (!boxes || !boxes.length) return;
@@ -605,6 +805,13 @@ return baseclass.extend({
           this.formatWirelessTextNodes(telemetry);
         }
 
+        // Extract radio device name if present
+        let radioDev = '';
+        const devMatch = headText.match(/\b(radio\d+|mt\d+|phy\d+|ra\d+|rax\d+|wlan\d+)\b/i);
+        if (devMatch) {
+          radioDev = devMatch[1].toLowerCase();
+        }
+
         // 1. Detect Frequency Band & inject Frequency pill in Header
         if (!head.querySelector('.sl-radio-band')) {
           let bandLabel = null;
@@ -643,6 +850,9 @@ return baseclass.extend({
               nw.classList.add('has-associations');
             }
           });
+
+          // Fix missing wireless encryption via UCI fallback
+          this.fixWirelessEncryptionElement(badge, radioDev);
         });
       });
     };
@@ -657,6 +867,7 @@ return baseclass.extend({
         isMutating = false;
       }
     };
+    this._runWirelessEnhance = runEnhance;
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', runEnhance);
@@ -1510,6 +1721,8 @@ return baseclass.extend({
     if (this._wirelessLayoutSetup) return;
     this._wirelessLayoutSetup = true;
 
+    this.loadWirelessEncryptionMap();
+
     const isWirelessPage = () => {
       const page = typeof document !== 'undefined' && document.body && document.body.getAttribute('data-page');
       const path = (typeof window !== 'undefined' && window.location ? (window.location.pathname || '') + (window.location.hash || '') : '');
@@ -1645,6 +1858,9 @@ return baseclass.extend({
           } else {
             if (row.classList.contains('is-disabled-network')) row.classList.remove('is-disabled-network');
           }
+
+          // Fix missing wireless encryption on Network -> Wireless SSID rows
+          this.fixWirelessEncryptionElement(row, currentRadioSid);
         }
       });
 
@@ -1667,6 +1883,7 @@ return baseclass.extend({
         isMutating = false;
       }
     };
+    this._syncWirelessLayout = syncWireless;
 
     syncWireless();
     const main = document.querySelector('#maincontent') || document.body;
