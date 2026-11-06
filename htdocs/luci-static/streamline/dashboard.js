@@ -503,78 +503,88 @@
           } catch (e) {}
         }
 
-      // 3. From UCI network if still empty
-      if (discovered.length === 0 && uciValues) {
-        Object.keys(uciValues).forEach(function (key) {
-          var s = uciValues[key];
-          if (s && s['.type'] === 'device' && s.type === 'bridge' && Array.isArray(s.ports)) {
-            s.ports.forEach(function (p, idx) {
-              var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
-              add(p, 'lan', lbl);
-            });
-          }
-          if (s && s['.type'] === 'interface' && (s['.name'] === 'wan' || s['.name'] === 'wan6')) {
-            if (s.device) add(s.device, 'wan', 'WAN');
-            else if (s.ifname) add(s.ifname, 'wan', 'WAN');
-          }
-        });
-      }
+        // 2. From UCI network if still empty (handles OpenWrt 21.02, 22.03, 23.05 & GL.iNet)
+        if (discovered.length === 0 && uciValues) {
+          Object.keys(uciValues).forEach(function (key) {
+            var s = uciValues[key];
+            if (!s || typeof s !== 'object') return;
 
-      // 4. From netDevs if still empty (querying active devices)
-      if (discovered.length === 0 && Object.keys(netDevs).length > 0) {
-        Object.keys(netDevs).forEach(function (devName) {
-          if (/^lan\d+$/i.test(devName)) {
-            add(devName, 'lan', devName.toUpperCase().replace('LAN', 'LAN '));
-          } else if (/^wan/i.test(devName)) {
-            add(devName, 'wan', 'WAN');
-          } else if (/^eth1$/i.test(devName)) {
-            add(devName, 'wan', 'WAN');
-          } else if (/^eth\d+$/i.test(devName)) {
-            add(devName, 'lan', devName.toUpperCase());
-          }
-        });
-      }
-        // 4. Fallback for non-DSA devices on LuCI 23.05+ (only if board.json, UCI & netDevs gave nothing)
-        var fallbackPromise = Promise.resolve();
-        if (discovered.length === 0) {
-          try {
-            var callBuiltin = rpc.declare({
-              object: 'luci',
-              method: 'getBuiltinEthernetPorts',
-              expect: { result: [] }
-            });
-            fallbackPromise = callBuiltin().then(function (builtin) {
-              if (Array.isArray(builtin) && builtin.length > 0) {
-                builtin.forEach(function (p) {
-                  if (p && p.device) {
-                    var role = p.role || (/wan/i.test(p.device) ? 'wan' : 'lan');
-                    add(p.device, role, p.label || (role === 'wan' ? 'WAN' : p.device.toUpperCase()));
-                  }
-                });
+            // Bridge device ports (OpenWrt 22.03+ / DSA)
+            if (s['.type'] === 'device' && s.type === 'bridge') {
+              var ports = Array.isArray(s.ports) ? s.ports : (typeof s.ports === 'string' ? s.ports.trim().split(/\s+/) : []);
+              ports.forEach(function (p, idx) {
+                var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
+                add(p, 'lan', lbl);
+              });
+            }
+
+            // Bridge interface ifnames (OpenWrt 21.02 / GL.iNet)
+            if (s['.type'] === 'interface' && (s['.name'] === 'lan' || s.type === 'bridge')) {
+              var ifnames = Array.isArray(s.ifname) ? s.ifname : (typeof s.ifname === 'string' ? s.ifname.trim().split(/\s+/) : []);
+              ifnames.forEach(function (p, idx) {
+                var lbl = (p.match(/^lan\d+$/i)) ? p.toUpperCase().replace('LAN', 'LAN ') : ('LAN ' + (idx + 1));
+                add(p, 'lan', lbl);
+              });
+              if (s.device && s.device !== 'br-lan') {
+                add(s.device, 'lan', 'LAN');
               }
-            }).catch(function () {});
-          } catch (e) {}
+            }
+
+            // WAN interface (all OpenWrt versions)
+            if (s['.type'] === 'interface' && (s['.name'] === 'wan' || s['.name'] === 'wan6')) {
+              var wDev = s.device || s.ifname;
+              if (typeof wDev === 'string') {
+                wDev.trim().split(/\s+/).forEach(function (p) {
+                  add(p, 'wan', 'WAN');
+                });
+              } else if (Array.isArray(wDev)) {
+                wDev.forEach(function (p) { add(p, 'wan', 'WAN'); });
+              }
+            }
+          });
         }
 
-        return fallbackPromise.then(function () {
-          // Filter: if netDevs has devices, only keep devices that actually exist in the kernel!
-          if (Object.keys(netDevs).length > 0) {
-            discovered = discovered.filter(function (p) {
-              return Boolean(netDevs[p.device]);
-            });
-          }
-
-          // Sort: WAN first, then LAN1, LAN2, LAN3...
-          discovered.sort(function (a, b) {
-            if (a.role === 'wan' && b.role !== 'wan') return -1;
-            if (a.role !== 'wan' && b.role === 'wan') return 1;
-            return a.device.localeCompare(b.device, undefined, { numeric: true });
+        // 3. From netDevs if still empty (querying active devices)
+        if (discovered.length === 0 && Object.keys(netDevs).length > 0) {
+          Object.keys(netDevs).forEach(function (devName) {
+            if (/^lan\d+$/i.test(devName)) {
+              add(devName, 'lan', devName.toUpperCase().replace('LAN', 'LAN '));
+            } else if (/^wan/i.test(devName)) {
+              add(devName, 'wan', 'WAN');
+            } else if (/^eth1$/i.test(devName)) {
+              add(devName, 'wan', 'WAN');
+            } else if (/^eth\d+$/i.test(devName)) {
+              add(devName, 'lan', devName.toUpperCase());
+            }
           });
+        }
 
-          portsList = discovered;
-          renderPortCards();
-          updatePortStatus();
+        // 4. Fallback for GL.iNet Flint 2 (GL-MT6000) if all else failed
+        if (discovered.length === 0) {
+          add('eth1', 'wan', 'WAN');
+          add('lan1', 'lan', 'LAN 1');
+          add('lan2', 'lan', 'LAN 2');
+          add('lan3', 'lan', 'LAN 3');
+          add('lan4', 'lan', 'LAN 4');
+        }
+
+        // Filter: if netDevs has devices, only keep devices that actually exist in the kernel!
+        if (Object.keys(netDevs).length > 0) {
+          discovered = discovered.filter(function (p) {
+            return Boolean(netDevs[p.device]);
+          });
+        }
+
+        // Sort: WAN first, then LAN1, LAN2, LAN3...
+        discovered.sort(function (a, b) {
+          if (a.role === 'wan' && b.role !== 'wan') return -1;
+          if (a.role !== 'wan' && b.role === 'wan') return 1;
+          return a.device.localeCompare(b.device, undefined, { numeric: true });
         });
+
+        portsList = discovered;
+        renderPortCards();
+        updatePortStatus();
       });
     }).catch(function () {
       portsDiscoveryPending = false;
