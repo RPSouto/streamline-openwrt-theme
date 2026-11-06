@@ -120,13 +120,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=5'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 5');
-assert(control.includes('Version: 1.0.58-5'), 'packaging/control Version is 1.0.58-5');
-assert(buildIpk.includes('1.0.58-5'), 'build-ipk.sh default target is 1.0.58-5');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-5'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-5');
-assert(swJs.includes('streamline-static-v58-5'), 'streamline-sw.js CACHE_NAME matches v58-5');
-assert(headerHtm.includes('?v=1.0.58.5'), 'header.htm asset query param matches v1.0.58.5');
-assert(headerUt.includes('?v=1.0.58.5'), 'header.ut asset query param matches v1.0.58.5');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=6'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 6');
+assert(control.includes('Version: 1.0.58-6'), 'packaging/control Version is 1.0.58-6');
+assert(buildIpk.includes('1.0.58-6'), 'build-ipk.sh default target is 1.0.58-6');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-6'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-6');
+assert(swJs.includes('streamline-static-v58-6'), 'streamline-sw.js CACHE_NAME matches v58-6');
+assert(headerHtm.includes('?v=1.0.58.6'), 'header.htm asset query param matches v1.0.58.6');
+assert(headerUt.includes('?v=1.0.58.6'), 'header.ut asset query param matches v1.0.58.6');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -528,10 +528,14 @@ assert(menuJs.includes('setupTableFilter()'), 'menu-streamline-v21.js defines se
 assert(menuJs.includes('this.setupTableFilter()'), 'menu-streamline-v21.js initializes setupTableFilter in __init__');
 assert(menuJs.includes('isFilterTarget(table)'), 'menu-streamline-v21.js implements isFilterTarget()');
 assert(menuJs.includes('bindTableFilter(table, info)'), 'menu-streamline-v21.js implements bindTableFilter()');
+assert(menuJs.includes('sl-filter-clear-chip'), 'menu-streamline-v21.js creates .sl-filter-clear-chip quick reset chip');
+assert(menuJs.includes('sl-filter-empty-btn'), 'menu-streamline-v21.js creates .sl-filter-empty-btn prominent empty-state button');
 assert(cascadeCss.includes('.sl-table-filter-bar'), 'cascade.css contains .sl-table-filter-bar container styling');
 assert(cascadeCss.includes('.sl-filter-input-wrap'), 'cascade.css contains .sl-filter-input-wrap styling');
 assert(cascadeCss.includes('.sl-table-filter-input'), 'cascade.css contains .sl-table-filter-input styling');
 assert(cascadeCss.includes('.sl-filter-clear-btn'), 'cascade.css contains .sl-filter-clear-btn styling');
+assert(cascadeCss.includes('.sl-filter-clear-chip'), 'cascade.css contains .sl-filter-clear-chip styling');
+assert(cascadeCss.includes('.sl-filter-empty-btn'), 'cascade.css contains .sl-filter-empty-btn styling');
 assert(cascadeCss.includes('.sl-filter-counter'), 'cascade.css contains .sl-filter-counter styling');
 assert(cascadeCss.includes('.sl-filter-no-matches'), 'cascade.css contains .sl-filter-no-matches styling');
 assert(mobileCss.includes('.sl-table-filter-bar') && mobileCss.includes('.sl-filter-input-wrap'),

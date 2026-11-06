@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-5';
+const THEME_VERSION = '1.0.58-6';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -2156,16 +2156,25 @@ return baseclass.extend({
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
     clearBtn.className = 'sl-filter-clear-btn';
-    clearBtn.title = 'Clear filter';
+    clearBtn.title = 'Clear filter (Esc)';
     clearBtn.setAttribute('aria-label', 'Clear filter');
     clearBtn.style.display = 'none';
-    clearBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    clearBtn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     inputWrap.appendChild(clearBtn);
 
     bar.appendChild(inputWrap);
 
     const meta = document.createElement('div');
     meta.className = 'sl-filter-meta';
+
+    const clearChip = document.createElement('button');
+    clearChip.type = 'button';
+    clearChip.className = 'sl-filter-clear-chip';
+    clearChip.title = 'Clear filter (Esc)';
+    clearChip.setAttribute('aria-label', 'Clear filter');
+    clearChip.style.display = 'none';
+    clearChip.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>Clear</span>';
+    meta.appendChild(clearChip);
 
     const counter = document.createElement('span');
     counter.className = 'sl-filter-counter';
@@ -2180,6 +2189,9 @@ return baseclass.extend({
     }
 
     let isFiltering = false;
+    let isFilteredState = false;
+    let lastQuery = '';
+    let lastTotal = -1;
 
     const getDataRows = () => {
       const allRows = table.querySelectorAll('tr, .tr');
@@ -2201,6 +2213,14 @@ return baseclass.extend({
       return rows;
     };
 
+    const clearFilter = () => {
+      if (input.value !== '') {
+        input.value = '';
+        updateFilter();
+      }
+      input.focus();
+    };
+
     const updateFilter = () => {
       if (isFiltering) return;
       isFiltering = true;
@@ -2211,33 +2231,53 @@ return baseclass.extend({
         const rows = getDataRows();
         const total = rows.length;
 
-        clearBtn.style.display = words.length > 0 ? 'flex' : 'none';
-
+        // If no filter query is active
         if (words.length === 0) {
-          rows.forEach((r) => { r.style.display = ''; });
-          const noMatches = table.querySelector('.sl-filter-no-matches');
-          if (noMatches && noMatches.parentElement) {
-            noMatches.parentElement.removeChild(noMatches);
+          clearBtn.style.display = 'none';
+          clearChip.style.display = 'none';
+
+          if (isFilteredState) {
+            rows.forEach((r) => {
+              if (r.style.display !== '') r.style.display = '';
+            });
+            const noMatches = table.querySelector('.sl-filter-no-matches');
+            if (noMatches && noMatches.parentElement) {
+              noMatches.parentElement.removeChild(noMatches);
+            }
+            isFilteredState = false;
           }
+
           counter.classList.remove('is-filtered');
-          counter.textContent = total === 1 ? '1 entry' : (total + ' entries');
+          const totalText = total === 1 ? '1 entry' : (total + ' entries');
+          if (counter.textContent !== totalText) {
+            counter.textContent = totalText;
+          }
+          lastQuery = '';
+          lastTotal = total;
           return;
         }
+
+        // Filter query is active
+        clearBtn.style.display = 'flex';
+        clearChip.style.display = 'inline-flex';
+        isFilteredState = true;
 
         let matchCount = 0;
         rows.forEach((r) => {
           const text = (r.textContent || '').toLowerCase();
           const matches = words.every((w) => text.includes(w));
-          if (matches) {
-            r.style.display = '';
-            matchCount++;
-          } else {
-            r.style.display = 'none';
+          const targetDisplay = matches ? '' : 'none';
+          if (r.style.display !== targetDisplay) {
+            r.style.display = targetDisplay;
           }
+          if (matches) matchCount++;
         });
 
         counter.classList.add('is-filtered');
-        counter.textContent = matchCount + ' / ' + total;
+        const matchText = matchCount + ' / ' + total;
+        if (counter.textContent !== matchText) {
+          counter.textContent = matchText;
+        }
 
         let noMatches = table.querySelector('.sl-filter-no-matches');
         if (matchCount === 0 && total > 0) {
@@ -2253,7 +2293,7 @@ return baseclass.extend({
             tbody.appendChild(noMatches);
           }
           const td = noMatches.querySelector('td, .td');
-          if (td) {
+          if (td && query !== lastQuery) {
             td.innerHTML = '';
             const emptyWrap = document.createElement('div');
             emptyWrap.className = 'sl-filter-empty-content';
@@ -2268,13 +2308,9 @@ return baseclass.extend({
 
             const resetBtn = document.createElement('button');
             resetBtn.type = 'button';
-            resetBtn.className = 'sl-filter-reset-link';
-            resetBtn.textContent = 'Clear filter';
-            resetBtn.addEventListener('click', () => {
-              input.value = '';
-              updateFilter();
-              input.focus();
-            });
+            resetBtn.className = 'sl-filter-empty-btn';
+            resetBtn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span>Clear filter</span>';
+            resetBtn.addEventListener('click', clearFilter);
 
             emptyWrap.appendChild(textSpan);
             emptyWrap.appendChild(resetBtn);
@@ -2283,37 +2319,67 @@ return baseclass.extend({
         } else if (noMatches && noMatches.parentElement) {
           noMatches.parentElement.removeChild(noMatches);
         }
+
+        lastQuery = query;
+        lastTotal = total;
       } finally {
-        setTimeout(() => { isFiltering = false; }, 10);
+        setTimeout(() => { isFiltering = false; }, 20);
       }
     };
 
     input.addEventListener('input', updateFilter);
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        input.value = '';
-        updateFilter();
+        clearFilter();
         input.blur();
       }
     });
 
-    clearBtn.addEventListener('click', () => {
-      input.value = '';
-      updateFilter();
-      input.focus();
-    });
+    clearBtn.addEventListener('click', clearFilter);
+    clearChip.addEventListener('click', clearFilter);
 
+    // Initial render of count
     updateFilter();
 
+    // Observe row changes only in tbody, ignoring cell text updates like timers or bytes
     if (typeof MutationObserver !== 'undefined') {
-      const observer = new MutationObserver(() => {
+      const targetTbody = table.querySelector('tbody') || table;
+      let debounceTimer = null;
+      const observer = new MutationObserver((mutations) => {
         if (isFiltering) return;
-        window.requestAnimationFrame(() => {
+
+        let hasRowChanges = false;
+        for (let i = 0; i < mutations.length; i++) {
+          const m = mutations[i];
+          for (let j = 0; j < m.addedNodes.length; j++) {
+            const n = m.addedNodes[j];
+            if (n.nodeType === 1 && !n.classList.contains('sl-filter-no-matches')) {
+              hasRowChanges = true;
+              break;
+            }
+          }
+          if (hasRowChanges) break;
+          for (let j = 0; j < m.removedNodes.length; j++) {
+            const n = m.removedNodes[j];
+            if (n.nodeType === 1 && !n.classList.contains('sl-filter-no-matches')) {
+              hasRowChanges = true;
+              break;
+            }
+          }
+          if (hasRowChanges) break;
+        }
+
+        if (!hasRowChanges) return;
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
           if (isFiltering) return;
           updateFilter();
-        });
+        }, 120);
       });
-      observer.observe(table, { childList: true, subtree: true });
+
+      // Crucial: subtree: false so we ONLY catch direct row additions/removals in tbody
+      observer.observe(targetTbody, { childList: true, subtree: false });
     }
   },
 
@@ -2337,8 +2403,27 @@ return baseclass.extend({
     const targetNode = document.querySelector('#maincontent') || document.querySelector('#view') || document.body;
     if (targetNode && typeof MutationObserver !== 'undefined') {
       let isScanning = false;
-      const observer = new MutationObserver(() => {
+      const observer = new MutationObserver((mutations) => {
         if (isScanning) return;
+
+        // Check if any added node is or contains a table
+        let hasTable = false;
+        for (let i = 0; i < mutations.length; i++) {
+          const added = mutations[i].addedNodes;
+          for (let j = 0; j < added.length; j++) {
+            const n = added[j];
+            if (n.nodeType === 1) {
+              if (n.tagName === 'TABLE' || (n.querySelector && n.querySelector('table, .cbi-section-table'))) {
+                hasTable = true;
+                break;
+              }
+            }
+          }
+          if (hasTable) break;
+        }
+
+        if (!hasTable) return;
+
         isScanning = true;
         setTimeout(() => {
           try {
@@ -2346,7 +2431,7 @@ return baseclass.extend({
           } finally {
             isScanning = false;
           }
-        }, 80);
+        }, 120);
       });
       observer.observe(targetNode, { childList: true, subtree: true });
     }
