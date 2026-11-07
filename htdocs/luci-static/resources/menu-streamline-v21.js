@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-11';
+const THEME_VERSION = '1.0.58-12';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -27,6 +27,7 @@ return baseclass.extend({
     this.setupSidebar();
     this.setupBrandVersion();
     this.setupFooter();
+    this.setupLoginVersion();
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
     this.normalizeWirelessOverview();
@@ -1538,6 +1539,63 @@ return baseclass.extend({
       document.addEventListener('DOMContentLoaded', cleanFooter);
     } else {
       cleanFooter();
+    }
+  },
+
+  setupLoginVersion() {
+    const updateLoginPowered = () => {
+      const powered = document.querySelector('.modal.login .login-powered, .modal:has(#luci_password) .login-powered, .login-powered');
+      if (!powered) return;
+      if (/^Powered by/i.test(powered.textContent) || !powered.getAttribute('data-sl-ver-resolved')) {
+        let label = '';
+        const verNode = document.querySelector('.login-version');
+        if (verNode && verNode.textContent.trim()) {
+          label = verNode.textContent.trim();
+        } else {
+          try {
+            label = window.sessionStorage.getItem('streamline.openwrt_version') || '';
+          } catch (_) {}
+        }
+        if (!label) {
+          const brand = document.querySelector('.brand[data-sub], .mobile-brand[data-sub]');
+          if (brand) label = brand.getAttribute('data-sub') || '';
+        }
+        if (label) {
+          powered.textContent = label;
+          powered.setAttribute('data-sl-ver-resolved', '1');
+        } else if (typeof L !== 'undefined' && typeof L.require === 'function') {
+          L.require('rpc').then((rpc) => {
+            const callBoard = rpc.declare({
+              object: 'system',
+              method: 'board',
+              expect: { release: {} }
+            });
+            callBoard().then((board) => {
+              const rel = (board && board.release) || {};
+              const dist = (rel.distribution && rel.distribution.trim()) ? rel.distribution.toUpperCase() : 'OPENWRT';
+              const match = rel.version ? String(rel.version).match(/^(\d+)/) : null;
+              let l = dist;
+              if (match) l = dist + ' ' + match[1];
+              else if (rel.version && /snapshot/i.test(String(rel.version))) l = dist + ' SNAPSHOT';
+              if (l && powered) {
+                powered.textContent = l;
+                powered.setAttribute('data-sl-ver-resolved', '1');
+              }
+            }).catch(() => {});
+          }).catch(() => {});
+        }
+      }
+    };
+    if (typeof document !== 'undefined') {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateLoginPowered);
+      } else {
+        updateLoginPowered();
+      }
+      if (typeof MutationObserver !== 'undefined' && (document.body || document.documentElement)) {
+        const observer = new MutationObserver(() => updateLoginPowered());
+        observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+      }
     }
   },
 

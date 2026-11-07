@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=11'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 11');
-assert(control.includes('Version: 1.0.58-11'), 'packaging/control Version is 1.0.58-11');
-assert(buildIpk.includes('1.0.58-11'), 'build-ipk.sh default target is 1.0.58-11');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-11'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-11');
-assert(swJs.includes('streamline-static-v58-11'), 'streamline-sw.js CACHE_NAME matches v58-11');
-assert(headerHtm.includes('?v=1.0.58.11'), 'header.htm asset query param matches v1.0.58.11');
-assert(headerUt.includes('?v=1.0.58.11'), 'header.ut asset query param matches v1.0.58.11');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=12'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 12');
+assert(control.includes('Version: 1.0.58-12'), 'packaging/control Version is 1.0.58-12');
+assert(buildIpk.includes('1.0.58-12'), 'build-ipk.sh default target is 1.0.58-12');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-12'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-12');
+assert(swJs.includes('streamline-static-v58-12'), 'streamline-sw.js CACHE_NAME matches v58-12');
+assert(headerHtm.includes('?v=1.0.58.12'), 'header.htm asset query param matches v1.0.58.12');
+assert(headerUt.includes('?v=1.0.58.12'), 'header.ut asset query param matches v1.0.58.12');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -641,6 +641,28 @@ assert(fs.existsSync(path.join(templateAddonDir, 'README.md')), 'luci-addon-temp
 
 assert(fs.existsSync(path.join(rootDir, 'build-addons.sh')), 'build-addons.sh exists in repository root');
 assert(fs.existsSync(path.join(rootDir, 'packages/README.md')), 'packages/README.md exists with documentation');
+
+// Test 26: Verify OpenWrt distribution version display on login screen
+console.log('\n26. Verifying OpenWrt distribution version display on login screen...');
+const sysauthHtm = fs.readFileSync(path.join(rootDir, 'luasrc/view/themes/streamline/sysauth.htm'), 'utf8');
+const sysauthUt = fs.readFileSync(path.join(rootDir, 'ucode/template/themes/streamline/sysauth.ut'), 'utf8');
+const sysauthJs = fs.readFileSync(path.join(rootDir, 'htdocs/luci-static/resources/view/streamline/sysauth.js'), 'utf8');
+
+assert(sysauthHtm.includes('class="login-version"') && sysauthHtm.includes('brand_sub'),
+  'sysauth.htm extracts brand_sub and outputs .login-version element');
+assert(sysauthUt.includes('class="login-version"') && sysauthUt.includes('brand_sub'),
+  'sysauth.ut extracts brand_sub and outputs .login-version element');
+
+assert(!sysauthJs.includes("['Powered by OpenWrt']"),
+  'sysauth.js does not hardcode Powered by OpenWrt');
+assert(sysauthJs.includes('.login-version') && sysauthJs.includes('versionText'),
+  'sysauth.js extracts version from .login-version element and displays it in .login-powered');
+
+assert(menuJs.includes('setupLoginVersion()') && menuJs.includes('this.setupLoginVersion()'),
+  'menu-streamline-v21.js defines and initializes setupLoginVersion() in __init__');
+
+assert(cascadeCss.includes('.modal.login .login-powered') && cascadeCss.includes('text-transform: uppercase'),
+  'cascade.css styles .login-powered with uppercase styling matching brand header');
 
 // Summary
 console.log(`\n========================================`);

@@ -1,9 +1,16 @@
 {# SPDX-License-Identifier: Apache-2.0 #}
-{% const login_boardinfo = ubus.call('system', 'board') ?? {}; %}
+{%
+  const login_boardinfo = ubus.call('system', 'board') ?? {};
+  const rel = login_boardinfo.release ?? {};
+  const dist = rel.distribution ? uc(rel.distribution) : 'OPENWRT';
+  const major = match(rel.version, /^(\d+)/)?.[1];
+  const brand_sub = major ? `${dist} ${major}` : (match(rel.version, /snapshot/i) ? `${dist} SNAPSHOT` : dist);
+%}
 {% include('header', { blank_page: true }) %}
 <script>document.documentElement.classList.add('login-page');if(document.body)document.body.classList.add('login-page');try{sessionStorage.removeItem('streamline.session_init');for(var k in localStorage){if(k.indexOf('streamline.menu.')===0)localStorage.removeItem(k);}}catch(e){}</script>
 <section hidden>
   <div class="login-hostname">{{ entityencode(login_boardinfo.hostname ?? 'OpenWrt') }}</div>
+  <div class="login-version">{{ entityencode(brand_sub) }}</div>
   <form method="post" class="cbi-map">
     <div class="cbi-section"><div class="cbi-section-node">
       <div class="cbi-value"><label class="cbi-value-title" for="luci_username">{{ _('Username') }}</label><div class="cbi-value-field"><input name="luci_username" id="luci_username" type="text" autocomplete="username" value="{{ entityencode(duser, true) }}"></div></div>

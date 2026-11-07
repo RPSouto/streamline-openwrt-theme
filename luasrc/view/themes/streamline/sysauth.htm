@@ -1,9 +1,17 @@
-<%# SPDX-License-Identifier: Apache-2.0 -%>
-<% blank_page = true; local login_util = require "luci.util"; local login_boardinfo = login_util.ubus("system", "board") or {} %>
+<%
+  blank_page = true
+  local login_util = require "luci.util"
+  local login_boardinfo = login_util.ubus("system", "board") or {}
+  local rel = login_boardinfo.release or {}
+  local dist = (rel.distribution and rel.distribution ~= "") and rel.distribution:upper() or "OPENWRT"
+  local major = rel.version and rel.version:match("^(%d+)")
+  local brand_sub = major and (dist .. " " .. major) or (rel.version and rel.version:lower():find("snapshot") and (dist .. " SNAPSHOT") or dist)
+%>
 <%+header%>
 <script>document.documentElement.classList.add('login-page');if(document.body)document.body.classList.add('login-page');try{sessionStorage.removeItem('streamline.session_init');for(var k in localStorage){if(k.indexOf('streamline.menu.')===0)localStorage.removeItem(k);}}catch(e){}</script>
 <section hidden>
   <div class="login-hostname"><%=login_util.pcdata(login_boardinfo.hostname or "OpenWrt")%></div>
+  <div class="login-version"><%=login_util.pcdata(brand_sub)%></div>
   <form method="post" class="cbi-map">
     <div class="cbi-section"><div class="cbi-section-node">
       <div class="cbi-value"><label class="cbi-value-title" for="luci_username"><%:Username%></label><div class="cbi-value-field"><input name="luci_username" id="luci_username" type="text" autocomplete="username" <%=attr('value', duser)%>></div></div>

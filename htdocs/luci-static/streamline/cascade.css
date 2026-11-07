@@ -1732,6 +1732,9 @@ body.login-page form.cbi-map::before {
   color: var(--sl-muted) !important;
   font-size: .78rem !important;
   text-align: center !important;
+  font-weight: 600 !important;
+  letter-spacing: .15em !important;
+  text-transform: uppercase !important;
 }
 .modal.login form,
 .modal.login .cbi-map,
