@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.58--10-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.58--12-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -11,7 +11,8 @@
 ## ✨ Highlights
 
 * **Physical Ethernet Port Map (`Status → Overview`)**: Real-time visual RJ45 port status map directly on the homepage. Automatically discovers WAN and LAN switch ports via `/etc/board.json` and network topology. Displays active connection state, glowing multi-speed LED indicators (2.5 Gbps cyan neon, 1 Gbps emerald green, 100 Mbps amber), duplex modes, and live download/upload throughput counters with zero-shift background polling.
-* **Dynamic OpenWrt Distribution & Version Badge**: Prominently displays the detected OpenWrt release (e.g. `OPENWRT 21`, `OPENWRT 23`, `IMMORTALWRT 23`) directly below the brand title in both the desktop sidebar and mobile navigation drawer.
+* **Extensible Streamline Addon Architecture**: Modular ecosystem for vendor-specific hardware profiles and cellular/VPN protocol handlers without core theme file collisions. Features dynamic server-side discovery and zero 404 network requests (`packages/README.md`).
+* **Dynamic OpenWrt Distribution Version**: Prominently displays the detected OpenWrt release (e.g. `OPENWRT 21`, `OPENWRT 23`, `IMMORTALWRT 23`) directly below the brand title on both sidebar navigation and the modern frosted login screen (replacing static "Powered by OpenWrt").
 * **Minimalist Right-Aligned Footer**: Clean footer displaying strictly `Streamline · <Distro> <Version>` (e.g., `Streamline · OpenWrt 21.02`), stripping verbose snapshot tags and git commit hashes.
 * **Enhanced Mobile Table Scrolling & Touch Swipe**: Smooth horizontal touch swipe and drag scrolling across overview tables, DHCP leases, firewall rules, and associated stations tables without cell clipping.
 * **Click-to-Copy for IP & MAC Addresses**: Click directly on any IPv4, IPv6, or MAC address across overview tables, status dashboards, wireless clients, DHCP leases, and routing tables to instantly copy it to your clipboard. Features a subtle hover affordance and sleek frosted glass toast notifications (smartly excludes forms, input fields, buttons, and modal dialogs, with HTTP fallback support).
@@ -26,7 +27,7 @@
   * **Parent-Child Visual Hierarchy**: Virtual interfaces are indented with a tree branch indicator (`↳`) under their parent physical controller.
 * **Status Card Modernization & Dark Channel Analysis**: Sleek device badges, baseline card alignment across upstream interfaces, and dark theme styling for Channel Analysis charts.
 * **Persistent Router Health Card**: Live CPU load, memory utilization, and flash storage meters rendered as unified full-width cards matching the system overview table.
-* **Clean Modern Frosted Login Screen**: Distraction-free dark canvas with subtle glowing ambient aura matching the active palette, router hostname display, and floating frosted glass credential card.
+* **Clean Modern Frosted Login Screen**: Distraction-free dark canvas with subtle glowing ambient aura matching the active palette, router hostname display, dynamic OpenWrt distribution version, and floating frosted glass credential card.
 * **Collapsible Sidebar & Navigation**: Auto-saving collapsible sidebar on desktop, closed accordion panels by default upon login, and a clean sliding drawer for mobile and tablet screens.
 * **Full-Width Terminal Viewers**: Independent scrolling and monospaced typography for System Logs, Kernel Logs, and command output.
 * **Normalized Actions & Spacing**: Standardized button heights, responsive action toolbars, and dedicated card separation across Firewall tables, DHCP leases, and network interfaces.
@@ -52,8 +53,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.58-10_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.58-10_all.ipk'
+scp releases/luci-theme-streamline_1.0.58-12_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.58-12_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -61,8 +62,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.58-r10_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.58-r10_all.apk'
+scp releases/luci-theme-streamline_1.0.58-r12_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.58-r12_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
