@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=12'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 12');
-assert(control.includes('Version: 1.0.58-12'), 'packaging/control Version is 1.0.58-12');
-assert(buildIpk.includes('1.0.58-12'), 'build-ipk.sh default target is 1.0.58-12');
-assert(menuJs.includes("THEME_VERSION = '1.0.58-12'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-12');
-assert(swJs.includes('streamline-static-v58-12'), 'streamline-sw.js CACHE_NAME matches v58-12');
-assert(headerHtm.includes('?v=1.0.58.12'), 'header.htm asset query param matches v1.0.58.12');
-assert(headerUt.includes('?v=1.0.58.12'), 'header.ut asset query param matches v1.0.58.12');
+assert(makefile.includes('PKG_VERSION:=1.0.58') && makefile.includes('PKG_RELEASE:=13'), 'Makefile PKG_VERSION is 1.0.58 and PKG_RELEASE is 13');
+assert(control.includes('Version: 1.0.58-13'), 'packaging/control Version is 1.0.58-13');
+assert(buildIpk.includes('1.0.58-13'), 'build-ipk.sh default target is 1.0.58-13');
+assert(menuJs.includes("THEME_VERSION = '1.0.58-13'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.58-13');
+assert(swJs.includes('streamline-static-v58-13'), 'streamline-sw.js CACHE_NAME matches v58-13');
+assert(headerHtm.includes('?v=1.0.58.13'), 'header.htm asset query param matches v1.0.58.13');
+assert(headerUt.includes('?v=1.0.58.13'), 'header.ut asset query param matches v1.0.58.13');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -663,6 +663,44 @@ assert(menuJs.includes('setupLoginVersion()') && menuJs.includes('this.setupLogi
 
 assert(cascadeCss.includes('.modal.login .login-powered') && cascadeCss.includes('text-transform: uppercase'),
   'cascade.css styles .login-powered with uppercase styling matching brand header');
+
+// Test 27: Verify Streamline Update Notifier & Version Checker
+console.log('\n27. Verifying Streamline Update Notifier & Version Checker...');
+assert(menuJs.includes('setupUpdateNotifier()') && menuJs.includes('this.setupUpdateNotifier()'),
+  'menu-streamline-v21.js defines and initializes setupUpdateNotifier() in __init__');
+assert(menuJs.includes('isNewerVersion(current, remote)'),
+  'menu-streamline-v21.js implements isNewerVersion()');
+assert(menuJs.includes('createStreamlineLogoSvg('),
+  'menu-streamline-v21.js implements createStreamlineLogoSvg()');
+assert(menuJs.includes('checkThemeUpdate()'),
+  'menu-streamline-v21.js implements checkThemeUpdate()');
+assert(menuJs.includes('renderUpdateNotification('),
+  'menu-streamline-v21.js implements renderUpdateNotification()');
+
+assert(cascadeCss.includes('.sidebar-update') && cascadeCss.includes('.sl-update-dot'),
+  'cascade.css contains .sidebar-update and .sl-update-dot styling');
+assert(cascadeCss.includes('slPulseAlert') && cascadeCss.includes('.brand-update'),
+  'cascade.css contains slPulseAlert animation and .brand-update styling');
+assert(mobileCss.includes('.mobile-update'),
+  'mobile.css contains .mobile-update styling');
+
+assert(headerHtm.includes('simulateUpdate') && headerHtm.includes('clearUpdateCheck'),
+  'header.htm defines simulateUpdate and clearUpdateCheck helpers');
+assert(headerUt.includes('simulateUpdate') && headerUt.includes('clearUpdateCheck'),
+  'header.ut defines simulateUpdate and clearUpdateCheck helpers');
+
+// Extract and unit-test isNewerVersion
+const isNewerVersionMatch = menuJs.match(/isNewerVersion\s*\([^)]*\)\s*\{[\s\S]*?\n\s{2}\},/);
+assert(isNewerVersionMatch !== null, 'Extracted isNewerVersion implementation for unit testing');
+if (isNewerVersionMatch) {
+  const isNewerVersion = new Function('return function ' + isNewerVersionMatch[0].replace(/,\s*$/, ''))();
+  assert(isNewerVersion('1.0.58-13', 'v1.0.58-13') === false, 'isNewerVersion recognizes equal versions (false)');
+  assert(isNewerVersion('1.0.58-13', 'v1.0.58-14') === true, 'isNewerVersion recognizes bump in release number (true)');
+  assert(isNewerVersion('1.0.58-13', 'v1.0.59') === true, 'isNewerVersion recognizes bump in patch version (true)');
+  assert(isNewerVersion('1.0.58-13', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
+  assert(isNewerVersion('1.0.58-13', 'v1.0.58-12') === false, 'isNewerVersion recognizes older version (false)');
+  assert(isNewerVersion('1.0.58-13', 'v1.0.57-10') === false, 'isNewerVersion recognizes older version 1.0.57-10 (false)');
+}
 
 // Summary
 console.log(`\n========================================`);

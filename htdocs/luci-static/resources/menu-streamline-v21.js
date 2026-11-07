@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-12';
+const THEME_VERSION = '1.0.58-13';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -28,6 +28,7 @@ return baseclass.extend({
     this.setupBrandVersion();
     this.setupFooter();
     this.setupLoginVersion();
+    this.setupUpdateNotifier();
     this.normalizeRealtimeGraphs();
     this.normalizeFirewallBadges();
     this.normalizeWirelessOverview();
@@ -1596,6 +1597,220 @@ return baseclass.extend({
         const observer = new MutationObserver(() => updateLoginPowered());
         observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
       }
+    }
+  },
+
+  setupUpdateNotifier() {
+    if (this._updateNotifierInitialized) return;
+    this._updateNotifierInitialized = true;
+
+    const run = () => {
+      const params = (typeof window !== 'undefined' && window.location && window.location.search) ? window.location.search : '';
+      const forceTest = params.indexOf('streamline_update_test=1') !== -1 ||
+                       (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('streamline.force_update_test') === 'true');
+
+      if (forceTest) {
+        this.renderUpdateNotification('v1.0.59', 'https://github.com/RPSouto/streamline-openwrt-theme/releases/latest');
+        return;
+      }
+
+      this.checkThemeUpdate();
+    };
+
+    if (typeof document !== 'undefined') {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run);
+      } else {
+        run();
+      }
+    }
+  },
+
+  isNewerVersion(current, remote) {
+    if (!remote || typeof remote !== 'string') return false;
+    if (!current || typeof current !== 'string') return false;
+
+    const parseParts = (v) => {
+      const clean = v.replace(/^v/i, '').trim();
+      return clean.split(/[-.]/).map((p) => {
+        const num = parseInt(p, 10);
+        return isNaN(num) ? 0 : num;
+      });
+    };
+
+    const curParts = parseParts(current);
+    const remParts = parseParts(remote);
+    const maxLen = Math.max(curParts.length, remParts.length);
+
+    for (let i = 0; i < maxLen; i++) {
+      const c = curParts[i] || 0;
+      const r = remParts[i] || 0;
+      if (r > c) return true;
+      if (r < c) return false;
+    }
+    return false;
+  },
+
+  createStreamlineLogoSvg(size) {
+    const s = size || 22;
+    const svgStr = '<svg class="sl-logo-symbol" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true">' +
+      '<defs><linearGradient id="sl-update-g" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">' +
+      '<stop stop-color="#9b6cff"/><stop offset="1" stop-color="#6334df"/></linearGradient></defs>' +
+      '<rect x="5" y="5" width="54" height="54" rx="17" fill="url(#sl-update-g)"/>' +
+      '<path d="M20 34.5 29 25l6.2 6.2L44 22v9h-4v-2.2l-4.8 4.9-6.2-6.2-6.2 6.4V43H20z" fill="#fff"/>' +
+      '</svg>';
+    try {
+      const fragment = document.createRange().createContextualFragment(svgStr);
+      return fragment.firstElementChild;
+    } catch (e) {
+      const span = document.createElement('span');
+      span.innerHTML = svgStr;
+      return span.firstElementChild;
+    }
+  },
+
+  checkThemeUpdate() {
+    const STORAGE_KEY = 'streamline.update_info';
+    const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+    const GITHUB_REPO = 'RPSouto/streamline-openwrt-theme';
+    const GITHUB_RELEASES_URL = 'https://github.com/' + GITHUB_REPO + '/releases/latest';
+    const GITHUB_API_URL = 'https://api.github.com/repos/' + GITHUB_REPO + '/releases/latest';
+    const currentVersion = THEME_VERSION;
+
+    let cached = null;
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) cached = JSON.parse(raw);
+    } catch (e) {}
+
+    const now = Date.now();
+    if (cached && typeof cached === 'object' && cached.checkedAt) {
+      const isFresh = (now - cached.checkedAt) < CACHE_TTL_MS;
+      if (isFresh) {
+        if (cached.hasUpdate && cached.latestVersion) {
+          this.renderUpdateNotification(cached.latestVersion, cached.htmlUrl || GITHUB_RELEASES_URL);
+        }
+        return;
+      }
+    }
+
+    if (typeof fetch !== 'function') return;
+
+    fetch(GITHUB_API_URL, {
+      method: 'GET',
+      headers: { 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    }).then((res) => {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then((data) => {
+      if (!data || !data.tag_name) return;
+      const latestVersion = String(data.tag_name).trim();
+      const hasUpdate = this.isNewerVersion(currentVersion, latestVersion);
+      const htmlUrl = data.html_url || GITHUB_RELEASES_URL;
+
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          checkedAt: now,
+          latestVersion: latestVersion,
+          htmlUrl: htmlUrl,
+          hasUpdate: hasUpdate
+        }));
+      } catch (e) {}
+
+      if (hasUpdate) {
+        this.renderUpdateNotification(latestVersion, htmlUrl);
+      }
+    }).catch(() => {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          checkedAt: now - CACHE_TTL_MS + (30 * 60 * 1000),
+          latestVersion: cached ? cached.latestVersion : null,
+          htmlUrl: cached ? cached.htmlUrl : GITHUB_RELEASES_URL,
+          hasUpdate: cached ? cached.hasUpdate : false
+        }));
+      } catch (e) {}
+      if (cached && cached.hasUpdate && cached.latestVersion) {
+        this.renderUpdateNotification(cached.latestVersion, cached.htmlUrl || GITHUB_RELEASES_URL);
+      }
+    });
+  },
+
+  renderUpdateNotification(latestVersion, releaseUrl) {
+    const targetUrl = releaseUrl || 'https://github.com/RPSouto/streamline-openwrt-theme/releases/latest';
+    const titleText = (typeof _ === 'function' ? _('Streamline update available: %s. Click to view on GitHub.') : 'Streamline update available: %s. Click to view on GitHub.').replace('%s', latestVersion);
+
+    const tryInject = () => {
+      // 1. Sidebar indicator in #indicators
+      const indicators = document.querySelector('#indicators');
+      if (indicators && !indicators.querySelector('.sidebar-update')) {
+        const updateLink = E('a', {
+          'class': 'sidebar-update',
+          'href': targetUrl,
+          'target': '_blank',
+          'rel': 'noopener noreferrer',
+          'title': titleText,
+          'aria-label': titleText
+        }, [
+          E('span', { 'class': 'sl-update-icon-wrapper' }, [
+            this.createStreamlineLogoSvg(22),
+            E('span', { 'class': 'sl-update-dot', 'aria-hidden': 'true' })
+          ]),
+          E('span', { 'class': 'indicator-label' }, [typeof _ === 'function' ? _('Update Available') : 'Update Available']),
+          E('span', { 'class': 'sl-update-tag' }, [latestVersion])
+        ]);
+
+        const palette = indicators.querySelector('.sidebar-palette');
+        if (palette && palette.nextSibling)
+          indicators.insertBefore(updateLink, palette.nextSibling);
+        else
+          indicators.appendChild(updateLink);
+      }
+
+      // 2. Mobile bar indicator in .mobile-bar
+      const mobileBar = document.querySelector('.mobile-bar');
+      if (mobileBar && !mobileBar.querySelector('.mobile-update')) {
+        const mobLink = E('a', {
+          'class': 'mobile-update',
+          'href': targetUrl,
+          'target': '_blank',
+          'rel': 'noopener noreferrer',
+          'title': titleText,
+          'aria-label': titleText
+        }, [
+          E('span', { 'class': 'sl-update-icon-wrapper' }, [
+            this.createStreamlineLogoSvg(20),
+            E('span', { 'class': 'sl-update-dot', 'aria-hidden': 'true' })
+          ])
+        ]);
+        mobileBar.appendChild(mobLink);
+      }
+
+      // 3. Desktop brand indicator on .brand
+      const brand = document.querySelector('header .brand');
+      if (brand && !brand.querySelector('.brand-update')) {
+        const brandLink = E('a', {
+          'class': 'brand-update',
+          'href': targetUrl,
+          'target': '_blank',
+          'rel': 'noopener noreferrer',
+          'title': titleText,
+          'aria-label': titleText
+        }, [
+          E('span', { 'class': 'sl-update-icon-wrapper' }, [
+            this.createStreamlineLogoSvg(18),
+            E('span', { 'class': 'sl-update-dot', 'aria-hidden': 'true' })
+          ])
+        ]);
+        brand.appendChild(brandLink);
+      }
+    };
+
+    tryInject();
+    if (typeof MutationObserver !== 'undefined' && document.body) {
+      const obs = new MutationObserver(() => tryInject());
+      obs.observe(document.body, { childList: true, subtree: true });
+      setTimeout(() => obs.disconnect(), 10000);
     }
   },
 

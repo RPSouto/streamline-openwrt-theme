@@ -1,6 +1,6 @@
 # Streamline for LuCI
 
-[![Release](https://img.shields.io/badge/release-v1.0.58--12-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.58--13-8b5cf6.svg)](https://github.com/RPSouto/streamline-openwrt-theme/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-21.02%20%7C%2022.03%20%7C%2023.05%20%7C%2024.10%20%7C%2025.12-25aee8.svg)](https://openwrt.org)
 
@@ -12,6 +12,7 @@
 
 * **Physical Ethernet Port Map (`Status → Overview`)**: Real-time visual RJ45 port status map directly on the homepage. Automatically discovers WAN and LAN switch ports via `/etc/board.json` and network topology. Displays active connection state, glowing multi-speed LED indicators (2.5 Gbps cyan neon, 1 Gbps emerald green, 100 Mbps amber), duplex modes, and live download/upload throughput counters with zero-shift background polling.
 * **Extensible Streamline Addon Architecture**: Modular ecosystem for vendor-specific hardware profiles and cellular/VPN protocol handlers without core theme file collisions. Features dynamic server-side discovery and zero 404 network requests (`packages/README.md`).
+* **Streamline Update Notifier**: Automatic background version check against GitHub Releases. Displays a sleek Streamline symbol with a pulsating neon alert badge in the sidebar dock, brand header, and mobile top bar whenever a new update is released, linking directly to GitHub upon click with local caching to prevent rate-limiting.
 * **Dynamic OpenWrt Distribution Version**: Prominently displays the detected OpenWrt release (e.g. `OPENWRT 21`, `OPENWRT 23`, `IMMORTALWRT 23`) directly below the brand title on both sidebar navigation and the modern frosted login screen (replacing static "Powered by OpenWrt").
 * **Minimalist Right-Aligned Footer**: Clean footer displaying strictly `Streamline · <Distro> <Version>` (e.g., `Streamline · OpenWrt 21.02`), stripping verbose snapshot tags and git commit hashes.
 * **Enhanced Mobile Table Scrolling & Touch Swipe**: Smooth horizontal touch swipe and drag scrolling across overview tables, DHCP leases, firewall rules, and associated stations tables without cell clipping.
@@ -53,8 +54,8 @@
 For routers running `opkg` (including all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.58-12_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.58-12_all.ipk'
+scp releases/luci-theme-streamline_1.0.58-13_all.ipk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.58-13_all.ipk'
 ```
 
 ### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
@@ -62,8 +63,8 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.58-r12_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.58-r12_all.apk'
+scp releases/luci-theme-streamline_1.0.58-r13_all.apk root@192.168.8.1:/tmp/
+ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.58-r13_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
