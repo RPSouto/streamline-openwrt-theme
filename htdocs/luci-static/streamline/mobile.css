@@ -778,28 +778,5 @@
   .dropdown-menu li a { min-height: 34px; padding: 6px 8px 6px 20px; font-size: .82rem; }
   #indicators { padding-top: 8px !important; gap: 6px !important; }
   #indicators > [data-indicator], #indicators > .sidebar-home, #indicators > .sidebar-palette, #indicators > .sidebar-search, #indicators > .sidebar-update { min-height: 34px; padding: 6px 10px; font-size: .78rem; }
-  .mobile-update {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 34px;
-    height: 34px;
-    margin-left: auto;
-    margin-right: 4px;
-    border-radius: 9px;
-    background: rgba(155, 108, 255, 0.16);
-    border: 1px solid rgba(155, 108, 255, 0.4);
-    text-decoration: none !important;
-    flex: 0 0 34px;
-    transition: all .2s ease;
-  }
-  .mobile-update:hover, .mobile-update:active {
-    background: rgba(155, 108, 255, 0.28);
-    border-color: var(--sl-purple);
-    box-shadow: 0 0 8px rgba(155, 108, 255, 0.4);
-  }
-  .mobile-update .sl-logo-symbol { width: 20px; height: 20px; }
-  .mobile-update .sl-update-dot { top: -3px; right: -3px; width: 9px; height: 9px; }
   .container { min-height: calc(100vh - 44px); padding: 12px 10px 36px; }
 }

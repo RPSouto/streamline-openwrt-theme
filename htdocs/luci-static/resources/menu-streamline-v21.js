@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.58-13';
+const THEME_VERSION = '1.0.59-1';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -1361,7 +1361,11 @@ return baseclass.extend({
         document.body.classList.remove('mobile-menu-open');
         window.location.assign(homeUrl);
       });
-      indicators.prepend(homeLink);
+      const updateEl = indicators.querySelector('.sidebar-update');
+      if (updateEl)
+        indicators.insertBefore(homeLink, updateEl.nextSibling);
+      else
+        indicators.prepend(homeLink);
     }
 
     const button = E('button', {
@@ -1741,10 +1745,15 @@ return baseclass.extend({
     const titleText = (typeof _ === 'function' ? _('Streamline update available: %s. Click to view on GitHub.') : 'Streamline update available: %s. Click to view on GitHub.').replace('%s', latestVersion);
 
     const tryInject = () => {
-      // 1. Sidebar indicator in #indicators
+      // Sidebar indicator in #indicators (positioned directly above .sidebar-home)
       const indicators = document.querySelector('#indicators');
-      if (indicators && !indicators.querySelector('.sidebar-update')) {
-        const updateLink = E('a', {
+      if (!indicators) return;
+
+      let updateLink = indicators.querySelector('.sidebar-update');
+      const home = indicators.querySelector('.sidebar-home');
+
+      if (!updateLink) {
+        updateLink = E('a', {
           'class': 'sidebar-update',
           'href': targetUrl,
           'target': '_blank',
@@ -1760,49 +1769,12 @@ return baseclass.extend({
           E('span', { 'class': 'sl-update-tag' }, [latestVersion])
         ]);
 
-        const palette = indicators.querySelector('.sidebar-palette');
-        if (palette && palette.nextSibling)
-          indicators.insertBefore(updateLink, palette.nextSibling);
+        if (home)
+          indicators.insertBefore(updateLink, home);
         else
-          indicators.appendChild(updateLink);
-      }
-
-      // 2. Mobile bar indicator in .mobile-bar
-      const mobileBar = document.querySelector('.mobile-bar');
-      if (mobileBar && !mobileBar.querySelector('.mobile-update')) {
-        const mobLink = E('a', {
-          'class': 'mobile-update',
-          'href': targetUrl,
-          'target': '_blank',
-          'rel': 'noopener noreferrer',
-          'title': titleText,
-          'aria-label': titleText
-        }, [
-          E('span', { 'class': 'sl-update-icon-wrapper' }, [
-            this.createStreamlineLogoSvg(20),
-            E('span', { 'class': 'sl-update-dot', 'aria-hidden': 'true' })
-          ])
-        ]);
-        mobileBar.appendChild(mobLink);
-      }
-
-      // 3. Desktop brand indicator on .brand
-      const brand = document.querySelector('header .brand');
-      if (brand && !brand.querySelector('.brand-update')) {
-        const brandLink = E('a', {
-          'class': 'brand-update',
-          'href': targetUrl,
-          'target': '_blank',
-          'rel': 'noopener noreferrer',
-          'title': titleText,
-          'aria-label': titleText
-        }, [
-          E('span', { 'class': 'sl-update-icon-wrapper' }, [
-            this.createStreamlineLogoSvg(18),
-            E('span', { 'class': 'sl-update-dot', 'aria-hidden': 'true' })
-          ])
-        ]);
-        brand.appendChild(brandLink);
+          indicators.prepend(updateLink);
+      } else if (home && updateLink.nextSibling !== home) {
+        indicators.insertBefore(updateLink, home);
       }
     };
 
