@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=3'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 3');
-assert(control.includes('Version: 1.0.59-3'), 'packaging/control Version is 1.0.59-3');
-assert(buildIpk.includes('1.0.59-3'), 'build-ipk.sh default target is 1.0.59-3');
-assert(menuJs.includes("THEME_VERSION = '1.0.59-3'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-3');
-assert(swJs.includes('streamline-static-v59-3'), 'streamline-sw.js CACHE_NAME matches v59-3');
-assert(headerHtm.includes('?v=1.0.59.3'), 'header.htm asset query param matches v1.0.59.3');
-assert(headerUt.includes('?v=1.0.59.3'), 'header.ut asset query param matches v1.0.59.3');
+assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=4'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 4');
+assert(control.includes('Version: 1.0.59-4'), 'packaging/control Version is 1.0.59-4');
+assert(buildIpk.includes('1.0.59-4'), 'build-ipk.sh default target is 1.0.59-4');
+assert(menuJs.includes("THEME_VERSION = '1.0.59-4'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-4');
+assert(swJs.includes('streamline-static-v59-4'), 'streamline-sw.js CACHE_NAME matches v59-4');
+assert(headerHtm.includes('?v=1.0.59.4'), 'header.htm asset query param matches v1.0.59.4');
+assert(headerUt.includes('?v=1.0.59.4'), 'header.ut asset query param matches v1.0.59.4');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -698,12 +698,12 @@ const isNewerVersionMatch = menuJs.match(/isNewerVersion\s*\([^)]*\)\s*\{[\s\S]*
 assert(isNewerVersionMatch !== null, 'Extracted isNewerVersion implementation for unit testing');
 if (isNewerVersionMatch) {
   const isNewerVersion = new Function('return function ' + isNewerVersionMatch[0].replace(/,\s*$/, ''))();
-  assert(isNewerVersion('1.0.59-3', 'v1.0.59-3') === false, 'isNewerVersion recognizes equal versions (false)');
-  assert(isNewerVersion('1.0.59-3', 'v1.0.59-4') === true, 'isNewerVersion recognizes bump in release number (true)');
-  assert(isNewerVersion('1.0.59-3', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
-  assert(isNewerVersion('1.0.59-3', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
-  assert(isNewerVersion('1.0.59-3', 'v1.0.59-2') === false, 'isNewerVersion recognizes older version (false)');
-  assert(isNewerVersion('1.0.59-3', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
+  assert(isNewerVersion('1.0.59-4', 'v1.0.59-4') === false, 'isNewerVersion recognizes equal versions (false)');
+  assert(isNewerVersion('1.0.59-4', 'v1.0.59-5') === true, 'isNewerVersion recognizes bump in release number (true)');
+  assert(isNewerVersion('1.0.59-4', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
+  assert(isNewerVersion('1.0.59-4', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
+  assert(isNewerVersion('1.0.59-4', 'v1.0.59-3') === false, 'isNewerVersion recognizes older version (false)');
+  assert(isNewerVersion('1.0.59-4', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
 }
 
 // Test 28: Verifying ucode template syntax and OpenWrt 24.10 / LuCI compatibility
@@ -750,6 +750,33 @@ try {
 } catch (e) {
   // If WSL / ucode is not present in CI/another machine, still pass the static checks
   console.log('  ⚠️ (ucode CLI not detected in standard environment, static checks passed)');
+}
+
+// Test 29: Verifying hardware-accurate Ethernet Port discovery & SPEED_UNKNOWN filtering
+console.log('\n29. Verifying hardware-accurate Ethernet Port discovery & SPEED_UNKNOWN filtering...');
+assert(dashboardJs.includes("method: 'getBoardJSON'"),
+  'dashboard.js uses luci-rpc.getBoardJSON (permitted by OpenWrt 24.10 RPCD ACL)');
+assert(!dashboardJs.includes('Fallback for GL.iNet Flint 2'),
+  'dashboard.js does not hardcode Flint 2 fallback ports on unrelated hardware');
+assert(dashboardJs.includes('hasDsaPorts'),
+  'dashboard.js excludes internal DSA CPU conduit (eth0) when DSA slave ports exist');
+assert(dashboardJs.includes('n === 65535 || n > 100000'),
+  'dashboard.js filters Linux ethtool SPEED_UNKNOWN (65535 / 4294967295) to prevent phantom 2.5 Gbps ports');
+assert(dashboardJs.includes('hasExplicitCarrier'),
+  'dashboard.js trusts explicit carrier:false and never marks disconnected ports as up');
+
+// Unit-test extracted parsePortSpeed from dashboard.js
+const parseSpeedMatch = dashboardJs.match(/function parsePortSpeed\(raw\)\s*\{[\s\S]*?\n  \}/);
+assert(parseSpeedMatch !== null, 'Extracted parsePortSpeed from dashboard.js');
+if (parseSpeedMatch) {
+  const realParsePortSpeed = new Function('return ' + parseSpeedMatch[0])();
+  assert(realParsePortSpeed(4294967295) === 0, 'parsePortSpeed rejects u32 SPEED_UNKNOWN (4294967295)');
+  assert(realParsePortSpeed(65535) === 0, 'parsePortSpeed rejects u16 SPEED_UNKNOWN (65535)');
+  assert(realParsePortSpeed(-1) === 0, 'parsePortSpeed rejects -1');
+  assert(realParsePortSpeed('-1') === 0, 'parsePortSpeed rejects string "-1"');
+  assert(realParsePortSpeed(1000) === 1000, 'parsePortSpeed accepts 1000');
+  assert(realParsePortSpeed(2500) === 2500, 'parsePortSpeed accepts 2500');
+  assert(realParsePortSpeed(10000) === 10000, 'parsePortSpeed accepts 10000');
 }
 
 // Summary

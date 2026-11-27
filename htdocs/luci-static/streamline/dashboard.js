@@ -290,10 +290,19 @@
   }
 
   function parsePortSpeed(raw) {
-    if (typeof raw === 'number') return raw > 0 ? raw : 0;
-    if (!raw) return 0;
-    var m = String(raw).match(/(\d+)/);
-    return m ? parseInt(m[1], 10) : 0;
+    var n = 0;
+    if (typeof raw === 'number') {
+      n = raw;
+    } else if (raw) {
+      var s = String(raw).trim();
+      if (/^-/.test(s)) return 0;
+      var m = s.match(/(\d+)/);
+      n = m ? parseInt(m[1], 10) : 0;
+    }
+    // Reject Linux ethtool SPEED_UNKNOWN (-1 -> 65535 / 4294967295) and invalid values
+    if (!isFinite(n) || n <= 0 || n === 65535 || n > 100000)
+      return 0;
+    return n;
   }
 
   function extractPortStatus(st) {
@@ -305,23 +314,29 @@
 
     // Carrier / Link detection
     var hasCarrier = false;
+    var hasExplicitCarrier = false;
     if (linkObj && typeof linkObj.carrier === 'boolean') {
       hasCarrier = linkObj.carrier;
+      hasExplicitCarrier = true;
     } else if (typeof st.carrier === 'boolean') {
       hasCarrier = st.carrier;
+      hasExplicitCarrier = true;
     } else if (typeof st.link === 'boolean') {
       hasCarrier = st.link;
+      hasExplicitCarrier = true;
     } else if (st.link === 1 || st.carrier === 1) {
       hasCarrier = true;
+      hasExplicitCarrier = true;
+    } else if (st.link === 0 || st.carrier === 0) {
+      hasCarrier = false;
+      hasExplicitCarrier = true;
     }
 
-    // Speed extraction
+    // Speed extraction (always validated through parsePortSpeed to filter SPEED_UNKNOWN)
     var speedNum = 0;
-    if (linkObj && typeof linkObj.speed === 'number' && linkObj.speed > 0) {
-      speedNum = linkObj.speed;
-    } else if (linkObj && linkObj.speed) {
+    if (linkObj && linkObj.speed !== undefined && linkObj.speed !== null) {
       speedNum = parsePortSpeed(linkObj.speed);
-    } else if (st.speed) {
+    } else if (st.speed !== undefined && st.speed !== null) {
       speedNum = parsePortSpeed(st.speed);
     }
 
@@ -336,13 +351,17 @@
     else if (/^half$/i.test(duplexRaw)) duplexText = 'Half Duplex';
     else if (duplexRaw && duplexRaw !== 'unknown') duplexText = String(duplexRaw);
 
-    // Is the port up?
-    var isUp = Boolean(hasCarrier || (speedNum > 0) || (st.up && (hasCarrier || speedNum > 0)));
+    // Is the port up? Trust explicit carrier when available; never override carrier:false
+    var isUp = hasExplicitCarrier ? Boolean(hasCarrier) : Boolean(speedNum > 0);
 
     // Speed text
     var speedText = tr('No Link', 'No Link');
     if (isUp) {
-      if (speedNum >= 2500) {
+      if (speedNum >= 10000) {
+        speedText = (speedNum % 1000 === 0 ? (speedNum / 1000) : (speedNum / 1000).toFixed(1)) + ' Gbps';
+      } else if (speedNum === 5000) {
+        speedText = '5 Gbps';
+      } else if (speedNum === 2500) {
         speedText = '2.5 Gbps';
       } else if (speedNum === 1000) {
         speedText = '1 Gbps';
@@ -431,6 +450,12 @@
     portsDiscoveryPending = true;
 
     Promise.resolve(L.require('rpc')).then(function (rpc) {
+      var callBoardJSON = rpc.declare({
+        object: 'luci-rpc',
+        method: 'getBoardJSON',
+        expect: { '': {} }
+      });
+
       var callFileRead = rpc.declare({
         object: 'file',
         method: 'read',
@@ -452,13 +477,15 @@
       });
 
       return Promise.all([
+        callBoardJSON().catch(function () { return null; }),
         callFileRead('/etc/board.json').catch(function () { return { data: '' }; }),
         callUciGet('network').catch(function () { return { values: {} }; }),
         callNetworkDevices().catch(function () { return {}; })
       ]).then(function (results) {
-        var boardData = (results[0] && results[0].data) ? results[0].data : '';
-        var uciValues = (results[1] && results[1].values) ? results[1].values : {};
-        var netDevs = results[2] || {};
+        var rpcBoard = (results[0] && typeof results[0] === 'object' && Object.keys(results[0]).length > 0) ? results[0] : null;
+        var boardData = (results[1] && results[1].data) ? results[1].data : '';
+        var uciValues = (results[2] && results[2].values) ? results[2].values : {};
+        var netDevs = results[3] || {};
 
         var discovered = [];
         var seen = {};
@@ -467,7 +494,7 @@
           if (!dev || typeof dev !== 'string') return;
           var cleanDev = dev.trim();
           if (!cleanDev || seen[cleanDev]) return;
-          if (/^(lo|br-.*|sit\d+|wlan\d+|phy\d+|dummy\d+|tun\d+|tap\d+|docker\d+|wg\d+|wg.*|gre\d+|gre.*|teql\d+)$/i.test(cleanDev))
+          if (/^(lo|br-.*|sit\d+|wlan\d+|phy\d+|dummy\d+|tun\d+|tap\d+|docker\d+|wg\d+|wg.*|gre\d+|gre.*|teql\d+|pppoe-.*|ifb\d+|veth.*|usb\d+|wwan\d+|rmnet.*|qmi.*|mbim.*|ip6tnl\d+|6in4-.*|6to4-.*|vxlan.*|tailscale\d+|zt.*|virbr\d+)$/i.test(cleanDev))
             return;
           seen[cleanDev] = true;
           discovered.push({
@@ -477,8 +504,8 @@
           });
         }
 
-        var board = null;
-        if (boardData) {
+        var board = rpcBoard;
+        if (!board && boardData) {
           try {
             board = JSON.parse(boardData);
           } catch (e) {}
@@ -495,15 +522,18 @@
           }
         }
 
-        // 1. From /etc/board.json (GL.iNet & standard OpenWrt DSA) if profile didn't define ports
+        // 1. From /etc/board.json (via luci-rpc.getBoardJSON or file.read) if profile didn't define ports
         if (discovered.length === 0 && board && board.network) {
           try {
-            if (board.network.wan) {
-              if (board.network.wan.device)
-                add(board.network.wan.device, 'wan', 'WAN');
-              else if (Array.isArray(board.network.wan.ports))
-                board.network.wan.ports.forEach(function (p) { add(p, 'wan', 'WAN'); });
-            }
+            ['wan', 'wan2'].forEach(function (wanKey, wIdx) {
+              var wObj = board.network[wanKey];
+              if (!wObj) return;
+              var wLbl = wIdx === 0 ? 'WAN' : ('WAN ' + (wIdx + 1));
+              if (wObj.device)
+                add(wObj.device, 'wan', wLbl);
+              else if (Array.isArray(wObj.ports))
+                wObj.ports.forEach(function (p, pIdx) { add(p, 'wan', wObj.ports.length > 1 ? ('WAN ' + (pIdx + 1)) : wLbl); });
+            });
             // Check LAN
             if (board.network.lan) {
               var lanPorts = board.network.lan.ports || (board.network.lan.device ? [board.network.lan.device] : []);
@@ -558,28 +588,21 @@
           });
         }
 
-        // 3. From netDevs if still empty (querying active devices)
+        // 3. From netDevs if still empty (querying active physical devices)
         if (discovered.length === 0 && Object.keys(netDevs).length > 0) {
-          Object.keys(netDevs).forEach(function (devName) {
+          var devNames = Object.keys(netDevs);
+          var hasDsaPorts = devNames.some(function (n) {
+            return /^(lan\d+|wan\d*)$/i.test(n) || (netDevs[n] && netDevs[n].devtype === 'dsa');
+          });
+          devNames.forEach(function (devName) {
             if (/^lan\d+$/i.test(devName)) {
               add(devName, 'lan', devName.toUpperCase().replace('LAN', 'LAN '));
-            } else if (/^wan/i.test(devName)) {
-              add(devName, 'wan', 'WAN');
-            } else if (/^eth1$/i.test(devName)) {
-              add(devName, 'wan', 'WAN');
-            } else if (/^eth\d+$/i.test(devName)) {
-              add(devName, 'lan', devName.toUpperCase());
+            } else if (/^wan\d*$/i.test(devName)) {
+              add(devName, 'wan', devName.toUpperCase());
+            } else if (!hasDsaPorts && /^eth\d+$/i.test(devName)) {
+              add(devName, devName === 'eth1' ? 'wan' : 'lan', devName.toUpperCase());
             }
           });
-        }
-
-        // 4. Fallback for GL.iNet Flint 2 (GL-MT6000) if all else failed
-        if (discovered.length === 0) {
-          add('eth1', 'wan', 'WAN');
-          add('lan1', 'lan', 'LAN 1');
-          add('lan2', 'lan', 'LAN 2');
-          add('lan3', 'lan', 'LAN 3');
-          add('lan4', 'lan', 'LAN 4');
         }
 
         // Filter: if netDevs has devices, only keep devices that actually exist in the kernel!
@@ -597,6 +620,11 @@
         });
 
         portsList = discovered;
+        if (portsList.length === 0) {
+          var emptySec = document.getElementById('streamline-ports-summary');
+          if (emptySec) emptySec.style.display = 'none';
+          return;
+        }
         renderPortCards();
         updatePortStatus();
       });
