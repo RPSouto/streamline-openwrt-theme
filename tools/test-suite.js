@@ -299,7 +299,7 @@ assert(mobileCss.includes('content: attr(data-sub);') && mobileCss.includes('.br
   'mobile.css supports data-sub attribute with OPENWRT fallback in mobile drawer');
 assert(headerHtm.includes('data-sub="<%=pcdata(brand_sub)%>"') && headerHtm.includes('rel.version:match("^(%d+)")'),
   'header.htm extracts major version and sets data-sub on brand');
-assert(headerUt.includes('data-sub="{{ entityencode(brand_sub) }}"') && headerUt.includes('match(rel.version, /^(\\d+)/)'),
+assert(headerUt.includes('data-sub="{{ entityencode(brand_sub) }}"') && (headerUt.includes('match(rel.version, /^(\\d+)/)') || headerUt.includes('match(rel.version, /^([0-9]+)/)')),
   'header.ut extracts major version and sets data-sub on brand');
 assert(menuJs.includes('setupBrandVersion()') && menuJs.includes('this.setupBrandVersion()'),
   'menu-streamline-v21.js defines and initializes setupBrandVersion');
@@ -729,16 +729,24 @@ assert(!headerUt.includes('{{ striptags(`${'),
 assert(!footerUtContent.includes('-%>'),
   'footer.ut does not contain Lua/ERB -%> closing tag');
 
+assert(!footerUtContent.includes('(?:'),
+  'footer.ut avoids non-capturing groups (?:) unsupported by POSIX regcomp/musl libc',
+  '(?: causes "Repetition not preceded by valid expression" on OpenWrt)');
+
 assert(!sysauthUtContent.includes('-%>'),
   'sysauth.ut does not contain Lua/ERB -%> closing tag');
 
-// Attempt native ucode compile verification if ucode / WSL is available
+// Attempt native ucode compile & runtime rendering verification if ucode / WSL is available
 try {
-  const wslCmd = 'wsl -d Ubuntu -u root -e ucode -L "/usr/local/lib/ucode/*.uc" -T -c';
-  execSync(`${wslCmd} /mnt/c/Users/Utilizador/Documents/GitHub/Streamline/ucode/template/themes/streamline/header.ut`, { stdio: 'pipe' });
-  execSync(`${wslCmd} /mnt/c/Users/Utilizador/Documents/GitHub/Streamline/ucode/template/themes/streamline/footer.ut`, { stdio: 'pipe' });
-  execSync(`${wslCmd} /mnt/c/Users/Utilizador/Documents/GitHub/Streamline/ucode/template/themes/streamline/sysauth.ut`, { stdio: 'pipe' });
+  const wslCmd = 'wsl -d Ubuntu -u root --cd /mnt/c/Users/Utilizador/Documents/GitHub/Streamline -e ucode -L "/usr/local/lib/ucode/*.uc" -T -c';
+  execSync(`${wslCmd} ucode/template/themes/streamline/header.ut`, { stdio: 'pipe' });
+  execSync(`${wslCmd} ucode/template/themes/streamline/footer.ut`, { stdio: 'pipe' });
+  execSync(`${wslCmd} ucode/template/themes/streamline/sysauth.ut`, { stdio: 'pipe' });
   assert(true, 'ucode compiler validates header.ut, footer.ut, and sysauth.ut without errors');
+
+  // Verify full template execution and rendering in ucode runtime
+  const renderTest = execSync('wsl -d Ubuntu -u root --cd /mnt/c/Users/Utilizador/Documents/GitHub/Streamline -e ucode -L "/usr/local/lib/ucode/*.uc" tools/test-render-ucode.uc', { stdio: 'pipe' }).toString();
+  assert(renderTest.includes('ALL THREE TEMPLATES RENDERED SUCCESSFULLY'), 'ucode runtime renders header, footer, and sysauth without any exceptions');
 } catch (e) {
   // If WSL / ucode is not present in CI/another machine, still pass the static checks
   console.log('  ⚠️ (ucode CLI not detected in standard environment, static checks passed)');

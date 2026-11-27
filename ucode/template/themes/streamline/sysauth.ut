@@ -3,7 +3,7 @@
   const login_boardinfo = ubus.call('system', 'board') ?? {};
   const rel = login_boardinfo.release ?? {};
   const dist = rel.distribution ? uc(rel.distribution) : 'OPENWRT';
-  const major = match(rel.version, /^(\d+)/)?.[1];
+  const major = match(rel.version, /^([0-9]+)/)?.[1];
   const brand_sub = major ? `${dist} ${major}` : (match(rel.version, /snapshot/i) ? `${dist} SNAPSHOT` : dist);
 %}
 {% include('header', { blank_page: true }) %}
