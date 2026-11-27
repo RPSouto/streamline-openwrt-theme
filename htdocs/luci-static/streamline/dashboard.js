@@ -557,8 +557,9 @@
           }
         }
 
-        // 1. From /etc/board.json (via luci-rpc.getBoardJSON or file.read) if profile didn't define ports
-        if (discovered.length === 0 && board && board.network) {
+        // 1. From /etc/board.json (via luci-rpc.getBoardJSON or file.read)
+        // Always merge with profile ports so real hardware ports are never hidden by incomplete profiles
+        if (board && board.network) {
           try {
             ['wan', 'wan2'].forEach(function (wanKey, wIdx) {
               var wObj = board.network[wanKey];

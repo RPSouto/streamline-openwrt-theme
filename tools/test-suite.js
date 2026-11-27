@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=7'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 7');
-assert(control.includes('Version: 1.0.59-7'), 'packaging/control Version is 1.0.59-7');
-assert(buildIpk.includes('1.0.59-7'), 'build-ipk.sh default target is 1.0.59-7');
-assert(menuJs.includes("THEME_VERSION = '1.0.59-7'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-7');
-assert(swJs.includes('streamline-static-v59-7'), 'streamline-sw.js CACHE_NAME matches v59-7');
-assert(headerHtm.includes('?v=1.0.59.7'), 'header.htm asset query param matches v1.0.59.7');
-assert(headerUt.includes('?v=1.0.59.7'), 'header.ut asset query param matches v1.0.59.7');
+assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=8'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 8');
+assert(control.includes('Version: 1.0.59-8'), 'packaging/control Version is 1.0.59-8');
+assert(buildIpk.includes('1.0.59-8'), 'build-ipk.sh default target is 1.0.59-8');
+assert(menuJs.includes("THEME_VERSION = '1.0.59-8'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-8');
+assert(swJs.includes('streamline-static-v59-8'), 'streamline-sw.js CACHE_NAME matches v59-8');
+assert(headerHtm.includes('?v=1.0.59.8'), 'header.htm asset query param matches v1.0.59.8');
+assert(headerUt.includes('?v=1.0.59.8'), 'header.ut asset query param matches v1.0.59.8');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -598,8 +598,8 @@ for (const p of protoFiles) {
 
 const glControl = fs.readFileSync(path.join(rootDir, 'packages/luci-proto-glinet/packaging/control'), 'utf8');
 const glMakefile = fs.readFileSync(path.join(rootDir, 'packages/luci-proto-glinet/Makefile'), 'utf8');
-assert(glControl.includes('Version: 1.0.0-3'), 'luci-proto-glinet control version is 1.0.0-3');
-assert(glMakefile.includes('PKG_RELEASE:=3'), 'luci-proto-glinet Makefile PKG_RELEASE is 3');
+assert(glControl.includes('Version: 1.0.0-4'), 'luci-proto-glinet control version is 1.0.0-4');
+assert(glMakefile.includes('PKG_RELEASE:=4'), 'luci-proto-glinet Makefile PKG_RELEASE is 4');
 
 // Test 25: Verify Streamline Addon & Router Extension Architecture
 console.log('\n25. Verifying Streamline Addon & Router Extension Architecture...');
@@ -629,6 +629,7 @@ if (fs.existsSync(glAddonPath)) {
   const glAddonContent = fs.readFileSync(glAddonPath, 'utf8');
   assert(glAddonContent.includes("registerAddon('glinet'"), 'glinet.js registers glinet addon');
   assert(glAddonContent.includes('gl-mt6000') && glAddonContent.includes('gl-mt3000'), 'glinet.js defines GL.iNet router profiles');
+  assert(glAddonContent.includes("device: 'lan5'"), 'glinet.js includes all 6 physical ports (eth1 + lan1..lan5) for GL-MT6000 Flint 2');
 }
 
 const templateAddonDir = path.join(rootDir, 'packages/luci-addon-template');
@@ -698,12 +699,12 @@ const isNewerVersionMatch = menuJs.match(/isNewerVersion\s*\([^)]*\)\s*\{[\s\S]*
 assert(isNewerVersionMatch !== null, 'Extracted isNewerVersion implementation for unit testing');
 if (isNewerVersionMatch) {
   const isNewerVersion = new Function('return function ' + isNewerVersionMatch[0].replace(/,\s*$/, ''))();
-  assert(isNewerVersion('1.0.59-7', 'v1.0.59-7') === false, 'isNewerVersion recognizes equal versions (false)');
-  assert(isNewerVersion('1.0.59-7', 'v1.0.59-8') === true, 'isNewerVersion recognizes bump in release number (true)');
-  assert(isNewerVersion('1.0.59-7', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
-  assert(isNewerVersion('1.0.59-7', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
-  assert(isNewerVersion('1.0.59-7', 'v1.0.59-6') === false, 'isNewerVersion recognizes older version (false)');
-  assert(isNewerVersion('1.0.59-7', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
+  assert(isNewerVersion('1.0.59-8', 'v1.0.59-8') === false, 'isNewerVersion recognizes equal versions (false)');
+  assert(isNewerVersion('1.0.59-8', 'v1.0.59-9') === true, 'isNewerVersion recognizes bump in release number (true)');
+  assert(isNewerVersion('1.0.59-8', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
+  assert(isNewerVersion('1.0.59-8', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
+  assert(isNewerVersion('1.0.59-8', 'v1.0.59-7') === false, 'isNewerVersion recognizes older version (false)');
+  assert(isNewerVersion('1.0.59-8', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
 }
 assert(menuJs.includes('const CACHE_TTL_MS = 15 * 60 * 1000;'),
   'menu-streamline-v21.js uses 15-minute update cache TTL');

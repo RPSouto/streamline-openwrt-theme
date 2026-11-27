@@ -1,5 +1,5 @@
 Package: luci-proto-glinet
-Version: 1.0.0-3
+Version: 1.0.0-4
 Depends: libc, luci-base
 Source: luci-proto-glinet
 SourceName: luci-proto-glinet

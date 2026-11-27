@@ -6,7 +6,7 @@
 
   window.Streamline.registerAddon('glinet', {
     name: 'GL.iNet Hardware & Protocol Profiles',
-    version: '1.0.0-3',
+    version: '1.0.0-4',
     vendor: 'GL.iNet',
     protocols: {
       wgclient: 'WireGuard Client (GL.iNet)',
@@ -33,7 +33,8 @@
           { device: 'lan1', role: 'lan', label: 'LAN 1 (2.5G)' },
           { device: 'lan2', role: 'lan', label: 'LAN 2 (1G)' },
           { device: 'lan3', role: 'lan', label: 'LAN 3 (1G)' },
-          { device: 'lan4', role: 'lan', label: 'LAN 4 (1G)' }
+          { device: 'lan4', role: 'lan', label: 'LAN 4 (1G)' },
+          { device: 'lan5', role: 'lan', label: 'LAN 5 (1G)' }
         ]
       },
       'gl-mt3000': {
