@@ -268,6 +268,17 @@
   var portsList = null;
   var portsDiscoveryPending = false;
   var portsUpdating = false;
+  var nativePortsDetected = false;
+
+  function hasNativePortStatus() {
+    return Boolean(document.querySelector('#view img[src*="icons/port_up.svg"], #view img[src*="icons/port_down.svg"]'));
+  }
+
+  function removePortsSection() {
+    var sec = document.getElementById('streamline-ports-summary');
+    if (sec && sec.parentNode)
+      sec.parentNode.removeChild(sec);
+  }
 
   var RJ45_SVG = '<svg class="sl-port-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">' +
     '<path d="M5 8C5 6.89543 5.89543 6 7 6H25C26.1046 6 27 6.89543 27 8V24C27 25.1046 26.1046 26 25 26H7C5.89543 26 5 25.1046 5 24V8Z" stroke="currentColor" stroke-width="2"/>' +
@@ -444,12 +455,24 @@
   }
 
   function discoverPorts() {
-    if (portsDiscoveryPending || !window.L || typeof L.require !== 'function')
+    if (nativePortsDetected || portsDiscoveryPending || !window.L || typeof L.require !== 'function')
       return;
+
+    if (hasNativePortStatus()) {
+      nativePortsDetected = true;
+      removePortsSection();
+      return;
+    }
 
     portsDiscoveryPending = true;
 
     Promise.resolve(L.require('rpc')).then(function (rpc) {
+      var callBuiltinPorts = rpc.declare({
+        object: 'luci',
+        method: 'getBuiltinEthernetPorts',
+        expect: { result: [] }
+      });
+
       var callBoardJSON = rpc.declare({
         object: 'luci-rpc',
         method: 'getBoardJSON',
@@ -477,15 +500,27 @@
       });
 
       return Promise.all([
+        callBuiltinPorts().catch(function () { return []; }),
         callBoardJSON().catch(function () { return null; }),
         callFileRead('/etc/board.json').catch(function () { return { data: '' }; }),
         callUciGet('network').catch(function () { return { values: {} }; }),
         callNetworkDevices().catch(function () { return {}; })
       ]).then(function (results) {
-        var rpcBoard = (results[0] && typeof results[0] === 'object' && Object.keys(results[0]).length > 0) ? results[0] : null;
-        var boardData = (results[1] && results[1].data) ? results[1].data : '';
-        var uciValues = (results[2] && results[2].values) ? results[2].values : {};
-        var netDevs = results[3] || {};
+        var builtinPorts = Array.isArray(results[0]) ? results[0] : [];
+        var isSwconfig = Boolean(window.L && typeof L.hasSystemFeature === 'function' && L.hasSystemFeature('swconfig'));
+
+        // OpenWrt 23.05 / 24.10+ natively renders Port status (29_ports.js) when builtin ports are present (non-swconfig)
+        if (hasNativePortStatus() || (!isSwconfig && builtinPorts.length > 0)) {
+          nativePortsDetected = true;
+          portsList = [];
+          removePortsSection();
+          return;
+        }
+
+        var rpcBoard = (results[1] && typeof results[1] === 'object' && Object.keys(results[1]).length > 0) ? results[1] : null;
+        var boardData = (results[2] && results[2].data) ? results[2].data : '';
+        var uciValues = (results[3] && results[3].values) ? results[3].values : {};
+        var netDevs = results[4] || {};
 
         var discovered = [];
         var seen = {};
@@ -620,11 +655,13 @@
         });
 
         portsList = discovered;
-        if (portsList.length === 0) {
-          var emptySec = document.getElementById('streamline-ports-summary');
-          if (emptySec) emptySec.style.display = 'none';
+        if (portsList.length === 0 || hasNativePortStatus()) {
+          if (hasNativePortStatus()) nativePortsDetected = true;
+          removePortsSection();
           return;
         }
+        var summaryEl = document.getElementById('streamline-overview-summary');
+        if (summaryEl) buildPortsSection(summaryEl);
         renderPortCards();
         updatePortStatus();
       });
@@ -749,11 +786,14 @@
       return;
     }
 
-    // Build and manage Ethernet Ports section
-    buildPortsSection(summary);
-    if (!portsList && !portsDiscoveryPending) {
+    // Build and manage Ethernet Ports section (only when OpenWrt's native Port status is absent)
+    if (nativePortsDetected || hasNativePortStatus()) {
+      nativePortsDetected = true;
+      removePortsSection();
+    } else if (!portsList && !portsDiscoveryPending) {
       discoverPorts();
-    } else if (portsList) {
+    } else if (portsList && portsList.length > 0) {
+      buildPortsSection(summary);
       updatePortStatus();
     }
 

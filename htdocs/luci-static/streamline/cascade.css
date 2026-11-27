@@ -813,6 +813,37 @@ table + table,
 .ifacebadge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; margin: 2px; border: 1px solid var(--sl-border); border-radius: 7px; background: #0d1118; }
 .ifacebadge img { filter: brightness(1.4); }
 
+/* Native OpenWrt 23.05 / 24.10 Port Status cards (29_ports.js) */
+.ifacebox:has(img[src*="icons/port_"]) {
+  overflow: visible;
+  min-width: 100px !important;
+  max-width: none !important;
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+.ifacebox:has(img[src*="icons/port_"]):hover {
+  border-color: var(--sl-accent);
+  transform: translateY(-1px);
+}
+.ifacebox:has(img[src*="icons/port_"]) > .ifacebox-head:first-child {
+  border-radius: 11px 11px 0 0;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.ifacebox:has(img[src*="icons/port_"]) > .ifacebox-head.cbi-tooltip-container {
+  padding: 4px 10px;
+  background: transparent;
+}
+.ifacebox:has(img[src*="icons/port_"]) > .ifacebox-body {
+  padding: 10px 8px;
+  font-size: 12px;
+}
+.ifacebox:has(img[src*="icons/port_"]) > .ifacebox-body img[src*="icons/port_"] {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+}
+
 /* ==========================================================================
    Wireless Overview Cards (Status -> Overview)
    ========================================================================== */

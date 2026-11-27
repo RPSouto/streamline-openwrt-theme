@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=4'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 4');
-assert(control.includes('Version: 1.0.59-4'), 'packaging/control Version is 1.0.59-4');
-assert(buildIpk.includes('1.0.59-4'), 'build-ipk.sh default target is 1.0.59-4');
-assert(menuJs.includes("THEME_VERSION = '1.0.59-4'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-4');
-assert(swJs.includes('streamline-static-v59-4'), 'streamline-sw.js CACHE_NAME matches v59-4');
-assert(headerHtm.includes('?v=1.0.59.4'), 'header.htm asset query param matches v1.0.59.4');
-assert(headerUt.includes('?v=1.0.59.4'), 'header.ut asset query param matches v1.0.59.4');
+assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=5'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 5');
+assert(control.includes('Version: 1.0.59-5'), 'packaging/control Version is 1.0.59-5');
+assert(buildIpk.includes('1.0.59-5'), 'build-ipk.sh default target is 1.0.59-5');
+assert(menuJs.includes("THEME_VERSION = '1.0.59-5'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-5');
+assert(swJs.includes('streamline-static-v59-5'), 'streamline-sw.js CACHE_NAME matches v59-5');
+assert(headerHtm.includes('?v=1.0.59.5'), 'header.htm asset query param matches v1.0.59.5');
+assert(headerUt.includes('?v=1.0.59.5'), 'header.ut asset query param matches v1.0.59.5');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -698,12 +698,12 @@ const isNewerVersionMatch = menuJs.match(/isNewerVersion\s*\([^)]*\)\s*\{[\s\S]*
 assert(isNewerVersionMatch !== null, 'Extracted isNewerVersion implementation for unit testing');
 if (isNewerVersionMatch) {
   const isNewerVersion = new Function('return function ' + isNewerVersionMatch[0].replace(/,\s*$/, ''))();
-  assert(isNewerVersion('1.0.59-4', 'v1.0.59-4') === false, 'isNewerVersion recognizes equal versions (false)');
-  assert(isNewerVersion('1.0.59-4', 'v1.0.59-5') === true, 'isNewerVersion recognizes bump in release number (true)');
-  assert(isNewerVersion('1.0.59-4', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
-  assert(isNewerVersion('1.0.59-4', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
-  assert(isNewerVersion('1.0.59-4', 'v1.0.59-3') === false, 'isNewerVersion recognizes older version (false)');
-  assert(isNewerVersion('1.0.59-4', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
+  assert(isNewerVersion('1.0.59-5', 'v1.0.59-5') === false, 'isNewerVersion recognizes equal versions (false)');
+  assert(isNewerVersion('1.0.59-5', 'v1.0.59-6') === true, 'isNewerVersion recognizes bump in release number (true)');
+  assert(isNewerVersion('1.0.59-5', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
+  assert(isNewerVersion('1.0.59-5', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
+  assert(isNewerVersion('1.0.59-5', 'v1.0.59-4') === false, 'isNewerVersion recognizes older version (false)');
+  assert(isNewerVersion('1.0.59-5', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
 }
 
 // Test 28: Verifying ucode template syntax and OpenWrt 24.10 / LuCI compatibility
@@ -764,6 +764,10 @@ assert(dashboardJs.includes('n === 65535 || n > 100000'),
   'dashboard.js filters Linux ethtool SPEED_UNKNOWN (65535 / 4294967295) to prevent phantom 2.5 Gbps ports');
 assert(dashboardJs.includes('hasExplicitCarrier'),
   'dashboard.js trusts explicit carrier:false and never marks disconnected ports as up');
+assert(dashboardJs.includes('hasNativePortStatus') && dashboardJs.includes("method: 'getBuiltinEthernetPorts'"),
+  'dashboard.js detects native OpenWrt 23.05/24.10 Port status (29_ports.js) and suppresses duplicate card');
+assert(cascadeCss.includes('.ifacebox:has(img[src*="icons/port_"])'),
+  'cascade.css styles native OpenWrt 23.05/24.10 Port status cards with overflow:visible for tooltips');
 
 // Unit-test extracted parsePortSpeed from dashboard.js
 const parseSpeedMatch = dashboardJs.match(/function parsePortSpeed\(raw\)\s*\{[\s\S]*?\n  \}/);
