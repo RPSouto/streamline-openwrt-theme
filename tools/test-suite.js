@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=2'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 2');
-assert(control.includes('Version: 1.0.59-2'), 'packaging/control Version is 1.0.59-2');
-assert(buildIpk.includes('1.0.59-2'), 'build-ipk.sh default target is 1.0.59-2');
-assert(menuJs.includes("THEME_VERSION = '1.0.59-2'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-2');
-assert(swJs.includes('streamline-static-v59-2'), 'streamline-sw.js CACHE_NAME matches v59-2');
-assert(headerHtm.includes('?v=1.0.59.2'), 'header.htm asset query param matches v1.0.59.2');
-assert(headerUt.includes('?v=1.0.59.2'), 'header.ut asset query param matches v1.0.59.2');
+assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=3'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 3');
+assert(control.includes('Version: 1.0.59-3'), 'packaging/control Version is 1.0.59-3');
+assert(buildIpk.includes('1.0.59-3'), 'build-ipk.sh default target is 1.0.59-3');
+assert(menuJs.includes("THEME_VERSION = '1.0.59-3'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-3');
+assert(swJs.includes('streamline-static-v59-3'), 'streamline-sw.js CACHE_NAME matches v59-3');
+assert(headerHtm.includes('?v=1.0.59.3'), 'header.htm asset query param matches v1.0.59.3');
+assert(headerUt.includes('?v=1.0.59.3'), 'header.ut asset query param matches v1.0.59.3');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -698,12 +698,12 @@ const isNewerVersionMatch = menuJs.match(/isNewerVersion\s*\([^)]*\)\s*\{[\s\S]*
 assert(isNewerVersionMatch !== null, 'Extracted isNewerVersion implementation for unit testing');
 if (isNewerVersionMatch) {
   const isNewerVersion = new Function('return function ' + isNewerVersionMatch[0].replace(/,\s*$/, ''))();
-  assert(isNewerVersion('1.0.59-2', 'v1.0.59-2') === false, 'isNewerVersion recognizes equal versions (false)');
-  assert(isNewerVersion('1.0.59-2', 'v1.0.59-3') === true, 'isNewerVersion recognizes bump in release number (true)');
-  assert(isNewerVersion('1.0.59-2', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
-  assert(isNewerVersion('1.0.59-2', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
-  assert(isNewerVersion('1.0.59-2', 'v1.0.59-1') === false, 'isNewerVersion recognizes older version (false)');
-  assert(isNewerVersion('1.0.59-2', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
+  assert(isNewerVersion('1.0.59-3', 'v1.0.59-3') === false, 'isNewerVersion recognizes equal versions (false)');
+  assert(isNewerVersion('1.0.59-3', 'v1.0.59-4') === true, 'isNewerVersion recognizes bump in release number (true)');
+  assert(isNewerVersion('1.0.59-3', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
+  assert(isNewerVersion('1.0.59-3', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
+  assert(isNewerVersion('1.0.59-3', 'v1.0.59-2') === false, 'isNewerVersion recognizes older version (false)');
+  assert(isNewerVersion('1.0.59-3', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
 }
 
 // Test 28: Verifying ucode template syntax and OpenWrt 24.10 / LuCI compatibility
