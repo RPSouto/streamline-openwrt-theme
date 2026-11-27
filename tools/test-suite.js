@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=1'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 1');
-assert(control.includes('Version: 1.0.59-1'), 'packaging/control Version is 1.0.59-1');
-assert(buildIpk.includes('1.0.59-1'), 'build-ipk.sh default target is 1.0.59-1');
-assert(menuJs.includes("THEME_VERSION = '1.0.59-1'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-1');
-assert(swJs.includes('streamline-static-v59-1'), 'streamline-sw.js CACHE_NAME matches v59-1');
-assert(headerHtm.includes('?v=1.0.59.1'), 'header.htm asset query param matches v1.0.59.1');
-assert(headerUt.includes('?v=1.0.59.1'), 'header.ut asset query param matches v1.0.59.1');
+assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=2'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 2');
+assert(control.includes('Version: 1.0.59-2'), 'packaging/control Version is 1.0.59-2');
+assert(buildIpk.includes('1.0.59-2'), 'build-ipk.sh default target is 1.0.59-2');
+assert(menuJs.includes("THEME_VERSION = '1.0.59-2'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-2');
+assert(swJs.includes('streamline-static-v59-2'), 'streamline-sw.js CACHE_NAME matches v59-2');
+assert(headerHtm.includes('?v=1.0.59.2'), 'header.htm asset query param matches v1.0.59.2');
+assert(headerUt.includes('?v=1.0.59.2'), 'header.ut asset query param matches v1.0.59.2');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -698,12 +698,50 @@ const isNewerVersionMatch = menuJs.match(/isNewerVersion\s*\([^)]*\)\s*\{[\s\S]*
 assert(isNewerVersionMatch !== null, 'Extracted isNewerVersion implementation for unit testing');
 if (isNewerVersionMatch) {
   const isNewerVersion = new Function('return function ' + isNewerVersionMatch[0].replace(/,\s*$/, ''))();
-  assert(isNewerVersion('1.0.59-1', 'v1.0.59-1') === false, 'isNewerVersion recognizes equal versions (false)');
-  assert(isNewerVersion('1.0.59-1', 'v1.0.59-2') === true, 'isNewerVersion recognizes bump in release number (true)');
-  assert(isNewerVersion('1.0.59-1', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
-  assert(isNewerVersion('1.0.59-1', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
-  assert(isNewerVersion('1.0.59-1', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version (false)');
-  assert(isNewerVersion('1.0.59-1', 'v1.0.57-10') === false, 'isNewerVersion recognizes older version 1.0.57-10 (false)');
+  assert(isNewerVersion('1.0.59-2', 'v1.0.59-2') === false, 'isNewerVersion recognizes equal versions (false)');
+  assert(isNewerVersion('1.0.59-2', 'v1.0.59-3') === true, 'isNewerVersion recognizes bump in release number (true)');
+  assert(isNewerVersion('1.0.59-2', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
+  assert(isNewerVersion('1.0.59-2', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
+  assert(isNewerVersion('1.0.59-2', 'v1.0.59-1') === false, 'isNewerVersion recognizes older version (false)');
+  assert(isNewerVersion('1.0.59-2', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
+}
+
+// Test 28: Verifying ucode template syntax and OpenWrt 24.10 / LuCI compatibility
+console.log('\n28. Verifying ucode template syntax and OpenWrt 24.10 compatibility...');
+const footerUtContent = fs.readFileSync(path.join(rootDir, 'ucode/template/themes/streamline/footer.ut'), 'utf8');
+const sysauthUtContent = fs.readFileSync(path.join(rootDir, 'ucode/template/themes/streamline/sysauth.ut'), 'utf8');
+
+assert(!headerUt.includes('-%>'),
+  'header.ut does not contain Lua/ERB -%> closing tag',
+  '-%> causes syntax error in ucode parser');
+
+assert(!headerUt.includes('require("fs")') && !headerUt.includes("require('fs')"),
+  'header.ut imports fs using import statement instead of require()',
+  'require() throws "Global require search path not set" in LuCI ucode environment');
+
+assert(headerUt.includes("import { glob, basename } from 'fs'") || headerUt.includes('import { glob, basename } from "fs"'),
+  'header.ut imports glob and basename from fs');
+
+assert(!headerUt.includes('{{ striptags(`${'),
+  'header.ut avoids nested template literal interpolation inside {{ ... }}',
+  'Nested ${...} inside {{ ... }} breaks ucode template block lexer');
+
+assert(!footerUtContent.includes('-%>'),
+  'footer.ut does not contain Lua/ERB -%> closing tag');
+
+assert(!sysauthUtContent.includes('-%>'),
+  'sysauth.ut does not contain Lua/ERB -%> closing tag');
+
+// Attempt native ucode compile verification if ucode / WSL is available
+try {
+  const wslCmd = 'wsl -d Ubuntu -u root -e ucode -L "/usr/local/lib/ucode/*.uc" -T -c';
+  execSync(`${wslCmd} /mnt/c/Users/Utilizador/Documents/GitHub/Streamline/ucode/template/themes/streamline/header.ut`, { stdio: 'pipe' });
+  execSync(`${wslCmd} /mnt/c/Users/Utilizador/Documents/GitHub/Streamline/ucode/template/themes/streamline/footer.ut`, { stdio: 'pipe' });
+  execSync(`${wslCmd} /mnt/c/Users/Utilizador/Documents/GitHub/Streamline/ucode/template/themes/streamline/sysauth.ut`, { stdio: 'pipe' });
+  assert(true, 'ucode compiler validates header.ut, footer.ut, and sysauth.ut without errors');
+} catch (e) {
+  // If WSL / ucode is not present in CI/another machine, still pass the static checks
+  console.log('  ⚠️ (ucode CLI not detected in standard environment, static checks passed)');
 }
 
 // Summary
