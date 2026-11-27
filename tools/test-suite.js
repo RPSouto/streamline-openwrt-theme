@@ -134,13 +134,13 @@ const control = fs.readFileSync(path.join(rootDir, 'packaging/control'), 'utf8')
 const swJs = fs.readFileSync(path.join(rootDir, 'htdocs/streamline-sw.js'), 'utf8');
 const buildIpk = fs.readFileSync(path.join(rootDir, 'build-ipk.sh'), 'utf8');
 
-assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=6'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 6');
-assert(control.includes('Version: 1.0.59-6'), 'packaging/control Version is 1.0.59-6');
-assert(buildIpk.includes('1.0.59-6'), 'build-ipk.sh default target is 1.0.59-6');
-assert(menuJs.includes("THEME_VERSION = '1.0.59-6'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-6');
-assert(swJs.includes('streamline-static-v59-6'), 'streamline-sw.js CACHE_NAME matches v59-6');
-assert(headerHtm.includes('?v=1.0.59.6'), 'header.htm asset query param matches v1.0.59.6');
-assert(headerUt.includes('?v=1.0.59.6'), 'header.ut asset query param matches v1.0.59.6');
+assert(makefile.includes('PKG_VERSION:=1.0.59') && makefile.includes('PKG_RELEASE:=7'), 'Makefile PKG_VERSION is 1.0.59 and PKG_RELEASE is 7');
+assert(control.includes('Version: 1.0.59-7'), 'packaging/control Version is 1.0.59-7');
+assert(buildIpk.includes('1.0.59-7'), 'build-ipk.sh default target is 1.0.59-7');
+assert(menuJs.includes("THEME_VERSION = '1.0.59-7'"), 'menu-streamline-v21.js THEME_VERSION is 1.0.59-7');
+assert(swJs.includes('streamline-static-v59-7'), 'streamline-sw.js CACHE_NAME matches v59-7');
+assert(headerHtm.includes('?v=1.0.59.7'), 'header.htm asset query param matches v1.0.59.7');
+assert(headerUt.includes('?v=1.0.59.7'), 'header.ut asset query param matches v1.0.59.7');
 
 // Test 8: Verify postinst does not kill active LuCI connections
 console.log('\n8. Verifying postinst does not abort LuCI web uploads...');
@@ -698,13 +698,17 @@ const isNewerVersionMatch = menuJs.match(/isNewerVersion\s*\([^)]*\)\s*\{[\s\S]*
 assert(isNewerVersionMatch !== null, 'Extracted isNewerVersion implementation for unit testing');
 if (isNewerVersionMatch) {
   const isNewerVersion = new Function('return function ' + isNewerVersionMatch[0].replace(/,\s*$/, ''))();
-  assert(isNewerVersion('1.0.59-6', 'v1.0.59-6') === false, 'isNewerVersion recognizes equal versions (false)');
-  assert(isNewerVersion('1.0.59-6', 'v1.0.59-7') === true, 'isNewerVersion recognizes bump in release number (true)');
-  assert(isNewerVersion('1.0.59-6', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
-  assert(isNewerVersion('1.0.59-6', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
-  assert(isNewerVersion('1.0.59-6', 'v1.0.59-5') === false, 'isNewerVersion recognizes older version (false)');
-  assert(isNewerVersion('1.0.59-6', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
+  assert(isNewerVersion('1.0.59-7', 'v1.0.59-7') === false, 'isNewerVersion recognizes equal versions (false)');
+  assert(isNewerVersion('1.0.59-7', 'v1.0.59-8') === true, 'isNewerVersion recognizes bump in release number (true)');
+  assert(isNewerVersion('1.0.59-7', 'v1.0.60') === true, 'isNewerVersion recognizes bump in patch version (true)');
+  assert(isNewerVersion('1.0.59-7', 'v2.0.0') === true, 'isNewerVersion recognizes bump in major version (true)');
+  assert(isNewerVersion('1.0.59-7', 'v1.0.59-6') === false, 'isNewerVersion recognizes older version (false)');
+  assert(isNewerVersion('1.0.59-7', 'v1.0.58-13') === false, 'isNewerVersion recognizes older version 1.0.58-13 (false)');
 }
+assert(menuJs.includes('const CACHE_TTL_MS = 15 * 60 * 1000;'),
+  'menu-streamline-v21.js uses 15-minute update cache TTL');
+assert(menuJs.includes('const stillHasUpdate = Boolean(cached.latestVersion && this.isNewerVersion(currentVersion, cached.latestVersion));'),
+  'menu-streamline-v21.js recomputes isNewerVersion against cached.latestVersion to clear stale badges after upgrade');
 
 // Test 28: Verifying ucode template syntax and OpenWrt 24.10 / LuCI compatibility
 console.log('\n28. Verifying ucode template syntax and OpenWrt 24.10 compatibility...');

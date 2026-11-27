@@ -2,7 +2,7 @@
 'require baseclass';
 'require ui';
 
-const THEME_VERSION = '1.0.59-6';
+const THEME_VERSION = '1.0.59-7';
 const MOBILE_MEDIA_QUERY = '(max-width: 991px), (max-height: 550px) and (orientation: landscape)';
 const FONTS = {
   system: { title: 'System', description: 'Default interface font', family: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -1675,7 +1675,7 @@ return baseclass.extend({
 
   checkThemeUpdate() {
     const STORAGE_KEY = 'streamline.update_info';
-    const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+    const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
     const GITHUB_REPO = 'RPSouto/streamline-openwrt-theme';
     const GITHUB_RELEASES_URL = 'https://github.com/' + GITHUB_REPO + '/releases/latest';
     const GITHUB_API_URL = 'https://api.github.com/repos/' + GITHUB_REPO + '/releases/latest';
@@ -1690,9 +1690,27 @@ return baseclass.extend({
     const now = Date.now();
     if (cached && typeof cached === 'object' && cached.checkedAt) {
       const isFresh = (now - cached.checkedAt) < CACHE_TTL_MS;
+      const stillHasUpdate = Boolean(cached.latestVersion && this.isNewerVersion(currentVersion, cached.latestVersion));
+
+      // If theme was upgraded locally, sync cache immediately and remove stale badge
+      if (cached.checkedVersion !== currentVersion || cached.hasUpdate !== stillHasUpdate) {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            checkedAt: cached.checkedAt,
+            checkedVersion: currentVersion,
+            latestVersion: cached.latestVersion || null,
+            htmlUrl: cached.htmlUrl || GITHUB_RELEASES_URL,
+            hasUpdate: stillHasUpdate
+          }));
+        } catch (e) {}
+      }
+
       if (isFresh) {
-        if (cached.hasUpdate && cached.latestVersion) {
+        if (stillHasUpdate) {
           this.renderUpdateNotification(cached.latestVersion, cached.htmlUrl || GITHUB_RELEASES_URL);
+        } else {
+          const existing = document.querySelector('#indicators .sidebar-update');
+          if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
         }
         return;
       }
@@ -1716,6 +1734,7 @@ return baseclass.extend({
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
           checkedAt: now,
+          checkedVersion: currentVersion,
           latestVersion: latestVersion,
           htmlUrl: htmlUrl,
           hasUpdate: hasUpdate
@@ -1724,17 +1743,22 @@ return baseclass.extend({
 
       if (hasUpdate) {
         this.renderUpdateNotification(latestVersion, htmlUrl);
+      } else {
+        const existing = document.querySelector('#indicators .sidebar-update');
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
       }
     }).catch(() => {
+      const stillHasUpdate = Boolean(cached && cached.latestVersion && this.isNewerVersion(currentVersion, cached.latestVersion));
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          checkedAt: now - CACHE_TTL_MS + (30 * 60 * 1000),
+          checkedAt: now - CACHE_TTL_MS + (5 * 60 * 1000),
+          checkedVersion: currentVersion,
           latestVersion: cached ? cached.latestVersion : null,
           htmlUrl: cached ? cached.htmlUrl : GITHUB_RELEASES_URL,
-          hasUpdate: cached ? cached.hasUpdate : false
+          hasUpdate: stillHasUpdate
         }));
       } catch (e) {}
-      if (cached && cached.hasUpdate && cached.latestVersion) {
+      if (stillHasUpdate) {
         this.renderUpdateNotification(cached.latestVersion, cached.htmlUrl || GITHUB_RELEASES_URL);
       }
     });
