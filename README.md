@@ -10,11 +10,14 @@
 
 ## ✨ Highlights
 
-* **Physical Ethernet Port Map (`Status → Overview`)**: Real-time visual RJ45 port status map directly on the homepage. Automatically discovers WAN and LAN switch ports via `/etc/board.json` and network topology. Displays active connection state, glowing multi-speed LED indicators (2.5 Gbps cyan neon, 1 Gbps emerald green, 100 Mbps amber), duplex modes, and live download/upload throughput counters with zero-shift background polling.
+* **Smart Ethernet Port Status (`Status → Overview`)**:
+  * **OpenWrt 21.02 / 22.03 / GL.iNet**: Renders Streamline's real-time visual RJ45 port map directly on the homepage, discovering all physical WAN/LAN ports via `/etc/board.json`, hardware profiles, and kernel topology (e.g., all 6 ports on the GL.iNet Flint 2: 2× 2.5G + 4× 1G) with glowing multi-speed LED indicators, duplex modes, and live RX/TX counters.
+  * **OpenWrt 23.05 / 24.10+**: Automatically detects OpenWrt's native `Port status` widget (`29_ports.js`) via `luci.getBuiltinEthernetPorts` and defers to it with zero duplication or flicker, polishing its native cards with Streamline styling and frosted glass tooltips (firewall zone badges & packet statistics).
 * **Extensible Streamline Addon Architecture**: Modular ecosystem for vendor-specific hardware profiles and cellular/VPN protocol handlers without core theme file collisions. Features dynamic server-side discovery and zero 404 network requests (`packages/README.md`).
-* **Streamline Update Notifier**: Automatic background version check against GitHub Releases. Displays a sleek Streamline symbol with a pulsating neon alert badge positioned directly above the Home button in the sidebar dock whenever a new update is released, linking directly to GitHub upon click with local caching to prevent rate-limiting.
-* **Dynamic OpenWrt Distribution Version**: Prominently displays the detected OpenWrt release (e.g. `OPENWRT 21`, `OPENWRT 23`, `IMMORTALWRT 23`) directly below the brand title on both sidebar navigation and the modern frosted login screen (replacing static "Powered by OpenWrt").
-* **Minimalist Right-Aligned Footer**: Clean footer displaying strictly `Streamline · <Distro> <Version>` (e.g., `Streamline · OpenWrt 21.02`), stripping verbose snapshot tags and git commit hashes.
+* **Streamline Update Notifier**: Automatic background version check against GitHub Releases (15-minute local cache). Displays a sleek Streamline symbol with a pulsating neon alert badge positioned directly above the Home button in the sidebar dock whenever a new update is released, linking directly to GitHub upon click and clearing automatically as soon as you upgrade.
+* **Refined Hover & Frosted Glass Tooltips**: Smooth elevation, subtle palette-matched accent glow on cards and table rows, and translucent frosted glass `.cbi-tooltip` popovers with proper `z-index` stacking and viewport-aware right-edge alignment.
+* **Dynamic OpenWrt Distribution Version**: Prominently displays the detected OpenWrt release (e.g. `OPENWRT 21`, `OPENWRT 24`, `IMMORTALWRT 23`) directly below the brand title on both sidebar navigation and the modern frosted login screen (replacing static "Powered by OpenWrt").
+* **Minimalist Right-Aligned Footer**: Clean footer displaying strictly `Streamline · <Distro> <Version>` (e.g., `Streamline · OpenWrt 24.10.3`), stripping verbose snapshot tags and git commit hashes.
 * **Enhanced Mobile Table Scrolling & Touch Swipe**: Smooth horizontal touch swipe and drag scrolling across overview tables, DHCP leases, firewall rules, and associated stations tables without cell clipping.
 * **Click-to-Copy for IP & MAC Addresses**: Click directly on any IPv4, IPv6, or MAC address across overview tables, status dashboards, wireless clients, DHCP leases, and routing tables to instantly copy it to your clipboard. Features a subtle hover affordance and sleek frosted glass toast notifications (smartly excludes forms, input fields, buttons, and modal dialogs, with HTTP fallback support).
 * **Quick Search / Command Palette (`Ctrl + K` / `Cmd + K`)**: Instantly jump to any LuCI menu, page, or service with keyboard navigation and fuzzy search.
@@ -41,39 +44,45 @@
 ## 💻 Compatibility
 
 * **OpenWrt Releases**: 21.02, 22.03, 23.05, 24.10, 25.12, and current snapshot releases.
-* **Template Engines**: Dual support for legacy Lua (`.htm`) and modern ucode (`.ut`) engines in the same package.
-* **Package Formats**: `opkg` (`.ipk`), `apk` (OpenWrt 25+), and direct SSH script installation.
-* **Target Devices**: Any OpenWrt-compatible hardware. Fully tested on the **GL.iNet Flint 2 (GL-MT6000)** (Streamline styles the LuCI interface opened via **System → Advanced Settings**).
+* **Template Engines**: Dual support for legacy **Lua** (`.htm`) and modern **ucode** (`.ut`, validated against the native `ucode` compiler & `musl libc` POSIX ERE) in the same package.
+* **Package Formats**: `opkg` (`.ipk` for OpenWrt 21.02 – 24.10 & GL.iNet), `apk` (`.apk` for OpenWrt 25.12+ / Snapshots), and direct SSH script installation.
+
+### Verified Reference Devices
+
+| Device | Firmware / OpenWrt | Template Engine | Package Manager | Verified Features |
+| :--- | :--- | :--- | :--- | :--- |
+| **GL.iNet Flint 2 (GL-MT6000)** | OpenWrt 21.02 (GL.iNet) | Lua (`.htm`) | `opkg` (`.ipk`) | Full 6-port map (`WAN 2.5G` + `LAN 1 2.5G` + `LAN 2–5 1G`), `luci-proto-glinet` addon, LuCI via *System → Advanced Settings* |
+| **Cudy WR3000E** | OpenWrt 24.10.3 | ucode (`.ut`) | `opkg` (`.ipk`) | Native ucode templates, zero-duplication native `Port status` integration (`29_ports.js`), frosted glass tooltips & DSA support |
 
 ---
 
 ## 📦 Installation
 
-### Option A: Install via IPK (OpenWrt 21.02 / 22.03 / 23.05 / GL.iNet)
+### Option A: Install via IPK (OpenWrt 21.02 / 22.03 / 23.05 / 24.10 & GL.iNet)
 
-For routers running `opkg` (including all GL.iNet firmware releases):
+For routers running `opkg` (including OpenWrt 24.10 and all GL.iNet firmware releases):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.59-8_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.59-8_all.ipk'
+scp releases/luci-theme-streamline_1.0.59-8_all.ipk root@192.168.1.1:/tmp/
+ssh root@192.168.1.1 'opkg install --force-reinstall /tmp/luci-theme-streamline_1.0.59-8_all.ipk'
 ```
 
-### Option B: Install via APK (OpenWrt 24.10 / 25.12+)
+### Option B: Install via APK (OpenWrt 25.12+ / Snapshots)
 
 For modern OpenWrt releases using the Alpine Package Keeper (`apk`):
 
 ```sh
-scp releases/luci-theme-streamline_1.0.59-r8_all.apk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.59-r8_all.apk'
+scp releases/luci-theme-streamline_1.0.59-r8_all.apk root@192.168.1.1:/tmp/
+ssh root@192.168.1.1 'apk add --allow-untrusted /tmp/luci-theme-streamline_1.0.59-r8_all.apk'
 ```
 
 ### Complementary Package for GL.iNet Routers: `luci-proto-glinet`
 
-If you run OpenWrt / LuCI on GL.iNet hardware and see **"Unsupported protocol type"** or 404 network errors on GL.iNet protocols (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`, `qmi`, `wwan`, `relay`, `3g`, `ncm`, `qcm`, `directip`, `callip`, `amneziawg`):
+If you run OpenWrt / LuCI on GL.iNet hardware (such as the **Flint 2 / GL-MT6000**) and see **"Unsupported protocol type"** or 404 network errors on GL.iNet protocols (`wgclient`, `wgserver`, `ovpnclient`, `ovpnserver`, `tethering`, `qmi`, `wwan`, `relay`, `3g`, `ncm`, `qcm`, `directip`, `callip`, `amneziawg`):
 
 ```sh
 scp releases/luci-proto-glinet_1.0.0-4_all.ipk root@192.168.8.1:/tmp/
-ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-proto-glinet_1.0.0-3_all.ipk'
+ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-proto-glinet_1.0.0-4_all.ipk'
 ```
 
 > **Note**: Perform a hard refresh (**`Ctrl + F5`** or **`Cmd + Shift + R`**) in your browser after installing to ensure cached static files are renewed.
@@ -85,10 +94,10 @@ ssh root@192.168.8.1 'opkg install --force-reinstall /tmp/luci-proto-glinet_1.0.
 To build release packages locally for both package managers:
 
 ```sh
-# Build OPKG package (.ipk) for OpenWrt <= 23.05
+# Build OPKG package (.ipk) for OpenWrt 21.02 – 24.10 & GL.iNet
 ./build-ipk.sh
 
-# Build Alpine/OpenWrt APK package (.apk) for OpenWrt >= 24.10 / 25.12
+# Build Alpine/OpenWrt APK package (.apk) for OpenWrt 25.12+ / Snapshots
 ./build-apk.sh
 ```
 
@@ -149,8 +158,8 @@ Open **Appearance** at the bottom of the desktop sidebar or within the mobile dr
 Ensure you have a POSIX shell with GNU `tar` and `gzip`:
 
 ```sh
-./build-ipk.sh releases/luci-theme-streamline_1.0.58-2_all.ipk
-node tools/verify-ipk.js releases/luci-theme-streamline_1.0.58-2_all.ipk
+./build-ipk.sh releases/luci-theme-streamline_1.0.59-8_all.ipk
+node tools/verify-ipk.js releases/luci-theme-streamline_1.0.59-8_all.ipk
 ```
 
 ### Building via OpenWrt SDK / Buildroot
