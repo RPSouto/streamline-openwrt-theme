@@ -661,7 +661,8 @@ td:first-child, .td:first-child { padding-left: 16px; }
 th:last-child, .th:last-child,
 td:last-child, .td:last-child { padding-right: 16px; }
 tr:last-child td, .tr:last-child .td { border-bottom: 0; }
-tr:hover td, .tr:hover .td { background: rgba(var(--sl-accent-rgb),.035); }
+td, .td { transition: background 0.14s ease; }
+tr:not(.table-titles):hover td, .tr:not(.table-titles):hover .td { background: rgba(var(--sl-accent-rgb), .06); }
 .td[data-title]::before, td[data-title]::before { color: var(--sl-muted); }
 
 /* Active DHCP Leases & Associated Stations Tables (Status -> Overview) */
@@ -815,14 +816,22 @@ table + table,
 
 /* Native OpenWrt 23.05 / 24.10 Port Status cards (29_ports.js) */
 .ifacebox:has(img[src*="icons/port_"]) {
+  position: relative;
   overflow: visible;
   min-width: 100px !important;
   max-width: none !important;
-  transition: transform 0.16s ease, border-color 0.16s ease;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .ifacebox:has(img[src*="icons/port_"]):hover {
-  border-color: var(--sl-accent);
-  transform: translateY(-1px);
+  z-index: 50;
+  border-color: rgba(var(--sl-accent-rgb), 0.55);
+  box-shadow: 0 8px 24px rgba(var(--sl-accent-rgb), 0.16), 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+.ifacebox:has(img[src*="icons/port_"]):last-child .cbi-tooltip-container:hover > .cbi-tooltip,
+.ifacebox:has(img[src*="icons/port_"]):nth-last-child(2) .cbi-tooltip-container:hover > .cbi-tooltip {
+  left: auto;
+  right: 0;
 }
 .ifacebox:has(img[src*="icons/port_"]) > .ifacebox-head:first-child {
   border-radius: 11px 11px 0 0;
@@ -842,6 +851,10 @@ table + table,
   width: 28px;
   height: 28px;
   margin-bottom: 4px;
+  transition: transform 0.18s ease;
+}
+.ifacebox:has(img[src*="icons/port_"]):hover > .ifacebox-body img[src*="icons/port_"] {
+  transform: scale(1.06);
 }
 
 /* ==========================================================================
@@ -1429,7 +1442,8 @@ table + table,
 .sl-live-status.is-loading { border-color: var(--sl-border); background: rgba(255,255,255,.025); color: var(--sl-muted); }
 .sl-live-status.is-loading i { background: #778093; box-shadow: 0 0 0 4px rgba(119,128,147,.1); animation: sl-health-pulse 1.35s ease-in-out infinite; }
 .sl-metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--sl-border); }
-.sl-metric { --sl-gauge: 0; --sl-gauge-color: var(--sl-green); display: flex; min-width: 0; min-height: 230px; padding: 22px 18px 18px; flex-direction: column; align-items: center; justify-content: center; background: rgba(15,19,27,.98); }
+.sl-metric { --sl-gauge: 0; --sl-gauge-color: var(--sl-green); display: flex; min-width: 0; min-height: 230px; padding: 22px 18px 18px; flex-direction: column; align-items: center; justify-content: center; background: rgba(15,19,27,.98); transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, box-shadow 0.18s ease; }
+.sl-metric:hover { border-color: rgba(var(--sl-accent-rgb), 0.45); box-shadow: 0 8px 24px rgba(var(--sl-accent-rgb), 0.12), 0 4px 12px rgba(0, 0, 0, 0.22); transform: translateY(-2px); }
 .sl-metric:nth-child(2) { --sl-gauge-color: var(--sl-purple); }
 .sl-metric:nth-child(3) { --sl-gauge-color: var(--sl-blue); }
 .sl-metric:nth-child(4) { --sl-gauge-color: #9f7aea; }
@@ -2793,8 +2807,49 @@ select.cbi-input-select option[value="drop"] {
 }
 .cbi-dropdown > button { min-height: 36px; border: 0; border-left: 1px solid var(--sl-border); border-radius: 0 8px 8px 0; }
 .cbi-tooltip-container { position: relative; cursor: help; }
-.cbi-tooltip { position: absolute; z-index: 900; left: -10000px; top: calc(100% + 8px); width: max-content; max-width: min(340px, 82vw); padding: 10px 12px; border: 1px solid var(--sl-border); border-radius: 9px; background: var(--sl-surface-3); color: var(--sl-text); box-shadow: var(--sl-shadow); line-height: 1.5; white-space: normal; overflow-wrap: anywhere; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-4px); transition: opacity .15s ease, transform .15s ease, visibility .15s ease; }
-.cbi-tooltip-container:hover > .cbi-tooltip:not(:empty), .cbi-tooltip-container:focus-within > .cbi-tooltip:not(:empty) { left: 0; opacity: 1; visibility: visible; transform: translateY(0); }
+.cbi-tooltip-container:hover, .cbi-tooltip-container:focus-within { z-index: 60; }
+.cbi-tooltip {
+  position: absolute;
+  z-index: 950;
+  left: -10000px;
+  top: calc(100% + 10px);
+  width: max-content;
+  max-width: min(360px, 84vw);
+  padding: 11px 14px;
+  border: 1px solid rgba(var(--sl-accent-rgb), 0.34);
+  border-radius: 11px;
+  background: rgba(13, 18, 32, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--sl-text);
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.54), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  line-height: 1.55;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.98);
+  transition: opacity 0.16s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.16s ease;
+}
+.cbi-tooltip strong { color: var(--sl-text); font-weight: 600; }
+.cbi-tooltip-container:hover > .cbi-tooltip:not(:empty),
+.cbi-tooltip-container:focus-within > .cbi-tooltip:not(:empty) {
+  left: 0;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+html[data-palette="light"] .cbi-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(var(--sl-accent-rgb), 0.28);
+  color: #0f172a;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+html[data-palette="light"] .cbi-tooltip strong { color: #0f172a; }
 .ifacebox .cbi-tooltip-container { display: inline-flex; align-items: center; vertical-align: middle; }
 .ifacebox .cbi-tooltip-container + .cbi-tooltip-container { margin-left: 4px; }
 .ifacebox .cbi-tooltip img { flex: 0 0 auto; }
